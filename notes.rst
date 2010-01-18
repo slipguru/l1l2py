@@ -9,8 +9,10 @@ Matlab: normalize -> unit variance on columns (in doc: unit norm!!!)
 I:      normalize -> unit norm (length)
         standardize -> unit variance
 
+
 Questions
 ---------
+
 +----------+---------+--------------------------------------------------------+
 | FUNCTION | ROWS    | DESCRIPTION                                            |
 +==========+=========+========================================================+
@@ -24,3 +26,22 @@ Questions
 +----------+---------+--------------------------------------------------------+
 
 
+Ranges
+------
+
+range = [start, end, step]
+linear = range(1):range(3):range(2);
+geometric = [range(1)
+                range(1) *
+                    ( (range(2)/range(1))^(1/(range(3)-1)) ).^(1:(tau_range(3)-1))];
+
+          [ start * [(end/start)^(1/(step-1))]^0,
+            start * [(end/start)^(1/(step-1))]^1,
+            start * [(end/start)^(1/(step-1))]^2,
+            ...
+            start * [(end/start)^(1/(step-1))]^(step-1) ]
+
+[2, 10, 20] # 20 numeri tra 2 e 10 in serie geometrica
+end/start = 10/2 = 5
+ratio= 5^(1/19)
+[2*ratio^0 2*ratio^1, 2*ratio^2, ..., 2*ratio^19)

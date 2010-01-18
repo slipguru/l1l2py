@@ -65,24 +65,5 @@ def main():
     #
     ##KCV_grid(expressions, labels, lambda_min,lambda_max,all_eps,Kint,Kext,split_idx,resultfile)
 
-
-
-def print_configuration(input):
-    width = 32
-    just = (width/2)-1
-    # Header
-    print
-    print '+',      '-'*width,         '+'
-    print '|', 'Input'.center(width),  '|'
-    print '+',      '-'*width,         '+'
-
-    # Content
-    for k in sorted(input.keys()):
-        print '| %s: %s |' % (k.rjust(just), str(input[k]).ljust(just))
-
-    # Footer
-    print '+',      '-'*width,         '+'
-    print
-
 if __name__ == '__main__':
     main()

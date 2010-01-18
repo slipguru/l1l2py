@@ -17,8 +17,15 @@ class Configuration(object):
     def __init__(self, file_path):
         from ConfigParser import SafeConfigParser
         self._conf = SafeConfigParser()
+
         if not self._conf.read(file_path):
-            raise RuntimeError('incorrect configuration file')
+            raise RuntimeError('incorrect configuration file') # WHEN!?
+
+        self._path = file_path
+
+    @property
+    def path(self):
+        return self._path
 
     def __getitem__(self, key):
         from ConfigParser import NoOptionError, NoSectionError
@@ -32,16 +39,35 @@ class Configuration(object):
         return ['_'.join((s, o)) for s in self._conf.sections()
                                  for o in self._conf.options(s)]
 
+    def data_matrices(self):
+        """ To make lazy!! """
+        ## if is a matlab file
+        from scipy.io import loadmat
+        from os import path
+
+        # Configuration file directory is the root directory
+        config_path = path.split(self.path)[0]
+
+        tmp = loadmat(path.join(config_path, self['data_path']),
+                      struct_as_record=True)
+        expressions = tmp[self['data_name']]
+
+        if self['data_path'] != self['labels_path']:
+            tmp = loadmat(self['labels_path'], struct_as_record=True)
+        labels = tmp[self['labels_name']]
+
+        return expressions, labels
+
     def __str__(self):
-        width = 51
-        just = (width/2)-1
+        width = 55
+        just_l, just_r = (width/2)-7, (width/2)+5
         separator = '+' + '-'*width + '+\n'
 
         header = separator + \
                  '|' + 'Input'.center(width) + '|\n' + \
                  separator
         content = '\n'.join(
-            '| ' + k.rjust(just) + ': ' + self[k].ljust(just) + '|'
+            '| ' + k.rjust(just_r) + ': ' + self[k].ljust(just_l) + '|'
                             for k in sorted(self.keys()) )
         footer = '\n' + separator
 
@@ -70,7 +96,6 @@ class TestConfiguration(object):
 
     def test_keys(self):
         t.assert_true('experiment_type' in self.conf.keys())
-
 
 #def read_configuration_file(file_path):
 #

@@ -1,22 +1,31 @@
 import numpy as np
 import mlpy
 
-def normalize(X, Y):
+def standardize(X):
     """ This function simulate the normalization
         function in the matlab code with norm_mean=norm_col=1"""
-    Xnorm = mlpy.data_standardize(X)
-    Ynorm = Y - Y.mean(axis=0)
+    return mlpy.data_standardize(X)
 
-    return Xnorm, Ynorm
+def center(X):
+    return X - X.mean(axis=0)
 
 def scaling_factor(X):
-    Xtmp = normalize(X, np.empty(0))[0]
+    Xtmp = standardize(X)
     return np.sqrt( np.linalg.norm( np.dot(Xtmp, Xtmp.T), 2) )
 
-def get_range(min, max, number, scaling_factor):
-    return np.linspace(min, max, number) * scaling_factor
 
-def get_geometric_range(min, max, number):
+def parameter_range(type, *args, **kwargs):
+    if type == 'linear':
+        return linear_range(*args, **kwargs)
+    elif type == 'geometric':
+        return linear_range(*args, **kwargs)
+    else:
+        raise RuntimeError()
+
+def linear_range(min, max, number):
+    return np.linspace(min, max, number)
+
+def geometric_range(min, max, number):
     """
     Examples
     --------
@@ -31,13 +40,13 @@ def get_geometric_range(min, max, number):
     ratio = (max/float(min))**(1.0/(number-1))
     return min * (ratio ** np.arange(20))
 
-def get_split_indexes(labels, k, experiment_type):
+def kcv_indexes(labels, k, experiment_type):
     if experiment_type == 'classification':
         return mlpy.kfoldS(labels, k)
     elif experiment_type == 'regression':
         return mlpy.kfold(labels.size, k)
     else:
-        raise Exception()
+        raise RuntimeError()
 
 def l1l2_kvc(*args):
     return args

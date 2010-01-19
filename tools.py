@@ -18,7 +18,7 @@ def parameter_range(type, *args, **kwargs):
     if type == 'linear':
         return linear_range(*args, **kwargs)
     elif type == 'geometric':
-        return linear_range(*args, **kwargs)
+        return geometric_range(*args, **kwargs)
     else:
         raise RuntimeError()
 

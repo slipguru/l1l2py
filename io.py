@@ -1,125 +1,154 @@
+import os
+from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
+
+import scipy.io as sio
+
 class Configuration(object):
     """ Configuration file object
-
-    Data type???
-
-    Example
-    --------
-
-    >>> c = Configuration('example_data/example.cfg')
-    >>> c['experiment_type']
-    'regression'
-    >>> c['parameters_internal-k']
-    '2'
-    >>>
-    """
-
-    def __init__(self, file_path):
-        from ConfigParser import SafeConfigParser
+    """    
+    def __init__(self, conf_file):
         self._conf = SafeConfigParser()
-
-        if not self._conf.read(file_path):
-            raise RuntimeError('incorrect configuration file') # WHEN!?
-
-        self._path = file_path
+        self._path = os.path.abspath(conf_file)
+        if not self._conf.read(self._path):
+            raise RuntimeError('not valid configuration file')
+            
+        #Lazy initializations
+        self._expressions = None
+        self._expressions_path = None
+        self._labels = None
+        self._labels_path = None
+        self._options = None
 
     @property
     def path(self):
         return self._path
-
-    def __getitem__(self, key):
-        from ConfigParser import NoOptionError, NoSectionError
-        section, option = key.split('_', 1) # max 1 split
-        try:
-            return self._conf.get(section, option)
-        except (NoOptionError, NoSectionError), err:
-            raise KeyError(err.message)
-
-    def keys(self):
-        return ['_'.join((s, o)) for s in self._conf.sections()
-                                 for o in self._conf.options(s)]
-
-    def data_matrices(self):
-        """ To make lazy!! """
-        ## if is a matlab file
-        from scipy.io import loadmat
-        from os import path
-
-        # Configuration file directory is the root directory
-        config_path = path.split(self.path)[0]
-
-        tmp = loadmat(path.join(config_path, self['data_path']),
-                      struct_as_record=True)
-        expressions = tmp[self['data_name']]
-
-        if self['data_path'] != self['labels_path']:
-            tmp = loadmat(self['labels_path'], struct_as_record=True)
-        labels = tmp[self['labels_name']]
-
-        return expressions, labels
-
-    def __str__(self):
+    
+    @property
+    def experiment_type(self):
+        return self._conf.get('experiment', 'type')
+    
+    @property
+    def experiment_types(self):
+        return ('classification', 'regression')
+        
+    @property
+    def expressions_path(self):
+        if not self._expressions_path: self._set_paths()
+        return self._expressions_path
+    
+    @property
+    def labels_path(self):
+        if not self._labels_path: self._set_paths()
+        return self._labels_path
+    
+    def _set_paths(self):
+        config_path = os.path.split(self._path)[0]
+        self._expressions_path = os.path.join(config_path,
+                                       self._conf.get('expressions', 'path'))
+        self._labels_path = os.path.join(config_path,
+                                       self._conf.get('labels', 'path'))
+           
+    @property
+    def expressions(self):
+        if not self._expressions:
+            expressions_type = self._conf.get('expressions', 'type')
+            if expressions_type == 'matlab':
+                if self.expressions_path == self.labels_path:
+                    self._expressions, self._labels = \
+                                self._get_data(self._conf.get('expressions', 'name'),
+                                               self._conf.get('labels', 'name'))
+                else:
+                    self._expressions = \
+                                self._get_data(self._conf.get('expressions',
+                                                              'name'))
+        return self._expressions
+    
+    @property
+    def labels(self):
+        if not self._labels:
+            labels_type = self._conf.get('labels', 'type')
+            if labels_type == 'matlab':
+                if self.expressions_path == self.labels_path:
+                    self._expressions, self._labels = \
+                                self._get_data(self._conf.get('expressions', 'name'),
+                                               self._conf.get('labels', 'name'))
+                else:
+                    self._labels = self._get_data(self._conf.get('labels', 'name'))
+        return self._labels
+    
+    #TODO: think better data reading!
+    
+    def _get_data(self, *names):
+        raw_data = sio.loadmat(self.expressions_path, struct_as_record=False)
+        
+        data = list()
+        for n in names:
+            data.append(raw_data[n])
+        
+        return data if len(data) > 1 else data[0]
+        
+    @property
+    def data_types(self):
+        return ('matlab', 'csv')
+        
+    @property
+    def tau_range_type(self):
+        return self._conf.get('parameters', 'tau-range-type')
+        
+    @property
+    def lambda_range_type(self):
+        return self._conf.get('parameters', 'lambda-range-type')
+        
+    @property
+    def mu_range_type(self):
+        return self._conf.get('parameters', 'mu-range-type')
+        
+    @property
+    def range_types(self):
+        return ('linear', 'geometric')
+    
+    @property
+    def tau_range(self):
+        return self._get_range_values('tau', self.tau_range_type)
+        
+    @property
+    def lambda_range(self):
+        return self._get_range_values('lambda', self.lambda_range_type)
+        
+    @property
+    def mu_range(self):
+        return self._get_range_values('mu', self.mu_range_type)
+        
+    def _get_range_values(self, param, type):
+        import tools
+        min = self._conf.getfloat('parameters', '%s-min' % param)
+        max = self._conf.getfloat('parameters', '%s-max' % param)
+        num = self._conf.getfloat('parameters', '%s-number' % param)
+        return tools.parameter_range(type, min, max, num)
+    
+    @property
+    def raw_options(self):
+        if not self._options:
+            sections = self._conf.sections()
+            self._options = dict()
+            for s in sections:
+                for o, v in self._conf.items(s):
+                    self._options['%s_%s' % (s, o)] = v
+        return self._options
+    
+    def __str__(self):       
         width = 55
         just_l, just_r = (width/2)-7, (width/2)+5
         separator = '+' + '-'*width + '+\n'
-
+        
         header = separator + \
-                 '|' + 'Input'.center(width) + '|\n' + \
+                 '|' + self.path.center(width) + '|\n' + \
                  separator
         content = '\n'.join(
-            '| ' + k.rjust(just_r) + ': ' + self[k].ljust(just_l) + '|'
-                            for k in sorted(self.keys()) )
+            '| ' + k.rjust(just_r) + ': ' + self.raw_options[k].ljust(just_l) + '|'
+                            for k in sorted(self.raw_options.keys()) )
         footer = '\n' + separator
-
+        
         return ''.join((header, content, footer))
 
-from nose import tools as t
-class TestConfiguration(object):
-    def setup(self):
-        self.conf = Configuration('example_data/example.cfg')
 
-    @t.raises(RuntimeError)
-    def test_raise(self):
-        Configuration('example_data/foo.cfg')
-
-    def test_read(self):
-        expected = self.conf._conf.get('experiment', 'type')
-        t.assert_equals(expected, self.conf['experiment_type'])
-
-    @t.raises(KeyError)
-    def test_bad_key(self):
-        self.conf['experiment_foo']
-
-    @t.raises(KeyError)
-    def test_bad_key2(self):
-        self.conf['foo_type']
-
-    def test_keys(self):
-        t.assert_true('experiment_type' in self.conf.keys())
-
-#def read_configuration_file(file_path):
-#
-#    # To generalize!!
-#    input = {'experiment_type': config.get('experiment', 'type'),
-#             'data_path': config.get('data', 'path'),
-#             'data_name': config.get('data', 'name'),
-#
-#             'labels_path': config.get('labels', 'path'),
-#             'labels_name': config.get('labels', 'name'),
-#             'labels_type': config.get('labels', 'type'),
-#
-#             'result_path': config.get('output', 'result'),
-#
-#             'tau_min': config.getfloat('parameters', 'tau-min'),
-#             'tau_max': config.getfloat('parameters', 'tau-max'),
-#             'lambda_min': config.getfloat('parameters', 'lambda-min'),
-#             'lambda_max': config.getfloat('parameters', 'lambda-max'),
-#             'mu_min': config.getfloat('parameters', 'mu-min'),
-#             'mu_max': config.getfloat('parameters', 'mu-max'),
-#
-#             'split_idx': config.getint('parameters', 'split-index'),
-#             'external_k': config.getint('parameters', 'external-k'),
-#             'internal_k': config.getint('parameters', 'internal-k'),
-#            }
-#
-#    return input

@@ -9,9 +9,9 @@ def standardize(X, p=None):
 def center(X, p=None):
     mean = X.mean(axis=0)
     if p is None:
-        return X - mean
+        return X - mean, mean
     else:
-        return X - mean, p - mean
+        return X - mean, p - mean, mean
 
 def scaling_factor(X):
     Xtmp = standardize(X)

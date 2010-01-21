@@ -21,7 +21,10 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
     print 'Coppie sets (interno):', int_cv_sets
     # --------------------------------------------------
     
-    for train_idxs, test_idxs in int_cv_sets:
+    err_ts = np.empty((len(int_cv_sets), tau_range.size, lambda_range.size))
+    err_tr = np.empty_like(err_ts)
+    
+    for i, (train_idxs, test_idxs) in enumerate(int_cv_sets):
         print 'Train: ', train_idxs, 'on: ', test_idxs
         
         # This command makes copy of the data!
@@ -31,17 +34,40 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
             Xtr, Xts = X[train_idxs,:], X[test_idxs,:]
             
         if center_Y:
-            Ytr, Yts = tools.center(Y[train_idxs,:], Y[test_idxs,:])
+            Ytr, Yts, meanY = tools.center(Y[train_idxs,:], Y[test_idxs,:])
         else:
             Ytr, Yts = Y[train_idxs,:], Y[test_idxs,:]
             
         # REG_PATH mu_0 and tau_range!!
         beta_casc = stage_Ia(Xtr, Ytr, mu_fact, tau_range)
+        
+        # STAGE Ib!!!
+        for j, b in enumerate(beta_casc):
+            selected = (b.flat != 0)
+            for k, l in enumerate(lambda_range):
+                beta = rls(Xtr[:,selected], Ytr, l)
+                err_ts[i, j, k] = linear_test(Xts[:,selected], Yts, beta,
+                                              experiment_type, meanY)
+                err_tr[i, j, k] = linear_test(Xtr[:,selected], Ytr, beta,
+                                              experiment_type, meanY)
+                
 
-    #Xtrain, Ytrain = expressions[train_idxs,:], labels[train_idxs,:]
-    #Xtest,  Ytest  = expressions[test_idxs, :], labels[test_idxs, :]
+    err_ts = err_ts.mean(axis=0)
+    err_tr = err_tr.mean(axis=0)
+    tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
+    tau_opt = tau_range[tau_opt_idx]
+    lambda_opt = lambda_range[lambda_opt_idx]
        
-    return None
+    return tau_opt, lambda_opt
+
+def linear_test(X, Y, beta, experiment_type, meanY):
+    learned = np.dot(X, beta) + meanY
+    if experiment_type == 'classification':
+        return np.sum(np.sign(learned) * sign(Y + meanY) != 1) / Y.size
+    elif experiment_type == 'regression':
+        return (np.linalg.norm(learned - (Y + meanY), 2)**2) / Y.size
+    else:
+        raise RuntimeError('not valid experiment type')
 
 def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
     """ reg_path """
@@ -59,7 +85,6 @@ def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
         else:
             beta_next, k = elastic_net(X, Y, mu, t, beta, kmax)
         out.appendleft(beta_next)
-        #...
         sparsity = np.sum(beta_next != 0)
         beta = beta_next
     
@@ -98,6 +123,15 @@ def soft_thresholding(x, th):
     out = x - (np.sign(x) * (th/2.0))
     out[np.abs(x) < (th/2.0)] = 0.0
     return out
+
+def rls(X, Y, penalty):
+    n, d = X.shape
+    if n < d:
+        tmp = np.linalg.pinv(np.dot(X, X.T) + penalty*n*np.eye(n))
+        return np.dot(np.dot(X.T, tmp), Y)
+    else:
+        tmp = np.linalg.pinv(np.dot(X, X.T) + penalty*n*np.eye(d))
+        return np.dot(tmp, np.dot(X.T, Y))
 
 def ols(X, Y):
     n, d = X.shape

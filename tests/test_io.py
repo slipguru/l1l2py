@@ -63,4 +63,11 @@ class TestConfiguration(object):
         assert_equals(dict, type(self.conf.raw_options))
         assert_true('expressions_path' in self.conf.raw_options)
         assert_true('parameters_tau-min' in self.conf.raw_options)
+        
+    def test_kcv_values(self):
+        assert_equals(3, self.conf.external_k)
+        assert_equals(2, self.conf.internal_k)
+        
+    def test_split_index(self):
+        assert_equals(1, self.conf.split_index)
                 

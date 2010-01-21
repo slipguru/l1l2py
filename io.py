@@ -50,13 +50,15 @@ class Configuration(object):
            
     @property
     def expressions(self):
-        if not self._expressions:
+        if self._expressions is None:
             expressions_type = self._conf.get('expressions', 'type')
             if expressions_type == 'matlab':
                 if self.expressions_path == self.labels_path:
                     self._expressions, self._labels = \
-                                self._get_data(self._conf.get('expressions', 'name'),
-                                               self._conf.get('labels', 'name'))
+                                self._get_data(self._conf.get('expressions',
+                                                              'name'),
+                                               self._conf.get('labels',
+                                                              'name'))
                 else:
                     self._expressions = \
                                 self._get_data(self._conf.get('expressions',
@@ -65,15 +67,18 @@ class Configuration(object):
     
     @property
     def labels(self):
-        if not self._labels:
+        if self._labels is None:
             labels_type = self._conf.get('labels', 'type')
             if labels_type == 'matlab':
                 if self.expressions_path == self.labels_path:
                     self._expressions, self._labels = \
-                                self._get_data(self._conf.get('expressions', 'name'),
-                                               self._conf.get('labels', 'name'))
+                                self._get_data(self._conf.get('expressions',
+                                                              'name'),
+                                               self._conf.get('labels',
+                                                              'name'))
                 else:
-                    self._labels = self._get_data(self._conf.get('labels', 'name'))
+                    self._labels = self._get_data(self._conf.get('labels',
+                                                                 'name'))
         return self._labels
     
     #TODO: think better data reading!
@@ -136,13 +141,27 @@ class Configuration(object):
                     self._options['%s_%s' % (s, o)] = v
         return self._options
     
-    def __str__(self):       
+    @property
+    def external_k(self):
+        return self._conf.getint('parameters', 'external-k')
+    
+    @property
+    def internal_k(self):
+        return self._conf.getint('parameters', 'internal-k')
+        
+    @property
+    def split_index(self):
+        return self._conf.getint('parameters', 'split-index')
+    
+    def __str__(self):
+        relative_path = os.path.relpath(self.path)
         width = 55
         just_l, just_r = (width/2)-7, (width/2)+5
+        
         separator = '+' + '-'*width + '+\n'
         
         header = separator + \
-                 '|' + self.path.center(width) + '|\n' + \
+                 '|' + relative_path.center(width) + '|\n' + \
                  separator
         content = '\n'.join(
             '| ' + k.rjust(just_r) + ': ' + self.raw_options[k].ljust(just_l) + '|'

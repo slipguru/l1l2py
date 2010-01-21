@@ -15,7 +15,7 @@ def main():
     conf = io.Configuration(config_file_path)
     print conf
 
-    expressions, labels = conf.data_matrices()
+    expressions, labels = conf.expressions, conf.labels
 
     # --------------------------------------------------
     print 'Data shape:', expressions.shape
@@ -26,24 +26,13 @@ def main():
 
     # Starting Protocol
     import tools
-    tau_values =    tools.parameter_range(conf['parameters_tau-range-type'],
-                                          float(conf['parameters_tau-min']),
-                                          float(conf['parameters_tau-max']),
-                                          int(conf['parameters_tau-number']))
-    lambda_values = tools.parameter_range(conf['parameters_lambda-range-type'],
-                                          float(conf['parameters_lambda-min']),
-                                          float(conf['parameters_lambda-max']),
-                                          int(conf['parameters_lambda-number']))
-    mu_values =     tools.parameter_range(conf['parameters_mu-range-type'],
-                                          float(conf['parameters_mu-min']),
-                                          float(conf['parameters_mu-max']),
-                                          int(conf['parameters_mu-number']))
+    tau_range =  conf.tau_range
+    lambda_range = conf.lambda_range
+    mu_range = conf.mu_range
 
-    ext_cv_sets = tools.kcv_indexes(labels, int(conf['parameters_external-k']),
-                                            conf['experiment_type'])
-    train_idxs = ext_cv_sets[int(conf['parameters_split-index'])][0]
-    test_idxs = ext_cv_sets[int(conf['parameters_split-index'])][1]
-
+    ext_cv_sets = tools.kcv_indexes(labels, conf.external_k, conf.experiment_type)
+    train_idxs, test_idxs = ext_cv_sets[conf.split_index]
+    
     # --------------------------------------------------
     print 'Numero fold:', len(ext_cv_sets)
     print 'Indici training set (esterno):', train_idxs

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-import io
+import io, algorithms
 
 def main():
     usage = "usage: %prog configuration-file"
@@ -42,6 +42,13 @@ def main():
 
     Xtrain, Ytrain = expressions[train_idxs,:], labels[train_idxs,:]
     Xtest,  Ytest  = expressions[test_idxs, :], labels[test_idxs, :]
+    assert Xtrain.shape == (20, 40)
+    assert Ytrain.shape == (20, 1)
+    assert Xtest.shape == (10, 40)
+    assert Ytest.shape == (10, 1)
+    
+    sol = algorithms.stage_I(Xtrain, Ytrain, mu_range[0], tau_range, lambda_range,
+                              conf.internal_k, conf.experiment_type)
 
     # STAGE I
     #functions.l1l2_kvc(Xtrain, Ytrain,
@@ -52,7 +59,6 @@ def main():
     #                   input['experiment_type']) #can I normalize externally?
     #
     #
-    ##KCV_grid(expressions, labels, lambda_min,lambda_max,all_eps,Kint,Kext,split_idx,resultfile)
 
 if __name__ == '__main__':
     main()

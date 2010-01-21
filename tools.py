@@ -1,13 +1,17 @@
 import numpy as np
 import mlpy
 
-def standardize(X):
+def standardize(X, p=None):
     """ This function simulate the normalization
         function in the matlab code with norm_mean=norm_col=1"""
-    return mlpy.data_standardize(X)
+    return mlpy.data_standardize(X, p)
 
-def center(X):
-    return X - X.mean(axis=0)
+def center(X, p=None):
+    mean = X.mean(axis=0)
+    if p is None:
+        return X - mean
+    else:
+        return X - mean, p - mean
 
 def scaling_factor(X):
     Xtmp = standardize(X)
@@ -47,6 +51,3 @@ def kcv_indexes(labels, k, experiment_type):
         return mlpy.kfold(labels.size, k)
     else:
         raise RuntimeError()
-
-def l1l2_kvc(*args):
-    return args

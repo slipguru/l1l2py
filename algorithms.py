@@ -50,9 +50,10 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
                                               experiment_type, meanY)
                 err_tr[i, j, k] = linear_test(Xtr[:,selected], Ytr, beta,
                                               experiment_type, meanY)
-                
+
     err_ts = err_ts.mean(axis=0)
     err_tr = err_tr.mean(axis=0)
+       
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
     tau_opt = tau_range[tau_opt_idx[0]]
     lambda_opt = lambda_range[lambda_opt_idx[0]]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-import io, algorithms
+import io, algorithms, tools
 
 def main():
     usage = "usage: %prog configuration-file"
@@ -23,13 +23,7 @@ def main():
     assert expressions.shape[0] == labels.shape[0]
     assert labels.shape[1] == 1
     # --------------------------------------------------
-
-    # Starting Protocol
-    import tools
-    tau_range =  conf.tau_range
-    lambda_range = conf.lambda_range
-    mu_range = conf.mu_range
-
+    
     ext_cv_sets = tools.kcv_indexes(labels, conf.external_k, conf.experiment_type)
     train_idxs, test_idxs = ext_cv_sets[conf.split_index]
     
@@ -46,25 +40,20 @@ def main():
     assert Ytrain.shape == (20, 1)
     assert Xtest.shape == (10, 40)
     assert Ytest.shape == (10, 1)
-      
-    tau_opt, lambda_opt = algorithms.stage_I(Xtrain, Ytrain, mu_range[0],
-                                             tau_range, lambda_range,
+         
+    tau_opt, lambda_opt = algorithms.stage_I(Xtrain, Ytrain,
+                                             conf.mu_range[0],
+                                             conf.tau_range,
+                                             conf.lambda_range,
                                              conf.internal_k,
                                              conf.experiment_type)
+    
     mu_opt = algorithms.stage_II(Xtrain, Ytrain, Xtest, Ytest,
-                                 tau_opt, lambda_opt, mu_range,
+                                 tau_opt,
+                                 lambda_opt,
+                                 conf.mu_range,
                                  conf.experiment_type)
     
-
-    # STAGE I
-    #functions.l1l2_kvc(Xtrain, Ytrain,
-    #                   tau_values,      # EN, stage Ia
-    #                   mu_values[0],    # EN, stage Ia
-    #                   lambda_values,    # RLS, stage Ib
-    #                   input['internal_k'],
-    #                   input['experiment_type']) #can I normalize externally?
-    #
-    #
 
 if __name__ == '__main__':
     main()

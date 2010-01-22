@@ -51,13 +51,12 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
                 err_tr[i, j, k] = linear_test(Xtr[:,selected], Ytr, beta,
                                               experiment_type, meanY)
                 
-
     err_ts = err_ts.mean(axis=0)
     err_tr = err_tr.mean(axis=0)
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
-    tau_opt = tau_range[tau_opt_idx]
-    lambda_opt = lambda_range[lambda_opt_idx]
-       
+    tau_opt = tau_range[tau_opt_idx[0]]
+    lambda_opt = lambda_range[lambda_opt_idx[0]]
+          
     return tau_opt, lambda_opt
 
 def stage_II(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
@@ -120,6 +119,8 @@ def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
 def elastic_net(X, Y, mu, tau, beta, kmax=np.inf):
     n, d = X.shape
     
+    assert beta.shape[1] == 1
+    
     sigma_0 = _get_sigma(X)
     mu = mu*sigma_0
     sigma = sigma_0 + mu
@@ -143,7 +144,7 @@ def elastic_net(X, Y, mu, tau, beta, kmax=np.inf):
         beta_next = soft_thresholding(value, tau_s)
         k = k+1
     
-    return beta, k
+    return beta_next, k
     
     
 def soft_thresholding(x, th):

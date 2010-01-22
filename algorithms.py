@@ -45,12 +45,19 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
         for j, b in enumerate(beta_casc):
             selected = (b.flat != 0)
             for k, l in enumerate(lambda_range):
-                beta = rls(Xtr[:,selected], Ytr, l)
-                err_ts[i, j, k] = linear_test(Xts[:,selected], Yts, beta,
-                                              experiment_type, meanY)
-                err_tr[i, j, k] = linear_test(Xtr[:,selected], Ytr, beta,
-                                              experiment_type, meanY)
-
+                beta = ridge_regression(Xtr[:,selected], Ytr, l)
+                
+                labelsTs = Yts + meanY
+                predictedTs = np.dot(Xts[:,selected], beta) + meanY
+                err_ts[i, j, k] = prediction_error(labelsTs,
+                                                   predictedTs,
+                                                   experiment_type)
+                
+                labelsTr = Ytr + meanY
+                predictedTr = np.dot(Xtr[:,selected], beta) + meanY
+                err_tr[i, j, k] = prediction_error(labelsTr,
+                                                   predictedTr,
+                                                   experiment_type)
     err_ts = err_ts.mean(axis=0)
     err_tr = err_tr.mean(axis=0)
        
@@ -70,15 +77,16 @@ def stage_II(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
         Ytr, Yts, meanY = tools.center(Ytr, Yts)
     
     # IIa
-    beta_0 = ols(Xtr, Ytr)
+    beta_0 = ridge_regression(Xtr, Ytr)
     beta, k = elastic_net(Xtr, Ytr, mu_range[0], tau_opt, beta_0)
     selected = (beta.flat != 0)
     
     # IIb
-    beta_opt = rls(Xtr[:,selected], Ytr, lambda_opt)
+    beta_opt = ridge_regression(Xtr[:,selected], Ytr, lambda_opt)
     
-    err_test = linear_test(Xts[:,selected], Yts, beta_opt,
-                           experiment_type, meanY)
+    labels = Yts + meanY
+    predicted = np.dot(Xts[:,selected], beta_opt) + meanY
+    err_test = prediction_error(labels, predicted, experiment_type)
     #sums sums sums
     
     for m in mu_range[1:]:
@@ -87,20 +95,11 @@ def stage_II(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
     mu_opt = None
     return mu_opt
 
-def linear_test(X, Y, beta, experiment_type, meanY):
-    learned = np.dot(X, beta) + meanY
-    if experiment_type == 'classification':
-        return np.sum(np.sign(learned) * sign(Y + meanY) != 1) / Y.size
-    elif experiment_type == 'regression':
-        return (np.linalg.norm(learned - (Y + meanY), 2)**2) / Y.size
-    else:
-        raise RuntimeError('not valid experiment type')
-
 def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
     """ reg_path """
     n, d = X.shape
     
-    beta_ls = ols(X, Y) # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
+    beta_ls = ridge_regression(X, Y) # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
     beta = beta_ls # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
     import collections
     out = collections.deque()
@@ -117,10 +116,42 @@ def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
     
     return np.asarray(out) #very inefficient! right?!
 
-def elastic_net(X, Y, mu, tau, beta, kmax=np.inf):
-    n, d = X.shape
+# -----------------------------------------------------------------------------
+# TESTED FUNCTIONS
+
+def prediction_error(labels, predicted, experiment_type):
+    if experiment_type == 'classification':
+        difference = (np.sign(labels) != np.sign(predicted))
+        return labels[difference].size / float(labels.size)
+    elif experiment_type == 'regression':
+        norm = np.linalg.norm(labels - predicted, 2)
+        return (norm * norm) / float(labels.size)
+    else:
+        raise RuntimeError('not valid experiment type')
     
-    assert beta.shape[1] == 1
+def soft_thresholding(x, th):
+    out = x - (np.sign(x) * (th/2.0))
+    out[np.abs(x) < (th/2.0)] = 0.0
+    return out
+
+def ridge_regression(X, Y, penalty=0.0):
+    n, d = X.shape
+        
+    if n < d:
+        tmp = np.dot(X, X.T)
+        if penalty: tmp += penalty*n*np.eye(n)
+        tmp = np.linalg.pinv(tmp)
+        
+        return np.dot(np.dot(X.T, tmp), Y)
+    else:
+        tmp = np.dot(X.T, X)
+        if penalty: tmp += penalty*n*np.eye(d)
+        tmp = np.linalg.pinv(tmp)
+        
+        return np.dot(tmp, np.dot(X.T, Y))
+
+def elastic_net(X, Y, mu, tau, beta=None, kmax=np.inf):
+    n, d = X.shape
     
     sigma_0 = _get_sigma(X)
     mu = mu*sigma_0
@@ -132,6 +163,10 @@ def elastic_net(X, Y, mu, tau, beta, kmax=np.inf):
     kmin = 100
     k = 0
     tol = 0.01
+    
+    if beta is None:
+        beta = ridge_regression(X, Y)
+        
     value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))
     beta_next = soft_thresholding(value, tau_s)
     log = True
@@ -146,30 +181,6 @@ def elastic_net(X, Y, mu, tau, beta, kmax=np.inf):
         k = k+1
     
     return beta_next, k
-    
-    
-def soft_thresholding(x, th):
-    out = x - (np.sign(x) * (th/2.0))
-    out[np.abs(x) < (th/2.0)] = 0.0
-    return out
-
-def rls(X, Y, penalty):
-    n, d = X.shape
-    if n < d:
-        tmp = np.linalg.pinv(np.dot(X, X.T) + penalty*n*np.eye(n))
-        return np.dot(np.dot(X.T, tmp), Y)
-    else:
-        tmp = np.linalg.pinv(np.dot(X, X.T) + penalty*n*np.eye(d))
-        return np.dot(tmp, np.dot(X.T, Y))
-
-def ols(X, Y):
-    n, d = X.shape
-    tmp = np.linalg.pinv(np.dot(X, X.T))
-    
-    if n < d:
-        return np.dot(np.dot(X.T, tmp), Y)
-    else:
-        return np.dot(tmp, np.dot(X.T, Y))
 
 def _get_sigma(X):
     n, d = X.shape
@@ -184,4 +195,3 @@ def _get_sigma(X):
         b = aval[-1]
     
     return (a+b)/(n*2.0)
-    

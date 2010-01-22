@@ -18,6 +18,9 @@ class Configuration(object):
         self._labels = None
         self._labels_path = None
         self._options = None
+        self._tau_range = None
+        self._lambda_range = None
+        self._mu_range = None
 
     @property
     def path(self):
@@ -114,21 +117,29 @@ class Configuration(object):
     
     @property
     def tau_range(self):
-        return self._get_range_values('tau', self.tau_range_type)
+        if self._tau_range is None:
+            self._tau_range = self._get_range_values('tau',
+                                                     self.tau_range_type)
+        return self._tau_range
         
     @property
     def lambda_range(self):
-        return self._get_range_values('lambda', self.lambda_range_type)
+        if self._lambda_range is None:
+            self._lambda_range = self._get_range_values('lambda',
+                                                        self.lambda_range_type)
+        return self._lambda_range
         
     @property
     def mu_range(self):
-        return self._get_range_values('mu', self.mu_range_type)
+        if self._mu_range is None:
+            self._mu_range = self._get_range_values('mu', self.mu_range_type)
+        return self._mu_range
         
     def _get_range_values(self, param, type):
         import tools
         min = self._conf.getfloat('parameters', '%s-min' % param)
         max = self._conf.getfloat('parameters', '%s-max' % param)
-        num = self._conf.getfloat('parameters', '%s-number' % param)
+        num = self._conf.getint('parameters', '%s-number' % param)
         return tools.parameter_range(type, min, max, num)
     
     @property

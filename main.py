@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-import io, algorithms, tools
+import io, framework, tools
 
 def main():
     usage = "usage: %prog configuration-file"
@@ -41,14 +41,14 @@ def main():
     assert Xtest.shape == (10, 40)
     assert Ytest.shape == (10, 1)
          
-    tau_opt, lambda_opt = algorithms.stage_I(Xtrain, Ytrain,
+    tau_opt, lambda_opt = framework.stage_I(Xtrain, Ytrain,
                                              conf.mu_range[0],
                                              conf.tau_range,
                                              conf.lambda_range,
                                              conf.internal_k,
                                              conf.experiment_type)
     
-    mu_opt = algorithms.stage_II(Xtrain, Ytrain, Xtest, Ytest,
+    mu_opt = framework.stage_II(Xtrain, Ytrain, Xtest, Ytest,
                                  tau_opt,
                                  lambda_opt,
                                  conf.mu_range,

@@ -46,9 +46,15 @@ def main():
     assert Ytrain.shape == (20, 1)
     assert Xtest.shape == (10, 40)
     assert Ytest.shape == (10, 1)
+      
+    tau_opt, lambda_opt = algorithms.stage_I(Xtrain, Ytrain, mu_range[0],
+                                             tau_range, lambda_range,
+                                             conf.internal_k,
+                                             conf.experiment_type)
+    mu_opt = algorithms.stage_II(Xtrain, Ytrain, Xtest, Ytest,
+                                 tau_opt, lambda_opt, mu_range,
+                                 conf.experiment_type)
     
-    sol = algorithms.stage_I(Xtrain, Ytrain, mu_range[0], tau_range, lambda_range,
-                              conf.internal_k, conf.experiment_type)
 
     # STAGE I
     #functions.l1l2_kvc(Xtrain, Ytrain,

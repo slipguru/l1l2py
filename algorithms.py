@@ -60,6 +60,33 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
        
     return tau_opt, lambda_opt
 
+def stage_II(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
+             standardize_X=True, center_Y=True):
+    
+    # This command makes copy of the data!
+    if standardize_X:
+        Xtr, Xts = tools.standardize(Xtr, Xts)
+    if center_Y:
+        Ytr, Yts, meanY = tools.center(Ytr, Yts)
+    
+    # IIa
+    beta_0 = ols(Xtr, Ytr)
+    beta, k = elastic_net(Xtr, Ytr, mu_range[0], tau_opt, beta_0)
+    selected = (beta.flat != 0)
+    
+    # IIb
+    beta_opt = rls(Xtr[:,selected], Ytr, lambda_opt)
+    
+    err_test = linear_test(Xts[:,selected], Yts, beta_opt,
+                           experiment_type, meanY)
+    #sums sums sums
+    
+    for m in mu_range[1:]:
+        pass
+    
+    mu_opt = None
+    return mu_opt
+
 def linear_test(X, Y, beta, experiment_type, meanY):
     learned = np.dot(X, beta) + meanY
     if experiment_type == 'classification':

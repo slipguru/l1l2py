@@ -10,17 +10,17 @@ def parameter_range(type, min, max, number):
     else:
         raise RuntimeError('not valid type parameter')
 
-def standardize(X, p=None):
+def standardize(matrix, p=None):
     """ This function simulate the normalization
         function in the matlab code with norm_mean=norm_col=1"""
-    return mlpy.data_standardize(X, p)
+    return mlpy.data_standardize(matrix, p)
 
-def center(X, p=None):
-    mean = X.mean(axis=0)
+def center(matrix, p=None):
+    mean = matrix.mean(axis=0)
     if p is None:
-        return X - mean, mean
+        return matrix - mean, mean
     else:
-        return X - mean, p - mean, mean
+        return matrix - mean, p - mean, mean
 
 
 

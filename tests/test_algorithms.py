@@ -6,9 +6,7 @@ from mlabwrap import mlab
 from nose.tools import *
 import algorithms as alg
 
-mlab.addpath('../REGRESSION_TOOLBOXES/L1L2_TOOLBOX/')
-mlab.addpath('../REGRESSION_TOOLBOXES/MISCELLANEOUS/')
-mlab.addpath('../REGRESSION_TOOLBOXES/RLS_TOOLBOX/')
+mlab.addpath('tests/matlab_code')
 TOL = 1e-3
 
 class TestConfiguration(object):

@@ -9,9 +9,9 @@ import algorithms as alg
 mlab.addpath('tests/matlab_code')
 TOL = 1e-3
 
-class TestConfiguration(object):
+class TestAlgorithms(object):
     """
-    Some result generated with the original matlab code
+    Results generated with the original matlab code
     """
 
     def setup(self):     
@@ -80,11 +80,15 @@ class TestConfiguration(object):
         
         error = alg.prediction_error(self.Y, predicted, 'regression')
         assert_almost_equals(0.0, error)
+        
+        matlab_error = mlab.linear_test(self.X, self.Y, beta, 'regr')
+        assert_almost_equals(matlab_error, error)
 
         predicted_mod = predicted.copy()        
         for num in np.arange(0, self.Y.size, 5):
             predicted_mod[0:num] = predicted[0:num] + 1.0
             exp_error = num / float(self.Y.size)
+            
             error = alg.prediction_error(self.Y, predicted_mod, 'regression')
             assert_almost_equals(exp_error, error)
         

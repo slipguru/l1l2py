@@ -1,14 +1,12 @@
 import numpy as np
 import mlpy
 
-def parameter_range(type, min, max, number):
-    if type == 'linear':
-        return np.linspace(min, max, number)
-    elif type == 'geometric':
-        ratio = (max/float(min))**(1.0/(number-1))
-        return min * (ratio ** np.arange(number))
-    else:
-        raise RuntimeError('not valid type parameter')
+def linear_range(min, max, number):
+    return np.linspace(min, max, number)
+
+def geometric_range(min, max, number):
+    ratio = (max/float(min))**(1.0/(number-1))
+    return min * (ratio ** np.arange(number))
 
 def standardize(matrix, p=None):
     """ This function simulate the normalization
@@ -21,8 +19,6 @@ def center(matrix, p=None):
         return matrix - mean, mean
     else:
         return matrix - mean, p - mean, mean
-
-
 
 def scaling_factor(X):
     Xtmp = standardize(X)

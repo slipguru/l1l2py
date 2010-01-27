@@ -48,7 +48,8 @@ class TestConfiguration(object):
         assert_equals('geometric', self.conf.lambda_range_type)
         assert_equals('linear', self.conf.mu_range_type)
         
-        assert_equals(('linear', 'geometric'), self.conf.range_types)
+        assert_true('linear' in self.conf.range_types)
+        assert_true('geometric' in self.conf.range_types)
         
     def test_range_values(self):
         import tools

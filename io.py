@@ -3,6 +3,8 @@ from ConfigParser import SafeConfigParser, NoOptionError, NoSectionError
 
 import scipy.io as sio
 
+import tools
+
 class Configuration(object):
     """ Configuration file object
     """    
@@ -12,7 +14,7 @@ class Configuration(object):
         if not self._conf.read(self._path):
             raise RuntimeError('not valid configuration file')
             
-        #Lazy initializations
+        # Lazy initializations
         self._expressions = None
         self._expressions_path = None
         self._labels = None
@@ -21,6 +23,10 @@ class Configuration(object):
         self._tau_range = None
         self._lambda_range = None
         self._mu_range = None
+        
+        # Parameters functions
+        self._ranges = {'linear':tools.linear_range,
+                        'geometric':tools.geometric_range}
 
     @property
     def path(self):
@@ -113,7 +119,7 @@ class Configuration(object):
         
     @property
     def range_types(self):
-        return ('linear', 'geometric')
+        return self._ranges.keys()
     
     @property
     def tau_range(self):
@@ -136,11 +142,10 @@ class Configuration(object):
         return self._mu_range
         
     def _get_range_values(self, param, type):
-        import tools
         min = self._conf.getfloat('parameters', '%s-min' % param)
         max = self._conf.getfloat('parameters', '%s-max' % param)
         num = self._conf.getint('parameters', '%s-number' % param)
-        return tools.parameter_range(type, min, max, num)
+        return self._ranges[type](min, max, num)
     
     @property
     def raw_options(self):

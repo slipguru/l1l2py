@@ -20,14 +20,8 @@ def center(matrix, p=None):
     else:
         return matrix - mean, p - mean, mean
 
-def scaling_factor(X):
-    Xtmp = standardize(X)
-    return np.sqrt( np.linalg.norm( np.dot(Xtmp, Xtmp.T), 2) )
+def regression_splits(labels, k):
+    return mlpy.kfold(labels.size, k)
 
-def kcv_indexes(labels, k, experiment_type):
-    if experiment_type == 'classification':
-        return mlpy.kfoldS(labels, k)
-    elif experiment_type == 'regression':
-        return mlpy.kfold(labels.size, k)
-    else:
-        raise RuntimeError()
+def classification_splits(labels, k):
+    return mlpy.kfoldS(labels, k)

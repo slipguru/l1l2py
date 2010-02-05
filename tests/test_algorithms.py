@@ -62,8 +62,23 @@ class TestAlgorithms(object):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)
             beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
-    
+       
             assert_true(np.allclose(exp_beta, beta, TOL))
-            assert_true(np.allclose(exp_k, k))        
+            assert_true(np.allclose(exp_k, k))
+            
+    def test_regpath(self):
+        values = np.linspace(0.1, 1.0, 5)
+        beta_path = alg.elastic_net_regpath(self.X, self.Y,
+                                            0.1, values, kmax=np.inf)
+        selected = (beta_path != 0)
+        
+        exp_selected = mlab.l1l2_regpath(self.X, self.Y,
+                                         values, 0.1, kmax=np.inf)
+        exp_selected = mlab.double(mlab.cell2mat(exp_selected)); # need because
+        exp_selected = np.split(exp_selected, values.size)       # return a cell
+        
+        for b, s in zip(selected, exp_selected):
+            # note: s contains 0s and 1s, b contains True and False values
+            assert_true(np.all(b == s))
         
         

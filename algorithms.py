@@ -55,6 +55,27 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=np.inf):
     
     return beta_next, k
 
+def elastic_net_regpath(X, Y, mu, tau_range, kmax=np.inf):
+    """ reg_path """
+    n, d = X.shape
+    
+    beta_ls = ridge_regression(X, Y) # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
+    beta = beta_ls # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
+    import collections
+    out = collections.deque()
+    sparsity = 0
+    for i, t in zip(reversed(xrange(10)), tau_range[::-1]):
+        
+        if mu == 0.0 and sparsity >= n:
+            beta_next = beta_ls                
+        else:
+            beta_next, k = elastic_net(X, Y, mu, t, beta, kmax)
+        out.appendleft(beta_next)
+        sparsity = np.sum(beta_next != 0)
+        beta = beta_next
+    
+    return np.asarray(out) #very inefficient! right?!
+
 def _get_sigma(X):
     n, d = X.shape
     

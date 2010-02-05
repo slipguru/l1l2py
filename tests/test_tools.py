@@ -5,6 +5,7 @@ from mlabwrap import mlab
 
 from nose.tools import *
 import tools
+import algorithms as alg
 
 mlab.addpath('tests/matlab_code')
 TOL = 1e-3
@@ -128,3 +129,30 @@ class TestTools(object):
         assert_almost_equal(positive, train2_p, 1)
         assert_almost_equal(negative, train1_n, 1)
         assert_almost_equal(negative, train2_n, 1)
+
+    def test_classification_error(self):              
+        labels = np.ones(100)
+        predicted = labels.copy()
+        for exp_error in (0.0, 0.5, 0.75, 1.0):
+            index = exp_error*100
+            predicted[0:index] = -1
+            error = tools.classification_error(labels, predicted)
+            assert_almost_equals(exp_error, error)
+         
+    def test_regression_error(self):
+        beta = alg.ridge_regression(self.X, self.Y)
+        predicted = np.dot(self.X, beta)
+        
+        error = alg.prediction_error(self.Y, predicted, 'regression')
+        assert_almost_equals(0.0, error)
+        
+        matlab_error = mlab.linear_test(self.X, self.Y, beta, 'regr')
+        assert_almost_equals(matlab_error, error)
+
+        predicted_mod = predicted.copy()        
+        for num in np.arange(0, self.Y.size, 5):
+            predicted_mod[0:num] = predicted[0:num] + 1.0
+            exp_error = num / float(self.Y.size)
+            
+            error = tools.regression_error(self.Y, predicted_mod)
+            assert_almost_equals(exp_error, error)

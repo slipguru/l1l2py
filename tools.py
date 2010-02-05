@@ -25,3 +25,11 @@ def regression_splits(labels, k):
 
 def classification_splits(labels, k):
     return mlpy.kfoldS(labels, k)
+
+def classification_error(labels, predicted):
+    difference = (np.sign(labels) != np.sign(predicted))
+    return labels[difference].size / float(labels.size)
+    
+def regression_error(labels, predicted):
+    norm = np.linalg.norm(labels - predicted, 2)
+    return (norm * norm) / float(labels.size)

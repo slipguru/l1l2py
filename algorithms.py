@@ -1,17 +1,7 @@
 from __future__ import division
 import tools
 import numpy as np
-
-def prediction_error(labels, predicted, experiment_type):
-    if experiment_type == 'classification':
-        difference = (np.sign(labels) != np.sign(predicted))
-        return labels[difference].size / float(labels.size)
-    elif experiment_type == 'regression':
-        norm = np.linalg.norm(labels - predicted, 2)
-        return (norm * norm) / float(labels.size)
-    else:
-        raise RuntimeError('not valid experiment type')
-    
+  
 def soft_thresholding(x, th):
     out = x - (np.sign(x) * (th/2.0))
     out[np.abs(x) < (th/2.0)] = 0.0

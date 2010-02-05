@@ -56,41 +56,14 @@ class TestAlgorithms(object):
         assert_true(np.allclose(b, value, TOL))
 
     def test_elastic_net(self):
-        for mu in np.linspace(0.1, 1.0, 5):
-            for tau in np.linspace(0.1, 1.0, 5):
-                exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
-                                                      tau, mu, nout=2)
-                beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
-        
-                assert_true(np.allclose(exp_beta, beta, TOL))
-                assert_true(np.allclose(exp_k, k))
-
-    def test_classification_error(self):              
-        labels = np.ones(100)
-        predicted = labels.copy()
-        for exp_error in (0.0, 0.5, 0.75, 1.0):
-            index = exp_error*100
-            predicted[0:index] = -1
-            error = alg.prediction_error(labels, predicted, 'classification')
-            assert_almost_equals(exp_error, error)
-            
-    def test_regression_error(self):
-        beta = alg.ridge_regression(self.X, self.Y)
-        predicted = np.dot(self.X, beta)
-        
-        error = alg.prediction_error(self.Y, predicted, 'regression')
-        assert_almost_equals(0.0, error)
-        
-        matlab_error = mlab.linear_test(self.X, self.Y, beta, 'regr')
-        assert_almost_equals(matlab_error, error)
-
-        predicted_mod = predicted.copy()        
-        for num in np.arange(0, self.Y.size, 5):
-            predicted_mod[0:num] = predicted[0:num] + 1.0
-            exp_error = num / float(self.Y.size)
-            
-            error = alg.prediction_error(self.Y, predicted_mod, 'regression')
-            assert_almost_equals(exp_error, error)
-        
+        from itertools import product
+        values = np.linspace(0.1, 1.0, 5)
+        for mu, tau in product(values, values):
+            exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
+                                                  tau, mu, nout=2)
+            beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
+    
+            assert_true(np.allclose(exp_beta, beta, TOL))
+            assert_true(np.allclose(exp_k, k))        
         
         

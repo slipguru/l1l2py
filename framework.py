@@ -42,7 +42,7 @@ def stage_I(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
             Ytr, Yts = Y[train_idxs,:], Y[test_idxs,:]
             
         # REG_PATH mu_0 and tau_range!!
-        beta_casc = stage_Ia(Xtr, Ytr, mu_fact, tau_range)
+        beta_casc = alg.elastic_net_regpath(Xtr, Ytr, mu_fact, tau_range)
         
         # STAGE Ib!!!
         for j, b in enumerate(beta_casc):
@@ -98,23 +98,3 @@ def stage_II(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
     mu_opt = None
     return mu_opt
 
-def stage_Ia(X, Y, mu, tau_range, kmax=np.inf):
-    """ reg_path """
-    n, d = X.shape
-    
-    beta_ls = ridge_regression(X, Y) # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
-    beta = beta_ls # np.dot(np.dot(X.T, X).I, np.dot(X.T, Y))
-    import collections
-    out = collections.deque()
-    sparsity = 0
-    for i, t in zip(reversed(xrange(10)), tau_range[::-1]):
-        
-        if mu == 0.0 and sparsity >= n:
-            beta_next = beta_ls                
-        else:
-            beta_next, k = elastic_net(X, Y, mu, t, beta, kmax)
-        out.appendleft(beta_next)
-        sparsity = np.sum(beta_next != 0)
-        beta = beta_next
-    
-    return np.asarray(out) #very inefficient! right?!

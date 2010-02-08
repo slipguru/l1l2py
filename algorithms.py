@@ -39,22 +39,22 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=1e5):
     
     if beta is None:
         beta = ridge_regression(X, Y)
-    
+      
     #--------------------------------------------------------------------------
     # The loop is 3x slower than matlab!
-    # Need to put down (C/C++ code)!    
+    # Need to push down (C/C++ code)!    
     value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))
     beta_next = soft_thresholding(value, tau_s)
     log = True
     
     while k < kmin or (k < kmax and log is True):
         th = np.abs(beta) * (tol / (k+1))
-        if np.all(np.abs(beta_next - beta) <= th): log = False
+        if (np.abs(beta_next - beta) <= th).all(): log = False
         
         beta = beta_next
-        value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))
+        value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))      
         beta_next = soft_thresholding(value, tau_s)
-        k = k+1
+        k += 1
     #--------------------------------------------------------------------------
     
     return beta_next, k
@@ -87,7 +87,6 @@ def _get_sigma(X):
     else:
         aval = np.linalg.svd(np.dot(X.T, X),
                              full_matrices=False, compute_uv=False)
-        a = aval[0]
-        b = aval[-1]
+        a, b = aval[(0, -1)]
     
     return (a+b)/(n*2.0)

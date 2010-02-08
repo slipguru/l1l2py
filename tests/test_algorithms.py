@@ -79,6 +79,6 @@ class TestAlgorithms(object):
         
         for b, s in zip(selected, exp_selected):
             # note: s contains 0s and 1s, b contains True and False values
-            assert_true(np.all(b == s))
+            assert_true(np.all(b == s.squeeze()))
         
         

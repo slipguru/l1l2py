@@ -4,6 +4,7 @@ import scipy.io as sio
 from mlabwrap import mlab
 
 from nose.tools import *
+from nose.plugins.attrib import attr
 import algorithms as alg
 
 mlab.addpath('tests/matlab_code')
@@ -58,6 +59,18 @@ class TestAlgorithms(object):
     def test_elastic_net(self):
         from itertools import product
         values = np.linspace(0.1, 1.0, 5)
+        for mu, tau in product(values, values):
+            exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
+                                                  tau, mu, nout=2)
+            beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
+       
+            assert_true(np.allclose(exp_beta, beta, TOL))
+            assert_true(np.allclose(exp_k, k))
+    
+    @attr('slow')    
+    def test_elastic_net_slow(self):
+        from itertools import product
+        values = np.linspace(0.0, 2.0, 10)
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)

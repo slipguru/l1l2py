@@ -54,11 +54,7 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=np.inf):
         k = k+1
     
     return beta_next, k
-
-def reverse_enumerate(iterable):
-    from itertools import izip
-    return izip(reversed(xrange(iterable.size)), reversed(iterable))
-    
+  
 def elastic_net_regpath(X, Y, mu, tau_range, kmax=np.inf):
     """ reg_path """
     n, d = X.shape
@@ -67,7 +63,7 @@ def elastic_net_regpath(X, Y, mu, tau_range, kmax=np.inf):
     beta = beta_ls
     out = np.empty((tau_range.size, beta.size))    
     sparsity = 0
-    for i, t in reverse_enumerate(tau_range):
+    for i, t in tools.reverse_enumerate(tau_range):
         if mu == 0.0 and sparsity >= n:
             beta_next = beta_ls                
         else:

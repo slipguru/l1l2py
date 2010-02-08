@@ -7,6 +7,10 @@ def linear_range(min, max, number):
 def geometric_range(min, max, number):
     ratio = (max/float(min))**(1.0/(number-1))
     return min * (ratio ** np.arange(number))
+    
+def reverse_enumerate(iterable):
+    from itertools import izip
+    return izip(reversed(xrange(iterable.size)), reversed(iterable))
 
 def standardize(matrix, p=None):
     """ This function simulate the normalization

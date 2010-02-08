@@ -143,7 +143,7 @@ class TestTools(object):
         beta = alg.ridge_regression(self.X, self.Y)
         predicted = np.dot(self.X, beta)
         
-        error = alg.prediction_error(self.Y, predicted, 'regression')
+        error = tools.regression_error(self.Y, predicted)
         assert_almost_equals(0.0, error)
         
         matlab_error = mlab.linear_test(self.X, self.Y, beta, 'regr')
@@ -156,3 +156,9 @@ class TestTools(object):
             
             error = tools.regression_error(self.Y, predicted_mod)
             assert_almost_equals(exp_error, error)
+            
+    def test_reverse_enumerate(self):
+        iterable = np.array((2, 3, 4, 5, 6))
+        rev_enumerate = ((4, 6), (3, 5), (2, 4), (1, 3), (0, 2))
+        for p1, p2 in zip(rev_enumerate, tools.reverse_enumerate(iterable)):
+            assert_equal(p1, p2)

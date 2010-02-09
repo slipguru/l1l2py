@@ -5,70 +5,44 @@ import algorithms as alg
 import tools
 
 # l1l2_kcv!
-def select_features(X, Y, mu_fact, tau_range, lambda_range=np.empty(0),
-                    int_cv_sets=None, experiment_type='classification',
-                    standardize_X=True, center_Y=True):
-    """
-    Ia: mu_fact, tau_range
-    Ib: lambda_range on selected
-        ** step II -> out **
-        
-    Normalization inside!
-    Is needed to normalize single sub-subsets
-    """
-    if experiment_type =='classification':
-    #    int_cv_sets = tools.classification_splits(Y, k)
-        compute_error = tools.classification_error
-    else:
-    #    int_cv_sets = tools.regression_splits(Y, k)
-        compute_error = tools.regression_error
-    
-    # --------------------------------------------------
-    #print 'Numero fold interni:', len(int_cv_sets)
-    #print 'Coppie sets (interno):', int_cv_sets
-    # --------------------------------------------------
-    
-    err_ts = np.empty((len(int_cv_sets), tau_range.size, lambda_range.size))
+def select_features(X, Y, mu, tau_range, lambda_range, cv_sets,
+                    error_function,
+                    data_normalizer=None, labels_normalizer=None):
+      
+    err_ts = np.empty((len(cv_sets), tau_range.size, lambda_range.size))
     err_tr = np.empty_like(err_ts)
     
-    for i, (train_idxs, test_idxs) in enumerate(int_cv_sets):
-        #print 'Train: ', np.asarray(train_idxs)+1, 'on: ', np.asarray(test_idxs)+1
-        
-        # This command makes copy of the data!
-        if standardize_X:
-            Xtr, Xts = tools.standardize(X[train_idxs,:], X[test_idxs,:])
-        else:
-            Xtr, Xts = X[train_idxs,:], X[test_idxs,:]
+    for i, (train_idxs, test_idxs) in enumerate(cv_sets):
+        # First create a view and then normalize (eventually)
+        Xtr, Xts = X[train_idxs,:], X[test_idxs,:]
+        if not data_normalizer is None:
+            Xtr, Xts = data_normalizer(Xtr, Xts)
             
-        if center_Y:
-            Ytr, Yts, meanY = tools.center(Y[train_idxs,:], Y[test_idxs,:])
-        else:
-            Ytr, Yts = Y[train_idxs,:], Y[test_idxs,:]
+        Ytr, Yts = Y[train_idxs,:], Y[test_idxs,:]
+        if not labels_normalizer is None:
+            Ytr, Yts, meanY = labels_normalizer(Ytr, Yts)
             
-        # REG_PATH mu_0 and tau_range!!
-        beta_casc = alg.elastic_net_regpath(Xtr, Ytr, mu_fact, tau_range)
+        # Builds a classifier for each value of tau
+        beta_casc = alg.elastic_net_regpath(Xtr, Ytr, mu, tau_range)
         
-        # STAGE Ib!!!
+        # For each sparse model builds a rls classifier
+        # for each value of lambda
         for j, b in enumerate(beta_casc):
-            selected = (b.flat != 0)
-            for k, l in enumerate(lambda_range):
-                beta = alg.ridge_regression(Xtr[:,selected], Ytr, l)
+            selected = (b != 0)
+            for k, lam in enumerate(lambda_range):
+                beta = alg.ridge_regression(Xtr[:,selected], Ytr, lam)
                 
-                labelsTs = Yts + meanY
-                predictedTs = np.dot(Xts[:,selected], beta) + meanY
-                err_ts[i, j, k] = compute_error(labelsTs,
-                                                   predictedTs)
+                prediction = np.dot(Xts[:,selected], beta)
+                err_ts[i, j, k] = error_function(Yts, prediction)
                 
-                labelsTr = Ytr + meanY
-                predictedTr = np.dot(Xtr[:,selected], beta) + meanY
-                err_tr[i, j, k] = compute_error(labelsTr,
-                                                predictedTr)
-    #print err_ts
+                prediction = np.dot(Xtr[:,selected], beta)
+                err_tr[i, j, k] = error_function(Ytr, prediction)
+    
     err_ts = err_ts.mean(axis=0)
     err_tr = err_tr.mean(axis=0)
        
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
-    tau_opt = tau_range[tau_opt_idx[0]]
+    tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
     lambda_opt = lambda_range[lambda_opt_idx[0]]
           
     return tau_opt, lambda_opt

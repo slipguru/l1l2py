@@ -36,13 +36,12 @@ class TestFramework(object):
                                               5, 'regr', 0,    1,    1, nout=2)
                            
             sets = TestFramework._get_matlab_splitting(self.Y, 5)    
-            tau_opt, lambda_opt = \
-                                fw.select_features(self.X, self.Y, mu,
-                                                   self.tau_range, self.lambda_range,
-                                                   int_cv_sets=sets,
-                                                   experiment_type='regression',
-                                                   standardize_X=True,
-                                                   center_Y=True)
+            tau_opt, lambda_opt = fw.select_features(self.X, self.Y, mu,
+                                    self.tau_range, self.lambda_range,
+                                    cv_sets=sets,
+                                    error_function=tools.regression_error,
+                                    data_normalizer=tools.standardize,
+                                    labels_normalizer=tools.center)
                                                    
             assert_almost_equals(tau_opt_exp, tau_opt)
             assert_almost_equals(lambda_opt_exp, lambda_opt)

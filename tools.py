@@ -15,7 +15,13 @@ def reverse_enumerate(iterable):
 def standardize(matrix, p=None):
     """ This function simulate the normalization
         function in the matlab code with norm_mean=norm_col=1"""
-    return mlpy.data_standardize(matrix, p)
+    mean = matrix.mean(axis=0)
+    std = matrix.std(axis=0, ddof=1)
+        
+    if p is None:
+        return (matrix - mean)/std, mean, std
+    else:
+        return (matrix - mean)/std, (p - mean)/std, mean, std
 
 def center(matrix, p=None):
     mean = matrix.mean(axis=0)

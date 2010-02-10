@@ -55,7 +55,7 @@ class TestTools(object):
                                                                 self.X, self.Y,
                                                                 nout=5)
         # Note: standardization includes matrix centering!
-        Xstd = tools.standardize(self.X)
+        Xstd, mean, std = tools.standardize(self.X)
         
         assert_true(np.allclose(Xexp, Xstd, TOL))
         assert_true(np.allclose(Xexp, Xexp2))

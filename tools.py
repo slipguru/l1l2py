@@ -24,11 +24,11 @@ def center(matrix, p=None):
     else:
         return matrix - mean, p - mean, mean
 
-def kfold_splits(labels, k):
-    return mlpy.kfold(labels.size, k)
+def kfold_splits(labels, k, rseed=0):
+    return mlpy.kfold(labels.size, k, rseed)
 
-def stratified_kfold_splits(labels, k):
-    return mlpy.kfoldS(labels, k)
+def stratified_kfold_splits(labels, k, rseed=0):
+    return mlpy.kfoldS(labels, k, rseed)
     
 def classification_error(labels, predicted):
     difference = (np.sign(labels) != np.sign(predicted))

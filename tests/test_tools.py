@@ -89,7 +89,25 @@ class TestTools(object):
         assert_equal(2, len(splits))
 
         TestTools._test_splits(labels.size, splits)
-        TestTools._test_balancing(labels, splits)        
+        TestTools._test_balancing(labels, splits)
+        
+    def test_rseed(self):
+        splits1 = tools.kfold_splits(self.Y, 2, 10)
+        splits2 = tools.kfold_splits(self.Y, 2, 10)
+        splits3 = tools.kfold_splits(self.Y, 2, 1)
+        assert_equal(splits1, splits2)
+        assert_not_equal(splits1, splits3)
+        assert_not_equal(splits2, splits3)
+        
+        labels = np.ones(100)
+        negative = np.arange(0, labels.size, 2)
+        labels[negative] = -1
+        splits1 = tools.stratified_kfold_splits(labels, 2, 10)
+        splits2 = tools.stratified_kfold_splits(labels, 2, 10)
+        splits3 = tools.stratified_kfold_splits(labels, 2, 1)
+        assert_equal(splits1, splits2)
+        assert_not_equal(splits1, splits3)
+        assert_not_equal(splits2, splits3)
                
     @staticmethod
     def _test_splits(labels_size, splits):

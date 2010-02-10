@@ -60,32 +60,32 @@ class TestTools(object):
         assert_true(np.allclose(Xexp, Xstd, TOL))
         assert_true(np.allclose(Xexp, Xexp2))
         
-    def test_regression_splits(self):
-        splits = tools.regression_splits(self.Y, 2)
+    def test_kfold_splits(self):
+        splits = tools.kfold_splits(self.Y, 2)
         assert_equal(2, len(splits))
         TestTools._test_splits(self.Y.size, splits)
         
-    def test_classification_splits(self):
+    def test_stratified_kfold_splits(self):
         labels = np.ones(100)
         negative = np.arange(0, labels.size, 2)
         labels[negative] = -1
         assert_equal(int(labels.size/2.0), labels[labels > 0].size)
         assert_equal(int(labels.size/2.0), labels[labels < 0].size)
         
-        splits = tools.classification_splits(labels, 2)
+        splits = tools.stratified_kfold_splits(labels, 2)
         assert_equal(2, len(splits))
         
         TestTools._test_splits(labels.size, splits)
         TestTools._test_balancing(labels, splits)        
         
-    def test_classification_splits_stratified(self):
+    def test_stratification(self):
         labels = np.ones(100)
         negative = np.arange(0, int(labels.size/2), 2) # only 25% of negative
         labels[negative] = -1
         assert_equal(100.0 - int(labels.size/4.0), labels[labels > 0].size)
         assert_equal(int(labels.size/4.0),  labels[labels < 0].size)
         
-        splits = tools.classification_splits(labels, 2)
+        splits = tools.stratified_kfold_splits(labels, 2)
         assert_equal(2, len(splits))
 
         TestTools._test_splits(labels.size, splits)

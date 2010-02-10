@@ -24,12 +24,12 @@ def center(matrix, p=None):
     else:
         return matrix - mean, p - mean, mean
 
-def regression_splits(labels, k):
+def kfold_splits(labels, k):
     return mlpy.kfold(labels.size, k)
 
-def classification_splits(labels, k):
+def stratified_kfold_splits(labels, k):
     return mlpy.kfoldS(labels, k)
-
+    
 def classification_error(labels, predicted):
     difference = (np.sign(labels) != np.sign(predicted))
     return labels[difference].size / float(labels.size)

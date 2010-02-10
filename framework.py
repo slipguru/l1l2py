@@ -4,7 +4,6 @@ import numpy as np
 import algorithms as alg
 import tools
 
-# l1l2_kcv!
 def select_features(X, Y, mu, tau_range, lambda_range, cv_sets,
                     error_function,
                     data_normalizer=None, labels_normalizer=None):
@@ -47,31 +46,35 @@ def select_features(X, Y, mu, tau_range, lambda_range, cv_sets,
           
     return tau_opt, lambda_opt
 
-#def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt, mu_range, experiment_type,
-#             standardize_X=True, center_Y=True):
-#    
-#    # This command makes copy of the data!
-#    if standardize_X:
-#        Xtr, Xts = tools.standardize(Xtr, Xts)
-#    if center_Y:
-#        Ytr, Yts, meanY = tools.center(Ytr, Yts)
-#    
-#    # IIa
-#    beta_0 = ridge_regression(Xtr, Ytr)
-#    beta, k = elastic_net(Xtr, Ytr, mu_range[0], tau_opt, beta_0)
-#    selected = (beta.flat != 0)
-#    
-#    # IIb
-#    beta_opt = ridge_regression(Xtr[:,selected], Ytr, lambda_opt)
-#    
-#    labels = Yts + meanY
-#    predicted = np.dot(Xts[:,selected], beta_opt) + meanY
-#    err_test = prediction_error(labels, predicted, experiment_type)
-#    #sums sums sums
-#    
-#    for m in mu_range[1:]:
-#        pass
-#    
-#    mu_opt = None
-#    return mu_opt
+def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt,
+                     mu_range, error_function,
+                     data_normalizer=None, labels_normalizer=None):
+    
+    if not data_normalizer is None:
+        Xtr, Xts = data_normalizer(Xtr, Xts)
+        
+    if not labels_normalizer is None:
+        Ytr, Yts, meanY = labels_normalizer(Ytr, Yts)
+    
+    err_ts = np.empty(mu_range.size)
+    err_tr = np.empty_like(err_ts)
+    
+    beta_opt = list()
+    selected_opt = list()
+    for i, m in enumerate(mu_range):
+        beta, k = alg.elastic_net(Xtr, Ytr, m, tau_opt)
+        selected = (beta.flat != 0)  
+        beta_opt.append(alg.ridge_regression(Xtr[:,selected], Ytr, lambda_opt))
+        selected_opt.append(selected)
+        
+        prediction = np.dot(Xts[:,selected], beta_opt[-1])
+        err_ts[i] = error_function(Yts, prediction)
+        
+        prediction = np.dot(Xtr[:,selected], beta_opt[-1])
+        err_tr[i] = error_function(Ytr, prediction)
+  
+    mu_opt_idx, = np.where(err_ts == err_ts.min())
+    mu_opt = mu_range[mu_opt_idx[0]]
+    
+    return beta_opt
 

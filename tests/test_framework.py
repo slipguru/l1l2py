@@ -58,7 +58,7 @@ class TestFramework(object):
         return sets
     
     def test_build_classifier(self):
-        sets = tools.regression_splits(self.Y, 2)
+        sets = tools.kfold_splits(self.Y, 2)
         train_idx, test_idx = sets[0]
         
         Xtr, Xts = self.X[train_idx,:], self.X[test_idx,:]

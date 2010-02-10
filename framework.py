@@ -63,7 +63,7 @@ def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt,
     selected_opt = list()
     for i, m in enumerate(mu_range):
         beta, k = alg.elastic_net(Xtr, Ytr, m, tau_opt)
-        selected = (beta.flat != 0)  
+        selected = (beta.flat != 0)
         beta_opt.append(alg.ridge_regression(Xtr[:,selected], Ytr, lambda_opt))
         selected_opt.append(selected)
         
@@ -76,5 +76,6 @@ def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt,
     mu_opt_idx, = np.where(err_ts == err_ts.min())
     mu_opt = mu_range[mu_opt_idx[0]]
     
-    return beta_opt
+    #return beta_opt
+    return beta_opt[mu_opt_idx[0]], selected_opt[mu_opt_idx[0]], mu_opt
 

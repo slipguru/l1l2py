@@ -1,8 +1,8 @@
-function [beta_opt] = step2(X, Y, Xtest, Ytest, tau_opt, lambda_opt, mu_range, err_type, norm_mean, norm_col)
+function [beta_opt, selected_opt, mu_opt] = step2(X, Y, Xtest, Ytest, tau_opt, lambda_opt, mu_range, err_type, norm_mean, norm_col)
 
 [n, d] = size(X);
 
-err_test = zeros(1,1); 
+err_test = zeros(1, length(mu_range)); 
 selected = zeros(d, length(mu_range));
 beta_opt = cell(1, length(mu_range));
 
@@ -11,7 +11,7 @@ beta = l1l2_algorithm(X,Y,tau_opt,mu_range(1));
 selected(:,1) = (beta~=0); % mark selected variables
 beta_opt{1} = rls_algorithm(X(:,logical(selected(:,1))),Y,lambda_opt);
 % calculate kcv and training errors
-err_test = linear_test(Xtest(:,logical(selected(:,1))),Ytest,beta_opt{1},err_type,meanY);
+err_test(1) = linear_test(Xtest(:,logical(selected(:,1))),Ytest,beta_opt{1},err_type,meanY);
 
 % for fixed lambda opt find solutions with different correlation
 % paramters epsilon
@@ -19,5 +19,12 @@ for m = 2:length(mu_range);
     beta = l1l2_algorithm(X,Y,tau_opt,mu_range(m));
     selected(:,m) = (beta~=0);    
     beta_opt{m} = rls_algorithm(X(:,logical(selected(:,m))),Y,lambda_opt);
+    
+    err_test(m) = linear_test(Xtest(:,logical(selected(:,m))),Ytest,beta_opt{m},err_type,meanY);
 end
+
+% finds optimal parameter
+mu_opt = find(err_test==min(err_test),1,'last'); %index of optimal parameter
+beta_opt = beta_opt{mu_opt};
+selected_opt = selected(:,mu_opt);
     

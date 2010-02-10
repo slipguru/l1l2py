@@ -68,17 +68,18 @@ class TestFramework(object):
         from itertools import product
         values = np.linspace(0.1, 10.0, 5)
         for tau, lam in product(values, values):
-            beta_opt_exp = mlab.step2(Xtr, Ytr, Xts, Yts, tau, lam,
-                                      mu_range, 'regr', 1, 1)
+            beta_opt_exp, selected_opt_exp = \
+                                    mlab.step2(Xtr, Ytr, Xts, Yts, tau, lam,
+                                        mu_range, 'regr', 1, 1, nout=2)
             
-            beta_opt = fw.build_classifier(Xtr, Ytr, Xts, Yts,
-                                           tau, lam, mu_range,
-                                           error_function=tools.regression_error,
-                                           data_normalizer=tools.standardize,
-                                           labels_normalizer=tools.center)
-            
-            for i in xrange(mlab.length(beta_opt_exp)):
-                exp = mlab.cell_element(beta_opt_exp, i+1)
-                assert_true(np.allclose(exp, beta_opt[i]))
-             
+            beta_opt, selected_opt, mu_opt = \
+                                    fw.build_classifier(Xtr, Ytr, Xts, Yts,
+                                        tau, lam, mu_range,
+                                        error_function=tools.regression_error,
+                                        data_normalizer=tools.standardize,
+                                        labels_normalizer=tools.center)
+                       
+            assert_true(np.allclose(beta_opt_exp, beta_opt))
+            assert_true(np.allclose(selected_opt_exp.flat, selected_opt))
+                          
     

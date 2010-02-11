@@ -180,3 +180,17 @@ class TestTools(object):
         rev_enumerate = ((4, 6), (3, 5), (2, 4), (1, 3), (0, 2))
         for p1, p2 in zip(rev_enumerate, tools.reverse_enumerate(iterable)):
             assert_equal(p1, p2)
+    
+    def test_classification_error_balanced(self):              
+        labels = np.ones((30, 1))
+        for exp_error in (0.0, 0.5, 0.75, 1.0):
+            index = exp_error*100
+            labels[0:index,:] = -1
+            beta = alg.ridge_regression(self.X, labels)
+            exp_error = mlab.linear_test_weighted(self.X, labels, beta, 'class')
+            
+            predicted = np.dot(self.X, beta) 
+            error = tools.classification_error_balanced(labels, predicted)
+            
+            assert_almost_equals(exp_error, error)
+        

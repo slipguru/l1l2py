@@ -35,9 +35,8 @@ class TestFramework(object):
             sets = TestFramework._get_matlab_splitting(self.Y, 5)    
             tau_opt, lambda_opt = fw.select_features(self.X, self.Y, mu,
                                     tau_range, lambda_range, cv_sets=sets,
-                                    error_function=tools.regression_error,
-                                    data_normalizer=tools.standardize,
-                                    labels_normalizer=tools.center)
+                                    error_function=tools.regression_error)
+                                    
                                                    
             assert_almost_equals(tau_opt_exp, tau_opt)
             assert_almost_equals(lambda_opt_exp, lambda_opt)
@@ -71,15 +70,18 @@ class TestFramework(object):
             beta_opt_exp, selected_opt_exp = \
                                     mlab.step2(Xtr, Ytr, Xts, Yts, tau, lam,
                                         mu_range, 'regr', 1, 1, nout=2)
-            
+
+            Xtr, Xts, meanX, stdX = tools.standardize(Xtr, Xts)       
+            Ytr, Yts, meanY = tools.center(Ytr, Yts)
             beta_opt, selected_opt, mu_opt = \
                                     fw.build_classifier(Xtr, Ytr, Xts, Yts,
                                         tau, lam, mu_range,
-                                        error_function=tools.regression_error,
-                                        data_normalizer=tools.standardize,
-                                        labels_normalizer=tools.center)
-                       
-            assert_true(np.allclose(beta_opt_exp, beta_opt))
-            assert_true(np.allclose(selected_opt_exp.flat, selected_opt))
+                                        error_function=tools.regression_error)
+        
+            for i in xrange(len(beta_opt)):
+                b_exp = mlab.cell_element(beta_opt_exp, i+1)
+                assert_true(np.allclose(b_exp, beta_opt[i]))
+                
+                assert_true(np.allclose(selected_opt_exp[:,i], selected_opt[i]))
                           
     

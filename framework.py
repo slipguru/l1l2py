@@ -15,7 +15,7 @@ def select_features(X, Y, mu, tau_range, lambda_range, cv_sets,
         # First create a view and then normalize (eventually)
         Xtr, Xts = X[train_idxs,:], X[test_idxs,:]
         if not data_normalizer is None:
-            Xtr, Xts = data_normalizer(Xtr, Xts)
+            Xtr, Xts, meanX, stdX = data_normalizer(Xtr, Xts)
             
         Ytr, Yts = Y[train_idxs,:], Y[test_idxs,:]
         if not labels_normalizer is None:
@@ -44,20 +44,13 @@ def select_features(X, Y, mu, tau_range, lambda_range, cv_sets,
     tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
     lambda_opt = lambda_range[lambda_opt_idx[0]]
           
-    return tau_opt, lambda_opt
+    return tau_opt, lambda_opt, err_ts, err_tr
 
 def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt,
-                     mu_range, error_function,
-                     data_normalizer=None, labels_normalizer=None):
-    
-    if not data_normalizer is None:
-        Xtr, Xts = data_normalizer(Xtr, Xts)
-        
-    if not labels_normalizer is None:
-        Ytr, Yts, meanY = labels_normalizer(Ytr, Yts)
+                     mu_range, error_function):
     
     err_ts = np.empty(mu_range.size)
-    err_tr = np.empty_like(err_ts)
+    #err_tr = np.empty_like(err_ts)
     
     beta_opt = list()
     selected_opt = list()
@@ -70,12 +63,16 @@ def build_classifier(Xtr, Ytr, Xts, Yts, tau_opt, lambda_opt,
         prediction = np.dot(Xts[:,selected], beta_opt[-1])
         err_ts[i] = error_function(Yts, prediction)
         
-        prediction = np.dot(Xtr[:,selected], beta_opt[-1])
-        err_tr[i] = error_function(Ytr, prediction)
+        #prediction = np.dot(Xtr[:,selected], beta_opt[-1])
+        #err_tr[i] = error_function(Ytr, prediction)
   
-    mu_opt_idx, = np.where(err_ts == err_ts.min())
-    mu_opt = mu_range[mu_opt_idx[0]]
-    
+    #print '*'*20
+    #print mu_range
+    #print err_ts
+  
+    #mu_opt_idx, = np.where(err_ts == err_ts.min())
+    #mu_opt = mu_range[mu_opt_idx[0]]
+        
     #return beta_opt
-    return beta_opt[mu_opt_idx[0]], selected_opt[mu_opt_idx[0]], mu_opt
+    return beta_opt, selected_opt, err_ts
 

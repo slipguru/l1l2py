@@ -5,6 +5,44 @@ import io, tools
 import framework as fw
 
 import numpy as np
+#import pylab as pl
+#from mpl_toolkits.mplot3d import Axes3D
+
+
+def create_jdf_model_selection():
+    f = open('listajob_gse2990_MF_ER-0p1.jdf','w') #nome nel config!
+    f.write('job :\n')
+    f.write('label : "Analisi gse2990_MF_ER "\n')
+    
+    locations = ['unige']
+    os = ['linux']
+    
+    envs = '||'.join('( environment == %s )' % x for x in locations)
+    os = '||'.join('( os == %s )' % x for x in os)
+    f.write('requirements :  %s' %  '&&'.join((lenv, os)))
+
+    #tgz_file = 'gse2990_MF_ER.tgz';
+    #[s, r]= system('tar cvzf gse2990_MF_ER.tgz MATLAB MATLAB_FUN info_range.csv lunghezzeMF.txt LABELS');
+
+    ext_cv_sets = tools.kfold_splits(labels, conf.external_k)
+    
+    print
+    print 'Splitting data in %d pairs' % len(ext_cv_sets)
+    
+    err_ts = np.empty(len(ext_cv_sets))
+    beta_list = list()
+    selected_list = list()
+    error_list = list()
+    for i, (train_idxs, test_idxs) in enumerate(ext_cv_sets):
+        f.write('task: init: put %s %s\n', config.expression_file_path, config.expression_file);
+        f.write('            put  %s %s\n',tgz_file,tgz_file);
+        f.write('            put run.sh run\n');
+        f.write('      remote: run %s l1l2_all.m %s %f %d %s %s %f %f %d %d > output.log 2>&1\n',tgz_file,task[t], eps(i),s,['../' resultfile_name], ['../' files(f).name],tau_min,tau_max, Kint, Kext
+        f.write('      final: get output.log %s/$PROC-$JOB-$TASK.log\n',outdir);
+        f.write('             get %s %s/%s\n',resultfile_name ,outdir,[resultfile_name '.mat']);
+        
+def create_jdf_features_family():
+    pass
 
 def main():
     usage = "usage: %prog configuration-file"
@@ -39,13 +77,14 @@ def main():
     err_ts = np.empty(len(ext_cv_sets))
     beta_list = list()
     selected_list = list()
+    error_list = list()
     for i, (train_idxs, test_idxs) in enumerate(ext_cv_sets):
         print 'Learning on the pair #%d...' % (i+1)
         
         Xtr, Ytr = expressions[train_idxs,:], labels[train_idxs,:]
         Xts,  Yts  = expressions[test_idxs, :], labels[test_idxs, :]
              
-        tau_opt, lambda_opt = fw.select_features(
+        tau_opt, lambda_opt, err_tr, err_ts = fw.select_features(
                                 Xtr, Ytr,
                                 conf.mu_range[0],
                                 conf.tau_range,
@@ -54,38 +93,45 @@ def main():
                                 error_function,
                                 data_normalizer=tools.standardize,
                                 labels_normalizer=tools.center)
+        # salvare conca
+        
+        Xtr, Xts, meanX, stdX = tools.standardize(Xtr, Xts)       
+        Ytr, Yts, meanY = tools.center(Ytr, Yts)
             
-        beta_opt, selected, mu_opt = fw.build_classifier(
+        beta_opt_list, selected_opt_list, err_ts = fw.build_classifier(
                                 Xtr, Ytr, Xts, Yts,
                                 tau_opt, lambda_opt,
                                 conf.mu_range,
-                                error_function,
-                                data_normalizer=tools.standardize,
-                                labels_normalizer=tools.center)
+                                error_function)
+        # salvare errori
         
-        print '...optimal parameters:', tau_opt, mu_opt, lambda_opt
-
-        beta_list.append(beta_opt)
-        selected_list.append(selected)
+        print '...optimal parameters:', tau_opt, lambda_opt
         
-        beta = np.zeros((selected.size, 1))
-        beta[selected] = beta_opt
-        prediction = np.dot(Xts, beta)
-        err_ts[i] = error_function(Yts, prediction)
+        beta_list.append(beta_opt_list)
+        selected_list.append(selected_opt_list)
+        error_list.append(err_ts)
     
-    opt_idx, = np.where(err_ts == err_ts.min()) # errore medio!
-    beta_opt = beta_list[opt_idx[0]]
-    sel_opt = selected_list[opt_idx[0]]
+    foo = np.asarray(selected_list)
+    print foo.shape
+    freq = foo.sum(axis=0)
+    print freq.shape
+    min = freq.min(axis=0)
+    max = freq.max(axis=0)
+    print min
+    print max
     
-    # frequency - recombine.
+    print np.asarray(error_list)
+    print np.asarray(error_list).mean(axis=0)
     
-    # Add zeros
-    beta = np.zeros((sel_opt.size, 1))
-    beta[sel_opt] = beta_opt
     
-    print
-    print 'Best model'
-    print beta.T
+    # Save: freq ed err_ts
+    
+    
+    #light
+    
+    
+    
+       
     
 
 if __name__ == '__main__':

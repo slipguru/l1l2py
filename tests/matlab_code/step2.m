@@ -1,4 +1,4 @@
-function [beta_opt, selected_opt, mu_opt] = step2(X, Y, Xtest, Ytest, tau_opt, lambda_opt, mu_range, err_type, norm_mean, norm_col)
+function [beta_opt, selected] = step2(X, Y, Xtest, Ytest, tau_opt, lambda_opt, mu_range, err_type, norm_mean, norm_col)
 
 [n, d] = size(X);
 
@@ -22,9 +22,4 @@ for m = 2:length(mu_range);
     
     err_test(m) = linear_test(Xtest(:,logical(selected(:,m))),Ytest,beta_opt{m},err_type,meanY);
 end
-
-% finds optimal parameter
-mu_opt = find(err_test==min(err_test),1,'last'); %index of optimal parameter
-beta_opt = beta_opt{mu_opt};
-selected_opt = selected(:,mu_opt);
     

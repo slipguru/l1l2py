@@ -59,16 +59,18 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=1e5):
     
     return beta_next, k
   
-def elastic_net_regpath(X, Y, mu, tau_range, kmax=np.inf):
+def elastic_net_regpath(X, Y, mu, tau_range, beta=None, kmax=np.inf):
     """ reg_path """
     n, d = X.shape
     
     beta_ls = ridge_regression(X, Y)
-    beta = beta_ls
-    out = np.empty((tau_range.size, beta.size))    
+    if beta is None:
+        beta = beta_ls
+        
+    out = np.empty((len(tau_range), beta.size))    
     sparsity = 0
     for i, t in tools.reverse_enumerate(tau_range):
-        if mu == 0.0 and sparsity >= n:
+        if mu == 0.0 and sparsity >= n: #??
             beta_next = beta_ls                
         else:
             beta_next, k = elastic_net(X, Y, mu, t, beta, kmax)

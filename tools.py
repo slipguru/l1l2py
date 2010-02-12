@@ -10,7 +10,7 @@ def geometric_range(min, max, number):
     
 def reverse_enumerate(iterable):
     from itertools import izip
-    return izip(reversed(xrange(iterable.size)), reversed(iterable))
+    return izip(reversed(xrange(len(iterable))), reversed(iterable))
 
 def standardize(matrix, p=None):
     """ This function simulate the normalization

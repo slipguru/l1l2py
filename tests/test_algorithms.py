@@ -1,13 +1,14 @@
-import os
 import numpy as np
 import scipy.io as sio
-from mlabwrap import mlab
 
 from nose.tools import *
 from nose.plugins.attrib import attr
-import algorithms as alg
 
+from biolearning._algorithms import *
+
+from mlabwrap import mlab
 mlab.addpath('tests/matlab_code')
+
 TOL = 1e-3
 
 class TestAlgorithms(object):
@@ -28,11 +29,11 @@ class TestAlgorithms(object):
         # case n >= d
         for penalty in np.linspace(0.0, 1.0, 5):
             expected = mlab.rls_algorithm(self.X, self.Y, penalty)
-            value = alg.ridge_regression(self.X, self.Y, penalty)
+            value = ridge_regression(self.X, self.Y, penalty)
             assert_true(np.allclose(expected, value, TOL))
         
-        expected = alg.ridge_regression(self.X, self.Y, 0.0)
-        value = alg.ridge_regression(self.X, self.Y)
+        expected = ridge_regression(self.X, self.Y, 0.0)
+        value = ridge_regression(self.X, self.Y)
         assert_true(np.allclose(expected, value, TOL))
         
         # case d > n
@@ -40,20 +41,22 @@ class TestAlgorithms(object):
         Y = self.X[0:1,:].T
         for penalty in np.linspace(0.0, 1.0, 5):
             expected = mlab.rls_algorithm(X, Y, penalty)
-            value = alg.ridge_regression(X, Y, penalty)
+            value = ridge_regression(X, Y, penalty)
             assert_true(np.allclose(expected, value, TOL))
             
-        expected = alg.ridge_regression(X, Y, 0.0)
-        value = alg.ridge_regression(X, Y)
+        expected = ridge_regression(X, Y, 0.0)
+        value = ridge_regression(X, Y)
         assert_true(np.allclose(expected, value, TOL))
         
     def test_soft_thresholding(self):
-        b = alg.ridge_regression(self.X, self.Y, 0.1)
+        from biolearning._algorithms import _soft_thresholding
+        
+        b = ridge_regression(self.X, self.Y, 0.1)
         expected = mlab.thresholding(b, 0.2)
-        value = alg.soft_thresholding(b, 0.2)
+        value = _soft_thresholding(b, 0.2)
         assert_true(np.allclose(expected, value))
         
-        value = alg.soft_thresholding(b, 0.0)
+        value = _soft_thresholding(b, 0.0)
         assert_true(np.allclose(b, value, TOL))
 
     def test_elastic_net(self):
@@ -62,7 +65,7 @@ class TestAlgorithms(object):
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)
-            beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
+            beta, k = elastic_net(self.X, self.Y, mu, tau)
        
             assert_true(np.allclose(exp_beta, beta, TOL))
             assert_true(np.allclose(exp_k, k))
@@ -74,14 +77,14 @@ class TestAlgorithms(object):
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)
-            beta, k = alg.elastic_net(self.X, self.Y, mu, tau)
+            beta, k = elastic_net(self.X, self.Y, mu, tau)
        
             assert_true(np.allclose(exp_beta, beta, TOL))
             assert_true(np.allclose(exp_k, k))
             
     def test_regpath(self):
         values = np.linspace(0.1, 1.0, 5)
-        beta_path = alg.elastic_net_regpath(self.X, self.Y,
+        beta_path = elastic_net_regpath(self.X, self.Y,
                                             0.1, values, kmax=np.inf)
         selected = (beta_path != 0)
         
@@ -93,5 +96,13 @@ class TestAlgorithms(object):
         for b, s in zip(selected, exp_selected):
             # note: s contains 0s and 1s, b contains True and False values
             assert_true(np.all(b == s.squeeze()))
+            
+    def test_reverse_enumerate(self):
+        from biolearning._algorithms import _reverse_enumerate
+        
+        iterable = np.array((2, 3, 4, 5, 6))
+        rev_enumerate = ((4, 6), (3, 5), (2, 4), (1, 3), (0, 2))
+        for p1, p2 in zip(rev_enumerate, _reverse_enumerate(iterable)):
+            assert_equal(p1, p2)
         
         

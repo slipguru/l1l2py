@@ -1,11 +1,6 @@
-from __future__ import division
-import tools
 import numpy as np
-  
-def soft_thresholding(x, th):
-    out = x - (np.sign(x) * (th/2.0))
-    out[np.abs(x) < (th/2.0)] = 0.0
-    return out
+
+__all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
 
 def ridge_regression(X, Y, penalty=0.0):
     n, d = X.shape
@@ -30,7 +25,7 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=1e5):
     mu = mu*sigma_0
     sigma = sigma_0 + mu
     mu_s = mu / sigma
-    tau_s = tau/sigma
+    tau_s = tau / sigma
     XT = X.T / (n*sigma)
     
     kmin = 100
@@ -44,7 +39,7 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=1e5):
     # The loop is 3x slower than matlab!
     # Need to push down (C/C++ code)!    
     value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))
-    beta_next = soft_thresholding(value, tau_s)
+    beta_next = _soft_thresholding(value, tau_s)
     log = True
     
     while k < kmin or (k < kmax and log is True):
@@ -53,7 +48,7 @@ def elastic_net(X, Y, mu, tau, beta=None, kmax=1e5):
         
         beta = beta_next
         value = beta * (1 - mu_s) + np.dot(XT, (Y - np.dot(X, beta)))      
-        beta_next = soft_thresholding(value, tau_s)
+        beta_next = _soft_thresholding(value, tau_s)
         k += 1
     #--------------------------------------------------------------------------
     
@@ -69,7 +64,7 @@ def elastic_net_regpath(X, Y, mu, tau_range, beta=None, kmax=np.inf):
         
     out = np.empty((len(tau_range), beta.size))    
     sparsity = 0
-    for i, t in tools.reverse_enumerate(tau_range):
+    for i, t in _reverse_enumerate(tau_range):
         if mu == 0.0 and sparsity >= n: #??
             beta_next = beta_ls                
         else:
@@ -92,3 +87,12 @@ def _get_sigma(X):
         a, b = aval[(0, -1)]
     
     return (a+b)/(n*2.0)
+    
+def _reverse_enumerate(iterable):
+    from itertools import izip
+    return izip(reversed(xrange(len(iterable))), reversed(iterable))
+    
+def _soft_thresholding(x, th):
+    out = x - (np.sign(x) * (th/2.0))
+    out[np.abs(x) < (th/2.0)] = 0.0
+    return out

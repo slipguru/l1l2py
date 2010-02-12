@@ -97,6 +97,43 @@ class TestAlgorithms(object):
             # note: s contains 0s and 1s, b contains True and False values
             assert_true(np.all(b == s.squeeze()))
             
+    def test_kcv_models_selection(self):
+        from biolearning import data_tools as tools
+        from biolearning import error_functions as err
+        
+        tau_range = tools.linear_range(0.1, 1.0, 5)
+        lambda_range = tools.linear_range(0.1, 1.0, 5)
+        
+        for mu in tools.linear_range(0.1, 1.0, 10):
+            tau_opt_exp, lambda_opt_exp = mlab.l1l2_kcv(self.X, self.Y,
+                                            tau_range, lambda_range, mu,
+                                            5, 'regr', 0, 1, 1, nout=2)
+                           
+            sets = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
+            tau_opt, lambda_opt = kcv_model_selection(self.X, self.Y, mu,
+                                          tau_range, lambda_range, cv_sets=sets,
+                                          error_function=err.regression_error,
+                                          data_normalizer=tools.standardize,
+                                          labels_normalizer=tools.center)
+                                                   
+            assert_almost_equals(tau_opt_exp, tau_opt)
+            assert_almost_equals(lambda_opt_exp, lambda_opt)    
+          
+    @staticmethod
+    def _get_matlab_splitting(labels, K):
+        mlab_sets = mlab.splitting(labels, 5, 0)
+        mlab_sets = mlab.double(mlab.cell2mat(mlab_sets)).T #row = set
+        mlab_sets -= 1 #matlab starts from 1
+    
+        indexes = np.arange(labels.size)
+        sets = list()
+        for ts in mlab_sets:
+            ts = np.array(ts, dtype=np.int)
+            tr = np.array(list(set(indexes) - set(ts)))
+            sets.append((tr, ts))
+            
+        return sets
+            
     def test_reverse_enumerate(self):
         from biolearning._algorithms import _reverse_enumerate
         

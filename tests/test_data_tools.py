@@ -41,13 +41,19 @@ class TestDataTools(object):
                                                                 True, False,
                                                                 self.X, self.Y,
                                                                 nout=5)
-        Ycent, mean = center(self.Y)
+        Ycent, mean = center(self.Y, return_mean=True)
         assert_true(np.allclose(Yexp, Ycent, TOL))
         assert_true(np.allclose(Yexp, Yexp2))
         assert_almost_equal(mean_exp, mean)
         
-        Ycent, Ycent2, mean = center(self.Y, self.Y)
+        Ycent, Ycent2 = center(self.Y, self.Y)
         assert_true(np.allclose(Ycent, Ycent2))
+        
+    def test_centering_outputs(self):
+        assert_equals(1, len(center(self.Y)))
+        assert_equals(2, len(center(self.Y, self.Y)))
+        assert_equals(2, len(center(self.Y, return_mean=True)))
+        assert_equals(3, len(center(self.Y, self.Y, return_mean=True)))
         
     def test_standardization(self):
         Xexp, Yexp, Xexp2, Yexp2, mean_exp = mlab.normalization(self.X, self.Y,
@@ -55,8 +61,14 @@ class TestDataTools(object):
                                                                 self.X, self.Y,
                                                                 nout=5)
         # Note: standardization includes matrix centering!
-        Xstd, mean, std = standardize(self.X)
+        Xstd, mean, std = standardize(self.X, return_factors=True)
         
         assert_true(np.allclose(Xexp, Xstd, TOL))
         assert_true(np.allclose(Xexp, Xexp2))
+        
+    def test_standardization_outputs(self):
+        assert_equals(1, len(standardize(self.X)))
+        assert_equals(2, len(standardize(self.X, self.X)))
+        assert_equals(3, len(standardize(self.X, return_factors=True)))
+        assert_equals(4, len(standardize(self.X, self.X, return_factors=True)))
         

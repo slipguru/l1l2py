@@ -50,7 +50,7 @@ class TestDataTools(object):
         assert_true(np.allclose(Ycent, Ycent2))
         
     def test_centering_outputs(self):
-        assert_equals(1, len(center(self.Y)))
+        assert_equals(np.ndarray, type(center(self.Y)))
         assert_equals(2, len(center(self.Y, self.Y)))
         assert_equals(2, len(center(self.Y, return_mean=True)))
         assert_equals(3, len(center(self.Y, self.Y, return_mean=True)))
@@ -67,7 +67,7 @@ class TestDataTools(object):
         assert_true(np.allclose(Xexp, Xexp2))
         
     def test_standardization_outputs(self):
-        assert_equals(1, len(standardize(self.X)))
+        assert_equals(np.ndarray, type(standardize(self.X)))
         assert_equals(2, len(standardize(self.X, self.X)))
         assert_equals(3, len(standardize(self.X, return_factors=True)))
         assert_equals(4, len(standardize(self.X, self.X, return_factors=True)))

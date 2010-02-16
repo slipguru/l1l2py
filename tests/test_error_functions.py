@@ -59,7 +59,7 @@ class TestErrorFunctions(object):
         for imbalance in np.linspace(0, 30, 4):
             labels[0:imbalance,:] = -1
 
-            labels_centered = center(labels)[0]            
+            labels_centered = center(labels)
             TestErrorFunctions._test_balanced(self.X, labels)
             TestErrorFunctions._test_balanced(self.X, labels_centered)
     

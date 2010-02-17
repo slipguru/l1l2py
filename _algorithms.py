@@ -8,10 +8,11 @@ def kcv_model_selection(data, labels,
                         error_function, return_mean_errors=False,
                         data_normalizer=None, labels_normalizer=None):
       
-    err_ts = np.empty((len(cv_sets), tau_range.size, lambda_range.size))
-    err_tr = np.empty_like(err_ts)
+    err_ts = list()
+    err_tr = list()
+    max_tau_num = len(tau_range)
     
-    for i, (train_idxs, test_idxs) in enumerate(cv_sets):
+    for i, (train_idxs, test_idxs) in enumerate(cv_sets):        
         # First create a view and then normalize (eventually)
         data_tr, data_ts = data[train_idxs,:], data[test_idxs,:]
         if not data_normalizer is None:
@@ -22,23 +23,32 @@ def kcv_model_selection(data, labels,
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
             
         # Builds a classifier for each value of tau
-        beta_casc = elastic_net_regpath(data_tr, labels_tr, mu, tau_range)
+        beta_casc = elastic_net_regpath(data_tr, labels_tr, mu,
+                                        tau_range[:max_tau_num])
+        
+        if len(beta_casc) < max_tau_num: max_tau_num = len(beta_casc)
+        _err_ts = np.empty((len(beta_casc), len(lambda_range)))
+        _err_tr = np.empty_like(_err_ts)
         
         # For each sparse model builds a rls classifier
         # for each value of lambda
         for j, b in enumerate(beta_casc):
-            selected = (b != 0)
+            selected = (b.flat != 0)
             for k, lam in enumerate(lambda_range):
                 beta = ridge_regression(data_tr[:,selected], labels_tr, lam)
                 
                 prediction = np.dot(data_ts[:,selected], beta)
-                err_ts[i, j, k] = error_function(labels_ts, prediction)
-                
-                prediction = np.dot(data_tr[:,selected], beta)
-                err_tr[i, j, k] = error_function(labels_tr, prediction)
+                _err_ts[j, k] = error_function(labels_ts, prediction)
     
-    err_ts = err_ts.mean(axis=0)
-    err_tr = err_tr.mean(axis=0)
+                prediction = np.dot(data_tr[:,selected], beta)
+                _err_tr[j, k] = error_function(labels_tr, prediction)
+        
+        err_ts.append(_err_ts)
+        err_tr.append(_err_tr)
+    
+    # cut columns and computes the mean
+    err_ts = np.asarray([a[:max_tau_num] for a in err_ts]).mean(axis=0)
+    err_tr = np.asarray([a[:max_tau_num] for a in err_tr]).mean(axis=0)
        
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
     tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
@@ -71,55 +81,56 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
     sigma_0 = _get_sigma(data)
     mu = mu*sigma_0
     sigma = sigma_0 + mu
+    
     mu_s = mu / sigma
     tau_s = tau / sigma
     dataT = data.T / (n*sigma)
-    
-    kmin = 100
-    k = 0
-    tol = 0.01
-    
+        
     if beta is None:
         beta = ridge_regression(data, labels)
-      
     #--------------------------------------------------------------------------
-    # The loop is 3x slower than matlab in the worst case (saturation)!
-    # Need to push down (C/C++ code)!    
-    value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta)))
-    beta_next = _soft_thresholding(value, tau_s)
-    log = True
-    
-    while k < kmin or (k < kmax and log is True):
-        th = np.abs(beta) * (tol / (k+1))
-        if (np.abs(beta_next - beta) <= th).all(): log = False
-        
-        beta = beta_next
-        value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta)))      
-        beta_next = _soft_thresholding(value, tau_s)
+    # The loop is slower than matlab in the worst case (saturation)!
+    # Need to push down (C/C++ code)!
+    k, kmin, tol = 0, 100, 0.01
+    th, difference = -np.inf, np.inf
+    while k < kmin or ((difference > th).any() and k < kmax):
         k += 1
-    #--------------------------------------------------------------------------
-    
+        
+        value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta)))
+        beta_next = _soft_thresholding(value, tau_s)
+        
+        difference = np.abs(beta_next - beta)
+        th = np.abs(beta) * (tol / k)
+        beta = beta_next
+    #--------------------------------------------------------------------------    
     return beta_next, k
   
 def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
-    """ reg_path """
+    """ reg_path
+    Is sufficient document the possibility to get
+    a shorter list of beta without using annoying warnings
+    """
+    from collections import deque
     n, d = data.shape
     
     beta_ls = ridge_regression(data, labels)
     if beta is None:
         beta = beta_ls
-        
-    out = np.empty((len(tau_range), beta.size))    
-    sparsity = 0
-    for i, t in _reverse_enumerate(tau_range):
-        if mu == 0.0 and sparsity >= n: #??
+    
+    out = deque()
+    nonzero = 0
+    for t in reversed(tau_range):
+        if mu == 0.0 and nonzero >= n: # lasso + saturation
             beta_next = beta_ls                
         else:
             beta_next, k = elastic_net(data, labels, mu, t, beta, kmax)
-        out[i,:] = beta_next.squeeze()
-        sparsity = np.sum(beta_next != 0)
+        
+        nonzero = np.sum(beta_next != 0)
+        if nonzero > 0:
+            out.appendleft(beta_next)
+            
         beta = beta_next
-       
+                   
     return out
 
 def _get_sigma(matrix):

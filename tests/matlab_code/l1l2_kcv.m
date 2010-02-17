@@ -112,7 +112,7 @@ for i = 1:length(sets);
         for j = 1:length(lambda_LS);
             beta = rls_algorithm(Xtr(:,selected{i,t}),Ytr,lambda_LS(j));
             err_KCV(i,t,j) = linear_test(Xts(:,selected{i,t}),Yts,beta,type,meanY);       
-            err_train(i,t,j) = linear_test(Xtr(:,selected{i,t}),Ytr,beta,type,meanY);       
+            err_train(i,t,j) = linear_test(Xtr(:,selected{i,t}),Ytr,beta,type,meanY);           
         end    
     end
     

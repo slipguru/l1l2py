@@ -5,8 +5,6 @@ biolearning
 Description
 """
 
-from _algorithms import *
-
-import kcv_tools
-import data_tools
-import error_functions
+from _core import *
+import algorithms
+import tools

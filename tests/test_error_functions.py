@@ -3,7 +3,7 @@ import scipy.io as sio
 
 from nose.tools import *
 
-from biolearning.error_functions import *
+from biolearning.tools import *
 import biolearning._algorithms as alg
 
 from mlabwrap import mlab
@@ -52,9 +52,7 @@ class TestErrorFunctions(object):
             error = regression_error(self.Y, predicted_mod)
             assert_almost_equals(exp_error, error)
             
-    def test_balanced_classification_error(self):
-        from biolearning.data_tools import center
-        
+    def test_balanced_classification_error(self):       
         labels = np.ones((30, 1))
         for imbalance in np.linspace(0, 30, 4):
             labels[0:imbalance,:] = -1

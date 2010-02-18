@@ -3,7 +3,7 @@ import scipy.io as sio
 
 from nose.tools import *
 
-from biolearning.kcv_tools import *
+from biolearning.tools import *
 
 from mlabwrap import mlab
 mlab.addpath('tests/matlab_code')

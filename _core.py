@@ -1,27 +1,32 @@
 import numpy as np
 from biolearning.algorithms import *
+from biolearning.tools import *
 
-__all__ = ['double_optimization', 'model_selection']
+__all__ = ['models_selection',
+           'minimal_model', 'nested_lists']
    
-def double_optimization(Xtr, Ytr, tau_opt, lambda_opt, m, error_function=None):
-    beta, k = alg.elastic_net(Xtr, Ytr, m, tau_opt)
-    selected = (beta.flat != 0)
+
+def models_selection(data, labels, test_data, test_labels,
+                     mu_range, tau_range, lambda_range, cv_sets,
+                     error_function, returns_kcv_errors=False,
+                     data_normalizer=None, labels_normalizer=None):
     
-    beta = alg.ridge_regression(Xtr[:,selected], Ytr, lambda_opt)
-           
-    if error_function:    
-        prediction = np.dot(Xtr[:,selected], beta)
-        err_tr[i] = error_function(Ytr, prediction)
-        return beta, selected, err_tr
-    else:
-        return beta, selected
+    out1 = minimal_model(data, labels, mu_range[0], tau_range, lambda_range,
+                        cv_sets, error_function, returns_kcv_errors,
+                        data_normalizer, labels_normalizer)
+    tau_opt, lambda_opt = out1[0], out1[1]
+    
+    out2 = nested_lists(data, labels, test_data, test_labels,
+                       tau_opt, lambda_opt, mu_range,
+                       error_function,
+                       data_normalizer, labels_normalizer)
+    #beta_opt, selected_opt, err_tr, err_ts = out
+    
+    return out1 + out2
 
-def model_selection(*args, **kwargs):
-    return stage_I(*args, **kwargs)
-
-def stage_I(data, labels, mu, tau_range, lambda_range, cv_sets,
-            error_function, return_mean_errors=False,
-            data_normalizer=None, labels_normalizer=None):
+def minimal_model(data, labels, mu, tau_range, lambda_range, cv_sets,
+                  error_function, returns_kcv_errors=False,
+                  data_normalizer=None, labels_normalizer=None):
       
     err_ts = list()
     err_tr = list()
@@ -69,30 +74,47 @@ def stage_I(data, labels, mu, tau_range, lambda_range, cv_sets,
     tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
     lambda_opt = lambda_range[lambda_opt_idx[0]]
     
-    if return_mean_errors:
+    if returns_kcv_errors:
         return tau_opt, lambda_opt, err_ts, err_tr
     else:
         return tau_opt, lambda_opt
+
     
 # Work in progress!! ----------------------------------------------------------
-def models_family(Xtr, Ytr, tau_opt, lambda_opt,
-                  mu_range, error_function=None):
+def nested_lists(data_tr, labels_tr, data_ts, labels_ts, tau_opt, lambda_opt,
+                  mu_range, error_function=None,
+                  data_normalizer=None, labels_normalizer=None):
+    
+    if not data_normalizer is None:
+        data_tr, data_ts = data_normalizer(data_tr, data_ts)
+            
+    if not labels_normalizer is None:
+        labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)  
     
     beta_opt = list()
     selected_opt = list()
     if error_function:
         err_tr = list()
+        err_ts = list()
     
-    for m in enumerate(mu_range):
-        beta, selected, err = double_optimization(Xtr, Ytr, tau_opt, lambda_opt, m,
-                                                   error_function)        
+    for m in mu_range:        
+        beta, k = elastic_net(data_tr, labels_tr, m, tau_opt)
+        selected = (beta.flat != 0)
+    
+        beta = ridge_regression(Xtr[:,selected], labels_tr, lambda_opt)
+           
+        if error_function:    
+            prediction = np.dot(data_tr[:,selected], beta)
+            err_tr.append(error_function(labels_tr, prediction))
+            
+            prediction = np.dot(data_ts[:,selected], beta)
+            err_ts.append(error_function(labels_ts, prediction))
+
         beta_opt.append(beta)
         selected_opt.append(selected)
-        if error_function:
-            err_tr.append(err) 
-              
+                      
     if error_function:
-        return beta_opt, selected_opt, err_tr
+        return beta_opt, selected_opt, err_tr, err_ts
     else:
         return beta_opt, selected_opt
 

@@ -29,7 +29,7 @@ class TestCore(object):
     def test_double_optimization(self):
         pass
             
-    def test_models_selection(self):
+    def test_minimal_model(self):
         from biolearning import tools
         
         tau_range = tools.linear_range(0.1, 1.0, 5)
@@ -41,7 +41,7 @@ class TestCore(object):
                                             5, 'regr', 0, 1, 1, nout=2)
                            
             sets = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
-            tau_opt, lambda_opt = model_selection(self.X, self.Y, mu,
+            tau_opt, lambda_opt = minimal_model(self.X, self.Y, mu,
                                           tau_range, lambda_range, cv_sets=sets,
                                           error_function=tools.regression_error,
                                           data_normalizer=tools.standardize,
@@ -50,7 +50,7 @@ class TestCore(object):
             assert_almost_equals(tau_opt_exp, tau_opt)
             assert_almost_equals(lambda_opt_exp, lambda_opt)
             
-    def test_models_selection_saturated(self):
+    def test_minimal_model_saturated(self):
         from biolearning import tools
         
         tau_range = [0.1, 1.0, 1e3, 1e4]
@@ -62,7 +62,7 @@ class TestCore(object):
                                             5, 'regr', 0, 1, 1, nout=2)
                            
             sets = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
-            tau_opt, lambda_opt = model_selection(self.X, self.Y, mu,
+            tau_opt, lambda_opt = minimal_model(self.X, self.Y, mu,
                                           tau_range, lambda_range, cv_sets=sets,
                                           error_function=tools.regression_error,
                                           data_normalizer=tools.standardize,

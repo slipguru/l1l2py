@@ -49,7 +49,7 @@ class TestAlgorithms(object):
         assert_true(np.allclose(expected, value, TOL))
         
     def test_soft_thresholding(self):
-        from biolearning._algorithms import _soft_thresholding
+        from biolearning.algorithms import _soft_thresholding
         
         b = ridge_regression(self.X, self.Y, 0.1)
         expected = mlab.thresholding(b, 0.2)
@@ -65,7 +65,8 @@ class TestAlgorithms(object):
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)            
-            beta, k = elastic_net(self.X, self.Y, mu, tau)
+            beta, k = elastic_net(self.X, self.Y, mu, tau,
+                                  returns_iterations=True)
              
             assert_true(np.allclose(exp_beta, beta, TOL))           
             assert_true(np.allclose(exp_k, k))
@@ -77,7 +78,8 @@ class TestAlgorithms(object):
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
                                                   tau, mu, nout=2)
-            beta, k = elastic_net(self.X, self.Y, mu, tau)
+            beta, k = elastic_net(self.X, self.Y, mu, tau,
+                                  returns_iterations=True)
        
             assert_true(np.allclose(exp_beta, beta, TOL))
             assert_true(np.allclose(exp_k, k))

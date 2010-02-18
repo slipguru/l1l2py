@@ -25,7 +25,8 @@ def ridge_regression(data, labels, penalty=0.0):
         
         return np.dot(tmp, np.dot(data.T, labels))
 
-def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
+def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5,
+                returns_iterations=False):
     """ TODO: Add docstring """
     n = data.shape[0]
     
@@ -54,7 +55,10 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
         th = np.abs(beta) * (tol / k)
         beta = beta_next
     #--------------------------------------------------------------------------
-    return beta_next, k
+    if returns_iterations:
+        return beta_next, k
+    else:
+        return beta
   
 def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
     """
@@ -76,7 +80,7 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
         if mu == 0.0 and nonzero >= n: # lasso + saturation
             beta_next = beta_ls                
         else:
-            beta_next = elastic_net(data, labels, mu, tau, beta, kmax)[0]
+            beta_next = elastic_net(data, labels, mu, tau, beta, kmax)
         
         nonzero = np.sum(beta_next != 0)
         if nonzero > 0:

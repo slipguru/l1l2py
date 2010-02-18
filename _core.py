@@ -2,32 +2,35 @@ import numpy as np
 from algorithms import *
 from tools import *
 
-__all__ = ['models_selection',
+__all__ = ['model_selection',
            'minimal_model', 'nested_lists']
    
 
-def models_selection(data, labels, test_data, test_labels,
-                     mu_range, tau_range, lambda_range, cv_sets,
-                     error_function, returns_kcv_errors=False,
-                     data_normalizer=None, labels_normalizer=None):
+def model_selection(data, labels, test_data, test_labels,
+                    mu_range, tau_range, lambda_range,
+                    cv_splits, error_function, 
+                    data_normalizer=None, labels_normalizer=None,
+                    returns_kcv_errors=False):
+    """ TODO: add docstring """
     
-    out1 = minimal_model(data, labels, mu_range[0], tau_range, lambda_range,
-                        cv_sets, error_function, returns_kcv_errors,
-                        data_normalizer, labels_normalizer)
-    tau_opt, lambda_opt = out1[0], out1[1]
+    stage1_out = minimal_model(data, labels, mu_range[0], tau_range, lambda_range,
+                         cv_splits, error_function, returns_kcv_errors,
+                         data_normalizer, labels_normalizer)
+    tau_opt, lambda_opt = stage1_out[0:2]
     
-    out2 = nested_lists(data, labels, test_data, test_labels,
-                       tau_opt, lambda_opt, mu_range,
-                       error_function,
-                       data_normalizer, labels_normalizer)
-    #beta_opt, selected_opt, err_tr, err_ts = out
+    stage2_out = nested_lists(data, labels,
+                              test_data, test_labels,
+                              tau_opt, lambda_opt, mu_range,
+                              error_function,
+                              data_normalizer, labels_normalizer)
     
-    return out1 + out2
+    return stage1_out + stage2_out
 
 def minimal_model(data, labels, mu, tau_range, lambda_range, cv_sets,
                   error_function, returns_kcv_errors=False,
                   data_normalizer=None, labels_normalizer=None):
-      
+    """ TODO: add docstring """
+    
     err_ts = list()
     err_tr = list()
     max_tau_num = len(tau_range)
@@ -79,11 +82,10 @@ def minimal_model(data, labels, mu, tau_range, lambda_range, cv_sets,
     else:
         return tau_opt, lambda_opt
 
-    
-# Work in progress!! ----------------------------------------------------------
 def nested_lists(data_tr, labels_tr, data_ts, labels_ts, tau_opt, lambda_opt,
                   mu_range, error_function=None,
                   data_normalizer=None, labels_normalizer=None):
+    """ TODO: add docstring """
     
     if not data_normalizer is None:
         data_tr, data_ts = data_normalizer(data_tr, data_ts)
@@ -98,10 +100,10 @@ def nested_lists(data_tr, labels_tr, data_ts, labels_ts, tau_opt, lambda_opt,
         err_ts = list()
     
     for m in mu_range:        
-        beta, k = elastic_net(data_tr, labels_tr, m, tau_opt)
+        beta = elastic_net(data_tr, labels_tr, m, tau_opt)
         selected = (beta.flat != 0)
     
-        beta = ridge_regression(Xtr[:,selected], labels_tr, lambda_opt)
+        beta = ridge_regression(data_tr[:,selected], labels_tr, lambda_opt)
            
         if error_function:    
             prediction = np.dot(data_tr[:,selected], beta)

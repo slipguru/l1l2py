@@ -4,7 +4,7 @@ import scipy.io as sio
 from nose.tools import *
 
 from biolearning.tools import *
-import biolearning._algorithms as alg
+import biolearning.algorithms as alg
 
 from mlabwrap import mlab
 mlab.addpath('tests/matlab_code')

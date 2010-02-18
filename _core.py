@@ -1,6 +1,6 @@
 import numpy as np
-from biolearning.algorithms import *
-from biolearning.tools import *
+from algorithms import *
+from tools import *
 
 __all__ = ['models_selection',
            'minimal_model', 'nested_lists']

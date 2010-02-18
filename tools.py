@@ -1,3 +1,5 @@
+""" TODO: Add docstring """
+
 import numpy as np
 
 __all__ = ['linear_range', 'geometric_range',
@@ -6,68 +8,77 @@ __all__ = ['linear_range', 'geometric_range',
                                    'regression_error',
             'kfold_splits', 'stratified_kfold_splits']
 
-# Ranges functions ------------------------------------------------------------    
-def linear_range(min, max, number):
-    return np.linspace(min, max, number)
+# Ranges functions ------------------------------------------------------------
+def linear_range(min_value, max_value, number):
+    """ TODO: Add docstring """
+    return np.linspace(min_value, max_value, number)
 
-def geometric_range(min, max, number):
-    ratio = (max/float(min))**(1.0/(number-1))
-    return min * (ratio ** np.arange(number))
+def geometric_range(min_value, max_value, number):
+    """ TODO: Add docstring """
+    ratio = (max_value/float(min_value))**(1.0/(number-1))
+    return min_value * (ratio ** np.arange(number))
 
 # Normalization ---------------------------------------------------------------
-def standardize(matrix, p=None, return_factors=False):
+def standardize(matrix, optional_matrix=None, return_factors=False):
+    """ TODO: Add docstring """
     mean = matrix.mean(axis=0)
     std = matrix.std(axis=0, ddof=1)
 
     # Simple case
-    if p is None and return_factors is False:
+    if optional_matrix is None and return_factors is False:
         return (matrix - mean)/std
                 
-    if p is None: # than return_factors is True
+    if optional_matrix is None: # than return_factors is True
         return (matrix - mean)/std, mean, std
         
     if return_factors is False: # ... with p not None
-        return (matrix - mean)/std, (p - mean)/std
+        return (matrix - mean)/std, (optional_matrix - mean)/std
         
     # Full case
-    return (matrix - mean)/std, (p - mean)/std, mean, std
+    return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
     
-def center(matrix, p=None, return_mean=False):
+def center(matrix, optional_matrix=None, return_mean=False):
+    """ TODO: Add docstring """
     mean = matrix.mean(axis=0)
     
     # Simple case
-    if p is None and return_mean is False:
+    if optional_matrix is None and return_mean is False:
         return matrix - mean
     
-    if p is None: # than return_mean is True
+    if optional_matrix is None: # than return_mean is True
         return (matrix - mean, mean)
     
     if return_mean is False: # ...with p not None
-        return (matrix - mean, p - mean)
+        return (matrix - mean, optional_matrix - mean)
     
     # Full case
-    return (matrix - mean, p - mean, mean)
+    return (matrix - mean, optional_matrix - mean, mean)
     
-# Error functions -------------------------------------------------------------    
+# Error functions -------------------------------------------------------------
 def classification_error(labels, predicted):
+    """ TODO: Add docstring """
     difference = (np.sign(labels) != np.sign(predicted))
     return labels[difference].size / float(labels.size)
     
 def balanced_classification_error(labels, predicted):
+    """ TODO: Add docstring """
     balance_factors = np.abs(center(labels)[0])
    
     errors = (np.sign(labels) != np.sign(predicted)) * balance_factors
     return errors.sum() / float(labels.size)
     
 def regression_error(labels, predicted):
+    """ TODO: Add docstring """
     norm = np.linalg.norm(labels - predicted, 2)
     return (norm * norm) / float(labels.size)
     
-# KCV tools -------------------------------------------------------------------    
+# KCV tools -------------------------------------------------------------------
 def kfold_splits(labels, k, rseed=0):
+    """ TODO: Add docstring """
     import mlpy
     return mlpy.kfold(labels.size, k, rseed)
 
 def stratified_kfold_splits(labels, k, rseed=0):
+    """ TODO: Add docstring """
     import mlpy
     return mlpy.kfoldS(labels, k, rseed)

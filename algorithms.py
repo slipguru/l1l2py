@@ -1,25 +1,33 @@
+"""
+TODO: Add docstring
+"""
+
 import numpy as np
 
 __all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
 
 def ridge_regression(data, labels, penalty=0.0):
+    """ TODO: Add docstring """
     n, d = data.shape
         
     if n < d:
         tmp = np.dot(data, data.T)
-        if penalty: tmp += penalty*n*np.eye(n)
+        if penalty:
+            tmp += penalty*n*np.eye(n)
         tmp = np.linalg.pinv(tmp)
         
         return np.dot(np.dot(data.T, tmp), labels)
     else:
         tmp = np.dot(data.T, data)
-        if penalty: tmp += penalty*n*np.eye(d)
+        if penalty:
+            tmp += penalty*n*np.eye(d)
         tmp = np.linalg.pinv(tmp)
         
         return np.dot(tmp, np.dot(data.T, labels))
 
 def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
-    n, d = data.shape
+    """ TODO: Add docstring """
+    n = data.shape[0]
     
     sigma_0 = _get_sigma(data)
     mu = mu*sigma_0
@@ -39,7 +47,7 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
     while k < kmin or ((difference > th).any() and k < kmax):
         k += 1
         
-        value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta))) 
+        value = beta*(1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta))) 
         beta_next = _soft_thresholding(value, tau_s)
         
         difference = np.abs(beta_next - beta)
@@ -49,12 +57,14 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
     return beta_next, k
   
 def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
-    """ reg_path
+    """
+    TODO: Add docstring
+    reg_path
     Is sufficient document the possibility to get
     a shorter list of beta without using annoying warnings
     """
     from collections import deque
-    n, d = data.shape
+    n = data.shape[0]
     
     beta_ls = ridge_regression(data, labels)
     if beta is None:
@@ -62,11 +72,11 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
     
     out = deque()
     nonzero = 0
-    for t in reversed(tau_range):
+    for tau in reversed(tau_range):
         if mu == 0.0 and nonzero >= n: # lasso + saturation
             beta_next = beta_ls                
         else:
-            beta_next, k = elastic_net(data, labels, mu, t, beta, kmax)
+            beta_next = elastic_net(data, labels, mu, tau, beta, kmax)[0]
         
         nonzero = np.sum(beta_next != 0)
         if nonzero > 0:
@@ -77,6 +87,7 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
     return out
 
 def _get_sigma(matrix):
+    """ TODO: Add docstring """
     n, d = matrix.shape
     
     if d > n:
@@ -90,6 +101,7 @@ def _get_sigma(matrix):
     return (a+b)/(n*2.0)
       
 def _soft_thresholding(x, th):
+    """ TODO: Add docstring """
     out = x - (np.sign(x) * (th/2.0))
     out[np.abs(x) < (th/2.0)] = 0.0
     return out

@@ -5,7 +5,6 @@ from tools import *
 __all__ = ['model_selection',
            'minimal_model', 'nested_lists']
    
-
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
                     cv_splits, error_function, 
@@ -13,9 +12,11 @@ def model_selection(data, labels, test_data, test_labels,
                     returns_kcv_errors=False):
     """ TODO: add docstring """
     
-    stage1_out = minimal_model(data, labels, mu_range[0], tau_range, lambda_range,
-                         cv_splits, error_function, returns_kcv_errors,
-                         data_normalizer, labels_normalizer)
+    stage1_out = minimal_model(data, labels, mu_range[0],
+                               tau_range, lambda_range,
+                               cv_splits, error_function,
+                               data_normalizer, labels_normalizer,
+                               returns_kcv_errors)
     tau_opt, lambda_opt = stage1_out[0:2]
     
     stage2_out = nested_lists(data, labels,
@@ -26,9 +27,10 @@ def model_selection(data, labels, test_data, test_labels,
     
     return stage1_out + stage2_out
 
-def minimal_model(data, labels, mu, tau_range, lambda_range, cv_sets,
-                  error_function, returns_kcv_errors=False,
-                  data_normalizer=None, labels_normalizer=None):
+def minimal_model(data, labels, mu, tau_range, lambda_range,
+                  cv_sets, error_function,
+                  data_normalizer=None, labels_normalizer=None,
+                  returns_kcv_errors=False):
     """ TODO: add docstring """
     
     err_ts = list()
@@ -82,41 +84,41 @@ def minimal_model(data, labels, mu, tau_range, lambda_range, cv_sets,
     else:
         return tau_opt, lambda_opt
 
-def nested_lists(data_tr, labels_tr, data_ts, labels_ts, tau_opt, lambda_opt,
-                  mu_range, error_function=None,
-                  data_normalizer=None, labels_normalizer=None):
+def nested_lists(data, labels, test_data, test_labels,
+                 tau, lambda_, mu_range, error_function=None,
+                 data_normalizer=None, labels_normalizer=None):
     """ TODO: add docstring """
     
     if not data_normalizer is None:
-        data_tr, data_ts = data_normalizer(data_tr, data_ts)
+        data, test_data = data_normalizer(data, test_data)
             
     if not labels_normalizer is None:
-        labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)  
+        labels, test_labels = labels_normalizer(labels, test_labels)  
     
-    beta_opt = list()
-    selected_opt = list()
+    beta_list = list()
+    selected_list = list()
     if error_function:
-        err_tr = list()
-        err_ts = list()
+        err_tr_list = list()
+        err_ts_list = list()
     
-    for m in mu_range:        
-        beta = elastic_net(data_tr, labels_tr, m, tau_opt)
+    for mu in mu_range:        
+        beta = elastic_net(data, labels, mu, tau)
         selected = (beta.flat != 0)
     
-        beta = ridge_regression(data_tr[:,selected], labels_tr, lambda_opt)
+        beta = ridge_regression(data[:,selected], labels, lambda_)
            
         if error_function:    
-            prediction = np.dot(data_tr[:,selected], beta)
-            err_tr.append(error_function(labels_tr, prediction))
+            prediction = np.dot(data[:,selected], beta)
+            err_tr_list.append(error_function(labels, prediction))
             
-            prediction = np.dot(data_ts[:,selected], beta)
-            err_ts.append(error_function(labels_ts, prediction))
+            prediction = np.dot(test_data[:,selected], beta)
+            err_ts_list.append(error_function(test_labels, prediction))
 
-        beta_opt.append(beta)
-        selected_opt.append(selected)
+        beta_list.append(beta)
+        selected_list.append(selected)
                       
     if error_function:
-        return beta_opt, selected_opt, err_tr, err_ts
+        return beta_list, selected_list, err_tr_list, err_ts_list
     else:
-        return beta_opt, selected_opt
+        return beta_list, selected_list
 

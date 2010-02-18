@@ -30,8 +30,8 @@ def kcv_model_selection(data, labels,
         _err_ts = np.empty((len(beta_casc), len(lambda_range)))
         _err_tr = np.empty_like(_err_ts)
         
-        # For each sparse model builds a rls classifier
-        # for each value of lambda
+        # For each sparse model builds a
+        # rls classifier for each value of lambda
         for j, b in enumerate(beta_casc):
             selected = (b.flat != 0)
             for k, lam in enumerate(lambda_range):
@@ -96,13 +96,13 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5):
     while k < kmin or ((difference > th).any() and k < kmax):
         k += 1
         
-        value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta)))
+        value = beta * (1 - mu_s) + np.dot(dataT, (labels - np.dot(data, beta))) 
         beta_next = _soft_thresholding(value, tau_s)
         
         difference = np.abs(beta_next - beta)
         th = np.abs(beta) * (tol / k)
         beta = beta_next
-    #--------------------------------------------------------------------------    
+    #--------------------------------------------------------------------------
     return beta_next, k
   
 def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
@@ -145,11 +145,7 @@ def _get_sigma(matrix):
         a, b = aval[(0, -1)]
     
     return (a+b)/(n*2.0)
-    
-def _reverse_enumerate(iterable):
-    from itertools import izip
-    return izip(reversed(xrange(len(iterable))), reversed(iterable))
-    
+      
 def _soft_thresholding(x, th):
     out = x - (np.sign(x) * (th/2.0))
     out[np.abs(x) < (th/2.0)] = 0.0

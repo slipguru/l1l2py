@@ -64,7 +64,7 @@ class TestAlgorithms(object):
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y,
-                                                  tau, mu, nout=2)
+                                                  tau, mu, nout=2)            
             beta, k = elastic_net(self.X, self.Y, mu, tau)
              
             assert_true(np.allclose(exp_beta, beta, TOL))           
@@ -167,13 +167,4 @@ class TestAlgorithms(object):
             sets.append((tr, ts))
             
         return sets
-            
-    def test_reverse_enumerate(self):
-        from biolearning._algorithms import _reverse_enumerate
-        
-        iterable = np.array((2, 3, 4, 5, 6))
-        rev_enumerate = ((4, 6), (3, 5), (2, 4), (1, 3), (0, 2))
-        for p1, p2 in zip(rev_enumerate, _reverse_enumerate(iterable)):
-            assert_equal(p1, p2)
-        
-        
+    

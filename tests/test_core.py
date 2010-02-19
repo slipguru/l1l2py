@@ -77,9 +77,9 @@ class TestCore(object):
                                             5, 'regr', 0, 1, 1, nout=2)
 
             from test_algorithms import TestAlgorithms                           
-            sets = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
+            splits = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
             tau_opt, lambda_opt = minimal_model(self.X, self.Y, mu,
-                                          tau_range, lambda_range, cv_sets=sets,
+                                          tau_range, lambda_range, splits,
                                           error_function=tools.regression_error,
                                           data_normalizer=tools.standardize,
                                           labels_normalizer=tools.center)
@@ -99,9 +99,9 @@ class TestCore(object):
                                             5, 'regr', 0, 1, 1, nout=2)
 
             from test_algorithms import TestAlgorithms                           
-            sets = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
+            splits = TestAlgorithms._get_matlab_splitting(self.Y, 5)    
             tau_opt, lambda_opt = minimal_model(self.X, self.Y, mu,
-                                          tau_range, lambda_range, cv_sets=sets,
+                                          tau_range, lambda_range, splits,
                                           error_function=tools.regression_error,
                                           data_normalizer=tools.standardize,
                                           labels_normalizer=tools.center)

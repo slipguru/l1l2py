@@ -10,7 +10,47 @@ def model_selection(data, labels, test_data, test_labels,
                     cv_splits, error_function, 
                     data_normalizer=None, labels_normalizer=None,
                     returns_kcv_errors=False):
-    """ TODO: add docstring """
+    """Short Summary.
+    
+    Extended Summary.
+    
+    Parameters
+    ----------
+    name1 :  array_like
+        Description of `name1`
+    name2 :  file or str, optional (the default is 'foo')
+        Description of `name2`
+    name3 : {1, 2, 3}
+        Description of `name3`
+    
+    Returns
+    -------
+    name :  type
+        description
+        
+    Notes
+    -----
+    Eventually notes and LaTeX [1]_ formulae
+    
+    .. math::
+    
+        \sum_{i=1}^N = 1
+        
+    References
+    ----------
+    .. [1] "Guide to LaTEX", foo editions
+
+    Examples
+    --------
+    >>> np.add(1, 2)
+    3
+    
+    Second example
+    
+    >>> np.add([1, 2], [3, 4])
+    array([4, 6])
+    
+    """
     
     stage1_out = minimal_model(data, labels, mu_range[0],
                                tau_range, lambda_range,
@@ -28,7 +68,7 @@ def model_selection(data, labels, test_data, test_labels,
     return stage1_out + stage2_out
 
 def minimal_model(data, labels, mu, tau_range, lambda_range,
-                  cv_sets, error_function,
+                  cv_splits, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   returns_kcv_errors=False):
     """ TODO: add docstring """
@@ -37,7 +77,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     err_tr = list()
     max_tau_num = len(tau_range)
     
-    for i, (train_idxs, test_idxs) in enumerate(cv_sets):        
+    for train_idxs, test_idxs in cv_splits:        
         # First create a view and then normalize (eventually)
         data_tr, data_ts = data[train_idxs,:], data[test_idxs,:]
         if not data_normalizer is None:
@@ -74,7 +114,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     # cut columns and computes the mean
     err_ts = np.asarray([a[:max_tau_num] for a in err_ts]).mean(axis=0)
     err_tr = np.asarray([a[:max_tau_num] for a in err_tr]).mean(axis=0)
-       
+
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
     tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
     lambda_opt = lambda_range[lambda_opt_idx[0]]

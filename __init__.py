@@ -1,6 +1,4 @@
-"""
-biolearning
-=================================================
+"""biolearning.
 
 Description
 """

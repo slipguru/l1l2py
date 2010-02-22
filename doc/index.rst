@@ -1,7 +1,4 @@
-.. biolearning documentation master file, created by
-   sphinx-quickstart on Fri Feb 19 15:10:00 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. biolearning
 
 Biolearning Reference
 =====================

@@ -114,7 +114,9 @@ div.sphinxsidebar ul.want-points {
 
 .field-list th {
   color: rgb(0,102,204);
+  background-color: #EEDDEE;
 }
+
 
 /** 
  * Extra admonitions 

@@ -100,7 +100,7 @@ def _get_sigma(matrix):
     else:
         aval = np.linalg.svd(np.dot(matrix.T, matrix),
                              full_matrices=False, compute_uv=False)
-        a, b = aval[(0, -1)]
+        a, b = aval[0], aval[-1]
     
     return (a+b)/(n*2.0)
       

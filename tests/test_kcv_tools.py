@@ -5,11 +5,6 @@ from nose.tools import *
 
 from biolearning.tools import *
 
-from mlabwrap import mlab
-mlab.addpath('tests/matlab_code')
-
-TOL = 1e-3
-
 class TestKCVTools(object):
     """
     Results generated with the original matlab code

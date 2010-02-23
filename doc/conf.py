@@ -31,7 +31,6 @@ extensions = ['sphinx.ext.autodoc',
               'matplotlib.sphinxext.mathmpl',
               'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
-              'ipython_console_highlighting',
               'numpydoc']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -80,7 +79,7 @@ exclude_trees = ['_build']
 #default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-#add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
@@ -174,7 +173,7 @@ htmlhelp_basename = 'biolearningdoc'
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').
-#latex_paper_size = 'letter'
+latex_paper_size = 'a4'
 
 # The font size ('10pt', '11pt' or '12pt').
 #latex_font_size = '10pt'

@@ -12,23 +12,70 @@ import numpy as np
 
 __all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
 
-#Regularized Least-Squares
+def ridge_regression(data, labels, mu=0.0):
+    r"""Regularized Least Squares.
 
-def ridge_regression(data, labels, penalty=0.0):
-    """ TODO: Add docstring """
+    Finds the RLS model with ``mu`` parameter associated with its l2 norm
+    (see `Notes`).
+
+    Parameters
+    ----------
+    data : (N, D) ndarray
+        Data matrix.
+    labels : (N,) ndarray
+        Labels vector.
+    mu : float, optional (default is `0.0`)
+        l_2 norm penalty.
+    
+    Returns
+    -------
+    beta : (D,) ndarray
+        RLS model.
+    
+    Notes
+    -----
+    RLS minimizes the following objective function:    
+    
+    .. math::
+    
+        \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2
+    
+    finding the optimal model :math:`\beta^*`, where
+    
+    =============== ===============
+    :math:`X`       ``data``
+    --------------- ---------------
+    :math:`Y`       ``labels``
+    --------------- ---------------
+    :math:`\mu`     ``mu``      
+    --------------- ---------------
+    :math:`\beta^*` ``beta``    
+    =============== ===============
+    
+    Using ``mu`` = `0.0` the algoritm performs Ordinary Least Squares (OLS).
+       
+    Examples
+    --------
+    >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
+    >>> beta = numpy.array([0.1, 0.1, 0.0])
+    >>> y = numpy.dot(X, beta)
+    >>> biolearning.algorithms.ridge_regression(X, y)
+    array([  1.00000000e-01,   1.00000000e-01,   6.62515290e-17])
+    
+    """
     n, d = data.shape
         
     if n < d:
         tmp = np.dot(data, data.T)
-        if penalty:
-            tmp += penalty*n*np.eye(n)
+        if mu:
+            tmp += mu*n*np.eye(n)
         tmp = np.linalg.pinv(tmp)
         
         return np.dot(np.dot(data.T, tmp), labels)
     else:
         tmp = np.dot(data.T, data)
-        if penalty:
-            tmp += penalty*n*np.eye(d)
+        if mu:
+            tmp += mu*n*np.eye(d)
         tmp = np.linalg.pinv(tmp)
         
         return np.dot(tmp, np.dot(data.T, labels))

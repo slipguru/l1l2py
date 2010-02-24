@@ -1,12 +1,18 @@
 .. _tools:
 
-**************************************
-Tools (:class:`biolearning.tools`)
-**************************************
-
+*********************************
+Tools (:mod:`biolearning.tools`)
+*********************************
+.. currentmodule:: biolearning.tools
+.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
+.. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. automodule:: biolearning.tools
 
-.. currentmodule:: biolearning.tools
+.. testsetup:: *
+
+   import biolearning.tools
+   import numpy
+
 
 Range generators
 ----------------
@@ -26,5 +32,10 @@ Error calculation
 
 Cross Validation utilities
 --------------------------
+.. warning::
+    
+    The following functions are simple wrappers on similar function of the
+    `mlpy <https://mlpy.fbk.eu/>`_  library.
+    
 .. autofunction:: kfold_splits
 .. autofunction:: stratified_kfold_splits

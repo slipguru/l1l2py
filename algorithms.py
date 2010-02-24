@@ -1,10 +1,18 @@
-"""
-TODO: Add docstring
+r"""Internal algorithms implementations.
+
+The :mod:`algorithms` module defines core numerical optimizazion algorithms:
+
+* :func:`ridge_regression`
+* :func:`elastic_net`
+* :func:`elastic_net_regpath`
+
 """
 
 import numpy as np
 
 __all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
+
+#Regularized Least-Squares
 
 def ridge_regression(data, labels, penalty=0.0):
     """ TODO: Add docstring """

@@ -25,11 +25,14 @@ sys.path.append(os.path.abspath('../../'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
-              'sphinx.ext.todo',
-              'sphinx.ext.coverage',
-              'sphinx.ext.inheritance_diagram',
-              'matplotlib.sphinxext.mathmpl',
-              'matplotlib.sphinxext.only_directives',
+              #'sphinx.ext.todo',
+              #'sphinx.ext.coverage',
+              'sphinx.ext.pngmath',
+              'sphinx.ext.intersphinx',
+              #'sphinx.ext.autosummary',
+              #'sphinx.ext.inheritance_diagram',
+              #'matplotlib.sphinxext.mathmpl',
+              #'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
               'numpydoc']
 
@@ -90,7 +93,7 @@ add_function_parentheses = False
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = 'sphinx'
+pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -147,7 +150,7 @@ html_static_path = ['_static']
 #html_additional_pages = {}
 
 # If false, no module index is generated.
-#html_use_modindex = True
+html_use_modindex = False
 
 # If false, no index is generated.
 #html_use_index = True
@@ -168,6 +171,9 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'biolearningdoc'
+
+# Pngmath should try to align formulas properly
+pngmath_use_preview = True
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -194,10 +200,68 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = r'''
+\usepackage{amsmath}
+\DeclareUnicodeCharacter{00A0}{\nobreakspace}
+
+% In the parameters section, place a newline after the Parameters
+% header
+\usepackage{expdlist}
+\let\latexdescription=\description
+\def\description{\latexdescription{}{} \breaklabel}
+
+% Make Examples/etc section headers smaller and more compact
+\makeatletter
+\titleformat{\paragraph}{\normalsize\py@HeaderFamily}%
+            {\py@TitleColor}{0em}{\py@TitleColor}{\py@NormalColor}
+\titlespacing*{\paragraph}{0pt}{1ex}{0pt}
+\makeatother
+
+% Fix footer/header
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\thechapter.\ #1}}{}}
+\renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{\thesection.\ #1}}}
+'''
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+latex_use_modindex = False
+
+# Intersphinx configuration
+intersphinx_mapping = {'http://docs.python.org/dev': None,
+                       'http://docs.scipy.org/doc/numpy': None}
+
+# Make numpydoc to generate plots for example sections
+numpydoc_use_plots = True
+
+# -----------------------------------------------------------------------------
+# Plots
+# -----------------------------------------------------------------------------
+plot_pre_code = """
+import numpy as np
+np.random.seed(0)
+"""
+plot_include_source = True
+plot_formats = [('png', 100), 'pdf']
+
+import math
+phi = (math.sqrt(5) + 1)/2
+
+import matplotlib
+matplotlib.rcParams.update({
+    'font.size': 8,
+    'axes.titlesize': 8,
+    'axes.labelsize': 8,
+    'xtick.labelsize': 8,
+    'ytick.labelsize': 8,
+    'legend.fontsize': 8,
+    'figure.figsize': (3*phi, 3),
+    'figure.subplot.bottom': 0.2,
+    'figure.subplot.left': 0.2,
+    'figure.subplot.right': 0.9,
+    'figure.subplot.top': 0.85,
+    'figure.subplot.wspace': 0.4,
+    'text.usetex': False,
+})
+

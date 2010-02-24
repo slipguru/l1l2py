@@ -6,13 +6,13 @@ Tools (:mod:`biolearning.tools`)
 .. currentmodule:: biolearning.tools
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
-.. automodule:: biolearning.tools
 
 .. testsetup:: *
 
    import biolearning.tools
    import numpy
 
+.. automodule:: biolearning.tools
 
 Range generators
 ----------------

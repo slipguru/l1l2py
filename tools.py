@@ -100,7 +100,7 @@ def geometric_range(min_value, max_value, number):
 
     .. math:: 
 
-        r = (\frac{b}{a})^{\frac{1}{n-1}}
+        r = \left(\frac{b}{a}\right)^{\frac{1}{n-1}}
 
     Examples
     --------
@@ -346,7 +346,7 @@ def balanced_classification_error(labels, predicted):
     .. warning::
 
         If ``labels`` contains single class labels, the functions returns
-        always `0.0` because :math:`l_i - mean(labels) = 0`.
+        always `0.0` because :math:`l_i - \overline{labels} = 0`.
     
     Examples
     --------

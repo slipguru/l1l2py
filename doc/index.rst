@@ -1,4 +1,4 @@
-.. biolearning
+.. _biolearning:
 
 Biolearning Reference
 =====================
@@ -13,11 +13,12 @@ Contents:
 
    core.rst
    tools.rst
+   algorithms.rst
+
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 

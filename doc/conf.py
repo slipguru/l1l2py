@@ -175,7 +175,6 @@ htmlhelp_basename = 'biolearningdoc'
 # Pngmath should try to align formulas properly
 pngmath_use_preview = True
 
-
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').

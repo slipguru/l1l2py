@@ -15,8 +15,8 @@ __all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
 def ridge_regression(data, labels, mu=0.0):
     r"""Regularized Least Squares.
 
-    Finds the RLS model with ``mu`` parameter associated with its l2 norm
-    (see `Notes`).
+    Finds the RLS model with ``mu`` parameter associated with its
+    :math:`\ell_2` norm (see `Notes`).
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def ridge_regression(data, labels, mu=0.0):
     labels : (N,) ndarray
         Labels vector.
     mu : float, optional (default is `0.0`)
-        l_2 norm penalty.
+        :math:`\ell_2` norm penalty.
     
     Returns
     -------

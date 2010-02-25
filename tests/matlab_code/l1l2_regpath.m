@@ -44,8 +44,7 @@ if isempty(sigma0);
     end
     sigma0 = (a+b)/(n*2); %step size for mu_fact=0
 end
-beta_ls =rls_algorithm(X,Y);
-beta0 = beta_ls;
+beta0 = zeros(d,1);
 sparsity = zeros(T,1);
 sparsity_prev = 0;
 for t = 1:T;

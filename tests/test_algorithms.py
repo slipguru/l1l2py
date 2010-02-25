@@ -68,7 +68,7 @@ class TestAlgorithms(object):
             beta, k = elastic_net(self.X, self.Y, mu, tau,
                                   returns_iterations=True)
              
-            assert_true(np.allclose(exp_beta, beta, TOL))           
+            assert_true(np.allclose(exp_beta, beta, TOL))
             assert_true(np.allclose(exp_k, k))
                 
     @attr('slow')    

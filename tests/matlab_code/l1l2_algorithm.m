@@ -13,7 +13,7 @@ function [beta,k] = l1l2_algorithm(X,Y,tau,mu_fact,beta0,sigma0,kmax)
     if isempty(sigma0);
         if d>n; 
             a = normest(X*XT);
-            b = 0; 
+            b = 1e-5; 
         else
             aval = svd(XT*X);
             a = aval(1);

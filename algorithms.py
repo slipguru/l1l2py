@@ -52,7 +52,7 @@ def ridge_regression(data, labels, mu=0.0):
     :math:`\beta^*` ``beta``    
     =============== ===============
     
-    Using ``mu`` = `0.0` the algoritm performs Ordinary Least Squares (OLS).
+    Using ``mu`` = `0.0` the algorithm performs Ordinary Least Squares (OLS).
        
     Examples
     --------
@@ -80,12 +80,45 @@ def ridge_regression(data, labels, mu=0.0):
         
         return np.dot(tmp, np.dot(data.T, labels))
 
-def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5,
+def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
+    """
+    TODO: Add docstring
+    reg_path
+    Is sufficient document the possibility to get
+    a shorter list of beta without using annoying warnings
+    """
+    from collections import deque
+    n, d = data.shape
+    
+    if mu == 0.0:
+        beta_ls = ridge_regression(data, labels)
+    if beta is None:
+        beta = np.zeros((d, 1))
+    
+    out = deque()
+    nonzero = 0
+    for tau in reversed(tau_range):
+        if mu == 0.0 and nonzero >= n: # lasso saturation             
+            beta_next = beta_ls
+        else:
+            beta_next = elastic_net(data, labels, mu, tau, beta, kmax)
+          
+        if len(beta_next.nonzero()[0]) > 0:
+            out.appendleft(beta_next)
+            
+        beta = beta_next
+                   
+    return out
+
+def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
                 returns_iterations=False):
-    """ TODO: Add docstring """
+    """
+    
+    """
     n = data.shape[0]
-                                        # Names on the paper
-    step_size = _step_size(data)        # 1/C
+    
+    if step_size is None:
+        step_size = _step_size(data)    # 1/C
     mu_s = (n * mu) * step_size         # (n mu)/C
     tau_s = (n * tau) * step_size       # (n tau)/C
     
@@ -114,53 +147,21 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5,
         return beta_next, k
     else:
         return beta
-  
-def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=np.inf):
-    """
-    TODO: Add docstring
-    reg_path
-    Is sufficient document the possibility to get
-    a shorter list of beta without using annoying warnings
-    """
-    from collections import deque
-    n, d = data.shape
-    
-    if mu == 0.0:
-        beta_ls = ridge_regression(data, labels)
-    if beta is None:
-        beta = np.zeros((d, 1))
-    
-    out = deque()
-    nonzero = 0
-    for tau in reversed(tau_range):
-        if mu == 0.0 and nonzero >= n: # lasso saturation             
-            beta_next = beta_ls
-        else:
-            beta_next = elastic_net(data, labels, mu, tau, beta, kmax)
-          
-        nonzero = np.sum(beta_next != 0)
-        if nonzero > 0:
-            out.appendleft(beta_next)
-            
-        beta = beta_next
-                   
-    return out
 
 def _step_size(matrix):
     n, d = matrix.shape
     
     if d > n:
-        a = np.linalg.norm(np.dot(matrix, matrix.T), 2)
-        b = 0
+        eigvals = np.linalg.eigvalsh(np.dot(matrix, matrix.T))
+        max_eig, min_eig = eigvals.max(), 0.0
     else:
-        aval = np.linalg.svd(np.dot(matrix.T, matrix),
-                             full_matrices=False, compute_uv=False)
-        a, b = aval[0], aval[-1]
+        eigvals = np.linalg.eigvalsh(np.dot(matrix.T, matrix))
+        max_eig, min_eig = eigvals.max(), eigvals.min()
         
-    return 2.0/(a+b)
+    return 2.0 / (max_eig + min_eig)
       
 def _soft_thresholding(x, th):
     """ TODO: Add docstring """
-    out = x - (np.sign(x) * (th/2.0))
-    out[np.abs(x) < (th/2.0)] = 0.0
+    out = x - (np.sign(x) * (th / 2.0))
+    out[np.abs(x) < (th / 2.0)] = 0.0
     return out

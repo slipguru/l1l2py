@@ -1,54 +1,70 @@
+r"""Core functions.
+
+In this module are implemented the two main stage of the model selection
+framwework presented in [DeMol09]_:
+
+* :func:`minimal_model` (`Stage I`)
+* :func:`nested_lists`  (`Stage II`)
+
+There are, also a simple wrapper of the above functions which can be used to
+perform sequantially the two stages:
+
+* :func:`model_selection`
+
+"""
+
+__all__ = ['model_selection', 'minimal_model', 'nested_lists']
+
 import numpy as np
 from algorithms import *
 from tools import *
-
-__all__ = ['model_selection',
-           'minimal_model', 'nested_lists']
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
                     cv_splits, error_function,
                     data_normalizer=None, labels_normalizer=None,
                     returns_kcv_errors=False):
-    """Short Summary.
+    r"""Complete model selection procedure.
 
-    Extended Summary.
+    This functions implements the full model selection framework
+    presented in [DeMol09]_.
+
+    The model selection consist of the sequential execution of two stage,
+    implemented in the functions :func:`minimal_model` and :func:`nested_lists`.
+    See the function documentation for details on each stage.
+
+    So, this function is a simple wrapper wich calls the other two
+    core function.
+
+    This function returns a concatenation of the outputs of
+    :func:`minimal_model` and :func:`nested_lists`.
 
     Parameters
     ----------
-    name1 :  array_like
-        Description of `name1`
-    name2 :  file or str, optional (the default is 'foo')
-        Description of `name2`
-    name3 : {1, 2, 3}
-        Description of `name3`
+    data : (N, D) ndarray
+        Data matrix.
+    labels : (N,)  or (N, 1) ndarray
+        Labels vector.
+    test_data : (N, D) ndarray
+        Test set matrix.
+    test_labels : (N,)  or (N, 1) ndarray
+        Test set labels vector.
+    mu_range : array_like of float
+        :math:`\ell_2` norm penalties.
+    tau_range : array_like of float
+        :math:`\ell_1` norm penalties.
+    lambda_range : array_like of float
+        :math:`\ell_1` norm penalties.
 
     Returns
     -------
     name :  type
         description
 
-    Notes
-    -----
-    Eventually notes and LaTeX [1]_ formulae
-
-    .. math::
-
-        \sum_{i=1}^N = 1
-
-    References
-    ----------
-    .. [1] "Guide to LaTEX", foo editions
-
-    Examples
+    See Also
     --------
-    >>> np.add(1, 2)
-    3
-
-    Second example
-
-    >>> np.add([1, 2], [3, 4])
-    array([4, 6])
+    minimal_model
+    nested_lists
 
     """
 

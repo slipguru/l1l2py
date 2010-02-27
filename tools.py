@@ -18,13 +18,11 @@ The :mod:`tools` module defines four type of functions:
 
 """
 
-import numpy as np
-
-__all__ = ['linear_range', 'geometric_range',
-           'standardize', 'center',
+__all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
-           'regression_error',
-           'kfold_splits', 'stratified_kfold_splits']
+           'regression_error', 'kfold_splits', 'stratified_kfold_splits']
+
+import numpy as np
 
 # Ranges functions ------------------------------------------------------------
 def linear_range(min_value, max_value, number):

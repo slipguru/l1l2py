@@ -8,9 +8,9 @@ The :mod:`algorithms` module defines core numerical optimizazion algorithms:
 
 """
 
-import numpy as np
-
 __all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
+
+import numpy as np
 
 def ridge_regression(data, labels, mu=0.0):
     r"""Regularized Least Squares.
@@ -199,6 +199,8 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
     --------------- ---------------
     :math:`\mu`     ``mu``
     --------------- ---------------
+    :math:`\tau`     ``tau``
+    --------------- ---------------
     :math:`\beta^*` ``beta``
     =============== ===============
 
@@ -282,7 +284,6 @@ def _step_size(matrix):
     return 2.0/(max_eig + 1e-5)
 
 def _soft_thresholding(x, th):
-    """ TODO: Add docstring """
     out = x - (np.sign(x) * (th / 2.0))
     out[np.abs(x) < (th / 2.0)] = 0.0
     return out

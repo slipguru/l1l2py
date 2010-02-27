@@ -59,8 +59,9 @@ def ridge_regression(data, labels, mu=0.0):
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> biolearning.algorithms.ridge_regression(X, y)
-    array([  1.00000000e-01,   1.00000000e-01,   6.62515290e-17])
+    >>> beta_rls = biolearning.algorithms.ridge_regression(X, y)
+    >>> numpy.allclose(beta, beta_rls)
+    True
 
     """
     n, d = data.shape
@@ -231,8 +232,9 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> biolearning.algorithms.elastic_net(X, y, 0.0, 0.0)
-    array([  1.00000000e-01,   1.00000000e-01,   6.24500451e-17])
+    >>> beta_rls = biolearning.algorithms.elastic_net(X, y, 0.0, 0.0)
+    >>> numpy.allclose(beta, beta_rls)
+    True
     >>> biolearning.algorithms.elastic_net(X, y, 0.1, 0.1)
     array([ 0.        ,  0.07715517,  0.        ])
 

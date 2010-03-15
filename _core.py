@@ -104,8 +104,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
 
         # Builds a classifier for each value of tau
-        beta_casc = elastic_net_regpath(data_tr, labels_tr, mu,
-                                        tau_range[:max_tau_num])
+        beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
 
         if len(beta_casc) < max_tau_num: max_tau_num = len(beta_casc)
         _err_ts = np.empty((len(beta_casc), len(lambda_range)))
@@ -158,7 +157,7 @@ def nested_lists(data, labels, test_data, test_labels,
         err_ts_list = list()
 
     for mu in mu_range:
-        beta = elastic_net(data, labels, mu, tau)
+        beta = l1l2_regularization(data, labels, mu, tau)
         selected = (beta.flat != 0)
 
         beta = ridge_regression(data[:,selected], labels, lambda_)

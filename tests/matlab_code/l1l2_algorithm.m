@@ -36,7 +36,7 @@ function [beta,k] = l1l2_algorithm(X,Y,tau,mu_fact,beta0,sigma0,kmax)
     XT = XT./(n*sigma); % XT/C
     if isempty(beta0); % initialize with RLS solution
         beta0 = rls_algorithm(X,Y); 
-    end   
+    end
 % l1l2 algorithm
     k = 0;
     beta = thresholding(beta0+XT*(Y-X*beta0),tau_s) ./ (1+mu_s); % first iteration

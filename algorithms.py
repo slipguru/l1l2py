@@ -3,12 +3,12 @@ r"""Internal algorithms implementations.
 The :mod:`algorithms` module defines core numerical optimizazion algorithms:
 
 * :func:`ridge_regression`
-* :func:`elastic_net`
-* :func:`elastic_net_regpath`
+* :func:`l1l2_regularization`
+* :func:`l1l2_path`
 
 """
 
-__all__ = ['ridge_regression', 'elastic_net', 'elastic_net_regpath']
+__all__ = ['ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 import numpy as np
 
@@ -81,12 +81,12 @@ def ridge_regression(data, labels, mu=0.0):
 
         return np.dot(tmp, np.dot(data.T, labels))
 
-def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=1e5,
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
                         step_size=None):
-    r"""Elastic Net regularization path.
+    r"""Regularized Least Squares path with :math:`\ell_1\ell_2` penalty.
 
-    Find the EN regularization path for each value in ``tau_range`` and
-    fixed value of ``mu``.
+    Find the :math:`\ell_1\ell_2` regularization path for each value in
+    ``tau_range`` and fixed value of ``mu``.
 
     Parameters
     ----------
@@ -99,25 +99,27 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=1e5,
     tau_range : array_like of float
         :math:`\ell_1` norm penalties.
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
-        Starting value of the iterations (see :func:`elastic_net` `Notes`).
+        Starting value of the iterations
+        (see :func:`l1l2_regularization` `Notes`).
         If is `None` iterations starts from the OLS solution.
     kmax : int, optional (default is :math:`10^5`)
         Maximum number of iterations.
     step_size : float, optional (default is `None`)
         Iterations step size.
         If is `None` the algorithm use default value
-        (see :func:`elastic_net` `Notes`).
+        (see :func:`l1l2_regularization` `Notes`).
 
     Returns
     -------
     beta_path : list of (D,) or (D, 1) ndarray
-        EN models. The number of models can differ the number of `tau` values.
+        :math:`\ell_1\ell_2` models. The number of models can differ the number
+        of `tau` values.
         The functions returns only the model with at least one nonzero value.
         For very high value of tau a model can have all `0s`.
 
     See Also
     --------
-    elastic_net
+    l1l2_regularization
 
     """
     from collections import deque
@@ -134,8 +136,8 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=1e5,
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls
         else:
-            beta_next = elastic_net(data, labels, mu, tau, beta,
-                                    kmax, step_size)
+            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
+                                            kmax, step_size)
 
         if len(beta_next.nonzero()[0]) > 0:
             out.appendleft(beta_next)
@@ -144,12 +146,12 @@ def elastic_net_regpath(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     return out
 
-def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
-                returns_iterations=False):
-    r"""Elastic Net regularization.
+def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
+                        step_size=None, returns_iterations=False):
+    r"""Regularized Least Squares with :math:`\ell_1\ell_2` penalty.
 
-    Finds the EN model with ``mu`` parameter associated with its
-    :math:`\ell_2` norm and ``tau`` parameter associated with its
+    Finds the :math:`\ell_1\ell_2` model with ``mu`` parameter associated with
+    its :math:`\ell_2` norm and ``tau`` parameter associated with its
     :math:`\ell_1` norm (see `Notes`).
 
     Parameters
@@ -178,13 +180,13 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
     Returns
     -------
     beta : (D,) or (D, 1) ndarray
-        EN model.
+        :math:`\ell_1\ell_2` model.
     k : int, optional
         Number of iterations performed.
 
     Notes
     -----
-    EN minimizes the following objective function:
+    :math:`\ell_1\ell_2` minimizes the following objective function:
 
     .. math::
 
@@ -223,21 +225,21 @@ def elastic_net(data, labels, mu, tau, beta=None, kmax=1e5, step_size=None,
 
     .. math::
 
-        \frac{1}{C} = \frac{2}{\|X^T X\| + 10^{-5}} < \frac{2}{\|X^T X\|}
+        \frac{1}{C} = \frac{2}{\|X^T X\| * 1.1} < \frac{2}{\|X^T X\|}
 
     See Also
     --------
-    elastic_net_regpath
+    l1l2_path
 
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> beta_rls = biolearning.algorithms.elastic_net(X, y, 0.0, 0.0)
+    >>> beta_rls = biolearning.algorithms.l1l2_regularization(X, y, 0.0, 0.0)
     >>> numpy.allclose(beta, beta_rls)
     True
-    >>> biolearning.algorithms.elastic_net(X, y, 0.1, 0.1)
+    >>> biolearning.algorithms.l1l2_regularization(X, y, 0.1, 0.1)
     array([ 0.        ,  0.07715517,  0.        ])
 
     """
@@ -281,7 +283,7 @@ def _step_size(matrix):
         tmp = np.dot(matrix.T, matrix)
     max_eig = np.linalg.eigvalsh(tmp).max()
 
-    return 2.0/(max_eig + 1e-5)
+    return 2.0/(max_eig * 1.1)
 
 def _soft_thresholding(x, th):
     out = x - (np.sign(x) * (th / 2.0))

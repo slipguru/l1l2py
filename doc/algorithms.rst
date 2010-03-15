@@ -14,5 +14,5 @@ Algorithms (:mod:`biolearning.algorithms`)
 
 .. automodule:: biolearning.algorithms
 .. autofunction:: ridge_regression
-.. autofunction:: elastic_net
-.. autofunction:: elastic_net_regpath
+.. autofunction:: l1l2_regularization
+.. autofunction:: l1l2_path

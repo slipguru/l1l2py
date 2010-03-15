@@ -1,15 +1,15 @@
 .. _biolearning:
 
+**********************
 Biolearning Reference
-=====================
+**********************
 
 :Release: |version|
 :Date: |today|
-:Homepage: http://slipguru.disi.unige.it/xxx
+:Homepage: http://slipguru.disi.unige.it/homepage_code_url
 
 Insert :mod:`biolearning` description ...
-
-Cite references [DeMol09]_ [DeMol08]_
+*TODO* citing references [DeMol09]_ [DeMol08]_
 
 .. toctree::
     :maxdepth: 2
@@ -17,10 +17,11 @@ Cite references [DeMol09]_ [DeMol08]_
     core.rst
     algorithms.rst
     tools.rst
-
+    
 :ref:`genindex`
 
-.. rubric:: References
+
+.. rubric:: Bibliografy
 
 .. [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,
              "A Regularized Method for Selecting Nested Group of Genes from

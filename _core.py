@@ -6,8 +6,8 @@ framwework presented in [DeMol09]_:
 * :func:`minimal_model` (`Stage I`)
 * :func:`nested_lists`  (`Stage II`)
 
-There are, also a simple wrapper of the above functions which can be used to
-perform sequantially the two stages:
+There is also a simple wrapper of the above functions which can be used to
+perform sequentially the two stages:
 
 * :func:`model_selection`
 
@@ -55,16 +55,33 @@ def model_selection(data, labels, test_data, test_labels,
         :math:`\ell_1` norm penalties.
     lambda_range : array_like of float
         :math:`\ell_1` norm penalties.
+    cv_splits : array_like of tuples
+        Each tuple contains two lists with the training set and testing set
+        indexes, like the output of the cross validation tools
+        in :mod:`biolearning.tools`.
+    error_function : function object
+        A function like the error functions in :mod:`biolearning.tools`.
+    data_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+    labels_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+    returns_kcv_errors : boolean
+        If True returns the cross validation errors calculated during
+        the Stage I.
 
     Returns
     -------
-    name :  type
-        description
+    out :  tuple
+        Returns a concatenation of the outputs of :func:`minimal_model`
+        and :func:`nested_lists`.
 
     See Also
     --------
     minimal_model
     nested_lists
+    biolearning.tools    
 
     """
 
@@ -87,7 +104,47 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
                   cv_splits, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   returns_kcv_errors=False):
-    """ TODO: add docstring """
+    r"""TODO: add docstring
+    
+    Parameters
+    ----------
+    data : (N, D) ndarray
+        Data matrix.
+    labels : (N,)  or (N, 1) ndarray
+        Labels vector.
+    mu : float
+        :math:`\ell_2` norm penalty.
+    tau_range : array_like of float
+        :math:`\ell_1` norm penalties.
+    lambda_range : array_like of float
+        :math:`\ell_1` norm penalties.
+    cv_splits : array_like of tuples
+        Each tuple contains two lists with the training set and testing set
+        indexes, like the output of the cross validation tools
+        in :mod:`biolearning.tools`.
+    error_function : function object
+        A function like the error functions in :mod:`biolearning.tools`.
+    data_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+    labels_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+    returns_kcv_errors : boolean
+        If True returns the cross validation errors calculated during
+        the Stage I.
+
+    Returns
+    -------
+
+
+    See Also
+    --------
+    model_selection
+    nested_lists
+    biolearning.tools    
+    
+    """
 
     err_ts = list()
     err_tr = list()
@@ -142,7 +199,42 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 def nested_lists(data, labels, test_data, test_labels,
                  tau, lambda_, mu_range, error_function=None,
                  data_normalizer=None, labels_normalizer=None):
-    """ TODO: add docstring """
+    r"""TODO: add docstring
+    
+        Parameters
+    ----------
+    data : (N, D) ndarray
+        Data matrix.
+    labels : (N,)  or (N, 1) ndarray
+        Labels vector.
+    test_data : (N, D) ndarray
+        Test set matrix.
+    test_labels : (N,)  or (N, 1) ndarray
+        Test set labels vector.
+    mu_range : array_like of float
+        :math:`\ell_2` norm penalties.
+    tau : float
+        :math:`\ell_1` norm penalty.
+    lambda : float
+        :math:`\ell_1` norm penalty.
+        error_function : function object
+    data_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+    labels_normalizer : function object
+        A function like the data normalization functions in
+        :mod:`biolearning.tools`.
+
+    Returns
+    -------
+
+    See Also
+    --------
+    model_selection
+    minimal_model
+    biolearning.tools
+    
+    """
 
     if not data_normalizer is None:
         data, test_data = data_normalizer(data, test_data)

@@ -1,8 +1,8 @@
 .. _core:
 
-******************************************
+*************************************
 Core functions (:class:`biolearning`)
-******************************************
+*************************************
 .. currentmodule:: biolearning
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
@@ -14,14 +14,15 @@ Core functions (:class:`biolearning`)
 
 .. automodule:: biolearning._core
 
-Stage I
-=======
-.. autofunction:: minimal_model
-
-Stage II
-========
-.. autofunction:: nested_lists
-
-Full Framework
+Model Selection
 ===============
 .. autofunction:: model_selection
+
+Stage I: Minimal Model Selection
+================================
+.. autofunction:: minimal_model
+
+Stage II: Nested lists generation
+=================================
+.. autofunction:: nested_lists
+

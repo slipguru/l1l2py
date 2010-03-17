@@ -87,6 +87,12 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     Find the :math:`\ell_1\ell_2` regularization path for each value in
     ``tau_range`` and fixed value of ``mu``.
+    
+    .. warning ::
+    
+        The number of models can differ the number of `tau` values.
+        The functions returns only the model with at least one nonzero feature.
+        For very high value of tau a model can have all `0s`.
 
     Parameters
     ----------
@@ -112,10 +118,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     Returns
     -------
     beta_path : list of (D,) or (D, 1) ndarray
-        :math:`\ell_1\ell_2` models. The number of models can differ the number
-        of `tau` values.
-        The functions returns only the model with at least one nonzero value.
-        For very high value of tau a model can have all `0s`.
+        :math:`\ell_1\ell_2` models with at least one nonzero feature. 
 
     See Also
     --------

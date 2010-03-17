@@ -16,6 +16,8 @@ perform sequentially the two stages:
 __all__ = ['model_selection', 'minimal_model', 'nested_lists']
 
 import numpy as np
+import itertools as it
+
 from algorithms import *
 from tools import *
 
@@ -79,6 +81,14 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     Data and labels will be normalized on each split using the function
     ``data_normalizer`` and ``labels_normalizer``.
     
+    .. warning ::
+    
+        On each cross validation split the number of nonempty model could be
+        different (on high value of tau).
+        
+        The function calculates the optimum value of tau from wich the model is
+        nonempty on every cross validation split.
+    
     
     Parameters
     ----------
@@ -114,9 +124,11 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     lambda_opt : float
         Optimal value of lambda selected in ``lambda_range``.
     err_ts : list, optional
-        List of ``len(cv_splits)`` cross validation error on the test set.
+        List of maximum ``len(cv_splits)`` cross validation error on the
+        test set.
     err_tr : list, optional
-        List of ``len(cv_splits)`` cross validation error on the training set.
+        List of maximum ``len(cv_splits)`` cross validation error on the
+        training set.
 
     See Also
     --------
@@ -144,12 +156,12 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
 
         if len(beta_casc) < max_tau_num: max_tau_num = len(beta_casc)
-        _err_ts = np.empty((len(beta_casc), len(lambda_range)))
+        _err_ts = np.empty((max_tau_num, len(lambda_range)))
         _err_tr = np.empty_like(_err_ts)
 
         # For each sparse model builds a
         # rls classifier for each value of lambda
-        for j, b in enumerate(beta_casc):
+        for j, b in it.izip(xrange(max_tau_num), beta_casc):
             selected = (b.flat != 0)
             for k, lam in enumerate(lambda_range):
                 beta = ridge_regression(data_tr[:,selected], labels_tr, lam)
@@ -168,7 +180,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     err_tr = np.asarray([a[:max_tau_num] for a in err_tr]).mean(axis=0)
 
     tau_opt_idx, lambda_opt_idx = np.where(err_ts == err_ts.min())
-    tau_opt = tau_range[tau_opt_idx[0]]             # ?? [0] or [-1]
+    tau_opt = tau_range[tau_opt_idx[0]]
     lambda_opt = lambda_range[lambda_opt_idx[0]]
 
     if returns_kcv_errors:

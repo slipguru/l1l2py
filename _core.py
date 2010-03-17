@@ -86,7 +86,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         On each cross validation split the number of nonempty model could be
         different (on high value of tau).
         
-        The function calculates the optimum value of tau from wich the model is
+        The function calculates the optimum value of tau for wich the model is
         nonempty on every cross validation split.
     
     
@@ -155,7 +155,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         # Builds a classifier for each value of tau
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
 
-        if len(beta_casc) < max_tau_num: max_tau_num = len(beta_casc)
+        max_tau_num = min(max_tau_num, len(beta_casc))
         _err_ts = np.empty((max_tau_num, len(lambda_range)))
         _err_tr = np.empty_like(_err_ts)
 

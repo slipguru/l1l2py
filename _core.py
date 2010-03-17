@@ -31,57 +31,19 @@ def model_selection(data, labels, test_data, test_labels,
 
     The model selection consist of the sequential execution of two stage,
     implemented in the functions :func:`minimal_model` and :func:`nested_lists`.
-    See the function documentation for details on each stage.
+    See the function documentation for details on each stage and the meaning
+    of each parameter.
 
-    So, this function is a simple wrapper wich calls the other two
-    core function.
-
-    This function returns a concatenation of the outputs of
-    :func:`minimal_model` and :func:`nested_lists`.
-
-    Parameters
-    ----------
-    data : (N, D) ndarray
-        Data matrix.
-    labels : (N,)  or (N, 1) ndarray
-        Labels vector.
-    test_data : (N, D) ndarray
-        Test set matrix.
-    test_labels : (N,)  or (N, 1) ndarray
-        Test set labels vector.
-    mu_range : array_like of float
-        :math:`\ell_2` norm penalties.
-    tau_range : array_like of float
-        :math:`\ell_1` norm penalties.
-    lambda_range : array_like of float
-        :math:`\ell_1` norm penalties.
-    cv_splits : array_like of tuples
-        Each tuple contains two lists with the training set and testing set
-        indexes, like the output of the cross validation tools
-        in :mod:`biolearning.tools`.
-    error_function : function object
-        A function like the error functions in :mod:`biolearning.tools`.
-    data_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
-    labels_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
-    returns_kcv_errors : boolean
-        If True returns the cross validation errors calculated during
-        the Stage I.
-
-    Returns
-    -------
-    out :  tuple
-        Returns a concatenation of the outputs of :func:`minimal_model`
-        and :func:`nested_lists`.
+    .. warning::
+    
+        This function is a simple wrapper wich calls the other two
+        core function and returns a concatenation of the outputs of
+        :func:`minimal_model` and :func:`nested_lists`.
 
     See Also
     --------
     minimal_model
-    nested_lists
-    biolearning.tools    
+    nested_lists  
 
     """
 
@@ -104,7 +66,19 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
                   cv_splits, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   returns_kcv_errors=False):
-    r"""TODO: add docstring
+    r"""Performs the minimal model selection.
+    
+    Given a supervised training set (``data`` and ``labels``), for the fixed
+    value of ``mu`` (should be minimum), finds the values in ``tau_range``
+    and ``lambda_range`` with minimum performance error via cross validation.
+    
+    Cross validation splits must be provided (``cv_splits``) as a list
+    of pairs containing traning-set and validation-set indexes
+    (see cross validation tools in :mod:`biolearning.tools`).
+    
+    Data and labels will be normalized on each split using the function
+    ``data_normalizer`` and ``labels_normalizer``.
+    
     
     Parameters
     ----------
@@ -131,12 +105,18 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         A function like the data normalization functions in
         :mod:`biolearning.tools`.
     returns_kcv_errors : boolean
-        If True returns the cross validation errors calculated during
-        the Stage I.
+        If True returns the cross validation errors calculated.
 
     Returns
     -------
-
+    tau_opt : float
+        Optimal value of tau selected in ``tau_range``.        
+    lambda_opt : float
+        Optimal value of lambda selected in ``lambda_range``.
+    err_ts : list, optional
+        List of ``len(cv_splits)`` cross validation error on the test set.
+    err_tr : list, optional
+        List of ``len(cv_splits)`` cross validation error on the training set.
 
     See Also
     --------

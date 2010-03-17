@@ -13,6 +13,7 @@ Core functions (:class:`biolearning`)
    import numpy
 
 .. automodule:: biolearning._core
+.. automodule:: biolearning
 
 Model Selection
 ===============

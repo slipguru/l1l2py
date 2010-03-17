@@ -4,7 +4,7 @@ In this module are implemented the two main stage of the model selection
 framwework presented in [DeMol09]_:
 
 * :func:`minimal_model` (`Stage I`)
-* :func:`nested_lists`  (`Stage II`)
+* :func:`nested_models`  (`Stage II`)
 
 There is also a simple wrapper of the above functions which can be used to
 perform sequentially the two stages:
@@ -13,7 +13,7 @@ perform sequentially the two stages:
 
 """
 
-__all__ = ['model_selection', 'minimal_model', 'nested_lists']
+__all__ = ['model_selection', 'minimal_model', 'nested_models']
 
 import numpy as np
 import itertools as it
@@ -32,7 +32,7 @@ def model_selection(data, labels, test_data, test_labels,
     presented in [DeMol09]_.
 
     The model selection consist of the sequential execution of two stage,
-    implemented in the functions :func:`minimal_model` and :func:`nested_lists`.
+    implemented in the functions :func:`minimal_model` and :func:`nested_models`.
     See the function documentation for details on each stage and the meaning
     of each parameter.
 
@@ -40,12 +40,12 @@ def model_selection(data, labels, test_data, test_labels,
     
         This function is a simple wrapper wich calls the other two
         core function and returns a concatenation of the outputs of
-        :func:`minimal_model` and :func:`nested_lists`.
+        :func:`minimal_model` and :func:`nested_models`.
 
     See Also
     --------
     minimal_model
-    nested_lists  
+    nested_models  
 
     """
 
@@ -56,11 +56,15 @@ def model_selection(data, labels, test_data, test_labels,
                                returns_kcv_errors)
     tau_opt, lambda_opt = stage1_out[0:2]
 
-    stage2_out = nested_lists(data, labels,
-                              test_data, test_labels,
-                              tau_opt, lambda_opt, mu_range,
-                              error_function,
-                              data_normalizer, labels_normalizer)
+    stage2_out = nested_models(data, labels,
+                               test_data, test_labels,
+                               mu_range, tau_opt, lambda_opt,
+                               error_function,
+                               data_normalizer, labels_normalizer)
+    
+    beta_list, selected_list, err_tr_list, err_ts_list = stage2_out
+    print beta_list[0].shape
+    print selected_list[0].shape
 
     return stage1_out + stage2_out
 
@@ -73,6 +77,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     Given a supervised training set (``data`` and ``labels``), for the fixed
     value of ``mu`` (should be minimum), finds the values in ``tau_range``
     and ``lambda_range`` with minimum performance error via cross validation.
+    (see error functions in :mod:`biolearning.tools`).
     
     Cross validation splits must be provided (``cv_splits``) as a list
     of pairs containing traning-set and validation-set indexes
@@ -80,6 +85,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     
     Data and labels will be normalized on each split using the function
     ``data_normalizer`` and ``labels_normalizer``.
+    (see data normalization functions in :mod:`biolearning.tools`).
     
     .. warning ::
     
@@ -123,18 +129,38 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         Optimal value of tau selected in ``tau_range``.        
     lambda_opt : float
         Optimal value of lambda selected in ``lambda_range``.
-    err_ts : list, optional
-        List of maximum ``len(cv_splits)`` cross validation error on the
-        test set.
-    err_tr : list, optional
-        List of maximum ``len(cv_splits)`` cross validation error on the
-        training set.
+    err_ts : (T, L) ndarray, optional (see `Notes`)
+        Matrix with cross validation error on the training set.
+    err_tr : (T, L) ndarray, optional (see `Notes`)
+        Matrix with cross validation error on the training set.
+        
+    Notes
+    -----
+    The function performs exactly the pesudocode described in
+    [DeMol09]_ (pag.7 - Stage I).
+    
+    The computation of the models for different value of :math:`\lambda`, fixed
+    the value of :math:`\tau` is performed by
+    :func:`biolearning.algorithms.l1l2_path` followed with a series of execution
+    of :func:`biolearning.algorithms.ridge_regression`.
+    
+    For this reason, the dimension of thw error matrices
+    (``err_ts`` and ``err_ts``) is T x L where:
+    
+        - T < ``len(tau_range)``
+        - L = ``len(lambda_range)``
+        
+    The value of T depends on the maximum value of :math:`\tau` with wich is
+    possible to calculate a nonempty model on each cross vaidation split.
+        
 
     See Also
     --------
     model_selection
-    nested_lists
-    biolearning.tools    
+    nested_models
+    biolearning.tools
+    biolearning.algorithms.l1l2_path
+    biolearning.algorithms.ridge_regression
     
     """
 
@@ -188,10 +214,24 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     else:
         return tau_opt, lambda_opt
 
-def nested_lists(data, labels, test_data, test_labels,
-                 tau, lambda_, mu_range, error_function=None,
-                 data_normalizer=None, labels_normalizer=None):
-    r"""TODO: add docstring
+def nested_models(data, labels, test_data, test_labels,
+                  mu_range, tau, lambda_, error_function,
+                  data_normalizer=None, labels_normalizer=None):
+    r"""Generates the models with the almost nested lists of features.
+    
+    Given a supervised training set (``data`` and ``labels``) and test set
+    (``test_data`` and ``test_labels``), for the fixed value of ``tau``
+    and ``lambda`` (should be the optimum calculated
+    with :func:`minimal_model`), calculates one model for each incerasing value
+    in ``mu_range``.
+       
+    Data and labels will be normalized using the function ``data_normalizer``
+    and ``labels_normalizer``.
+    (see data normalization functions in :mod:`biolearning.tools`).
+    
+    The function also returns test and training error using the
+    ``error_function`` provided.
+    (see error functions in :mod:`biolearning.tools`).
     
         Parameters
     ----------
@@ -209,7 +249,8 @@ def nested_lists(data, labels, test_data, test_labels,
         :math:`\ell_1` norm penalty.
     lambda : float
         :math:`\ell_1` norm penalty.
-        error_function : function object
+    error_function : function object
+        A function like the error functions in :mod:`biolearning.tools`.
     data_normalizer : function object
         A function like the data normalization functions in
         :mod:`biolearning.tools`.
@@ -219,12 +260,44 @@ def nested_lists(data, labels, test_data, test_labels,
 
     Returns
     -------
-
+    beta_list : list of M (S,1) ndarray (see `Notes`)
+        Models calculated for each value in ``mu_range``.
+    selected_list : list of M (D,) ndarray of boolean (see `Notes`)
+        Selected feature for each models calculated.
+    err_tr_list : list of M float (see `Notes`)
+        Training error for the models calculated.
+    err_ts_list : list of M float (see `Notes`)
+        Testing error for the models calculated.
+            
+    Notes
+    -----
+    The function performs exactly the pesudocode described in
+    [DeMol09]_ (pag.7 - Stage II).
+    
+    The computation of the models for different value of :math:`\mu`, fixed
+    the value of :math:`\tau_{opt}` and :math:`\lambda_{opt}` is performed by
+    :func:`biolearning.algorithms.l1l2_regularization` followed by 
+    :func:`biolearning.algorithms.ridge_regression`.
+    
+    Each output list has dimension M = ``len(mu_range)``.
+    
+    Moreover, if :math:`\beta^*_i` is the model selected by the
+    :math:`\ell_1\ell_2` regularization, each final model :math:`\beta_i`
+    has dimension :math:`S_i \times 1` where
+    :math:`S_i` is the :math:`\ell_0` norm of :math:`\beta^*_i`
+    (number of feature selected).
+    
+    The ndarrays in ``selected_list`` have dimension D and each elements is
+    `True` if and only if it's selected by :math:`\ell_1\ell_2`
+    regularization step.   
+    
     See Also
     --------
     model_selection
     minimal_model
     biolearning.tools
+    biolearning.algorithms.l1l2_regularization
+    biolearning.algorithms.ridge_regression
     
     """
 
@@ -236,27 +309,22 @@ def nested_lists(data, labels, test_data, test_labels,
 
     beta_list = list()
     selected_list = list()
-    if error_function:
-        err_tr_list = list()
-        err_ts_list = list()
+    err_tr_list = list()
+    err_ts_list = list()
 
     for mu in mu_range:
         beta = l1l2_regularization(data, labels, mu, tau)
         selected = (beta.flat != 0)
 
         beta = ridge_regression(data[:,selected], labels, lambda_)
-
-        if error_function:
-            prediction = np.dot(data[:,selected], beta)
-            err_tr_list.append(error_function(labels, prediction))
-
-            prediction = np.dot(test_data[:,selected], beta)
-            err_ts_list.append(error_function(test_labels, prediction))
-
+        
         beta_list.append(beta)
         selected_list.append(selected)
 
-    if error_function:
-        return beta_list, selected_list, err_tr_list, err_ts_list
-    else:
-        return beta_list, selected_list
+        prediction = np.dot(data[:,selected], beta)
+        err_tr_list.append(error_function(labels, prediction))
+
+        prediction = np.dot(test_data[:,selected], beta)
+        err_ts_list.append(error_function(test_labels, prediction))
+
+    return beta_list, selected_list, err_tr_list, err_ts_list

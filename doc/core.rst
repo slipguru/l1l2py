@@ -13,7 +13,6 @@ Core functions (:class:`biolearning`)
    import numpy
 
 .. automodule:: biolearning._core
-.. automodule:: biolearning
 
 Model Selection
 ===============
@@ -25,5 +24,5 @@ Stage I: Minimal Model Selection
 
 Stage II: Nested lists generation
 =================================
-.. autofunction:: nested_lists
+.. autofunction:: nested_models
 

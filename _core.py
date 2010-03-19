@@ -1,13 +1,13 @@
 r"""Core functions.
 
-In this module are implemented the two main stage of the model selection
-framwework presented in [DeMol09]_:
+In this module, the two main stages of the model selection framwework presented
+in [DeMol09]_ are implemented:
 
 * :func:`minimal_model` (`Stage I`)
 * :func:`nested_models`  (`Stage II`)
 
-There is also a simple wrapper of the above functions which can be used to
-perform sequentially the two stages:
+Also, wrapper function that encapsulates the above two stages in sequential
+way, is available:
 
 * :func:`model_selection`
 
@@ -26,21 +26,16 @@ def model_selection(data, labels, test_data, test_labels,
                     cv_splits, error_function,
                     data_normalizer=None, labels_normalizer=None,
                     returns_kcv_errors=False):
-    r"""Complete model selection procedure.
+    r"""Implements complete model selection framework.
 
-    This functions implements the full model selection framework
-    presented in [DeMol09]_.
-
-    The model selection consist of the sequential execution of two stage,
-    implemented in the functions :func:`minimal_model` and :func:`nested_models`.
-    See the function documentation for details on each stage and the meaning
-    of each parameter.
+    It executes two stages implemented in core functions, namely
+    :func:`minimal_model` and :func:`nested_models`, and returns their
+    concatenated output.
 
     .. warning::
     
-        This function is a simple wrapper wich calls the other two
-        core function and returns a concatenation of the outputs of
-        :func:`minimal_model` and :func:`nested_models`.
+        See the function documentation for details on each stage and the meaning
+        of each parameter.
 
     See Also
     --------

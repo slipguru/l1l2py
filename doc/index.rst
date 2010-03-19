@@ -46,8 +46,6 @@ libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
 :ref:`genindex`
 
 
-.. rubric:: Bibliografy
-
 .. [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,
              "A Regularized Method for Selecting Nested Group of Genes from
              Microarray Data"

@@ -1,6 +1,6 @@
-r"""Various useful tools.
+r"""Miscellaneous useful tools.
 
-The :mod:`tools` module defines four type of functions:
+The :mod:`tools` module contains four type of functions:
 
 * Range generators
     - :func:`linear_range`
@@ -28,8 +28,8 @@ import numpy as np
 def linear_range(min_value, max_value, number):
     r"""Returns a linear range of values.
 
-    Returns ``number`` evenly spaced values from
-    ``min_value`` to ``max_value``.
+    Returns a sequence of ``number`` evenly spaced values from ``min_value``
+    to ``max_value``.
 
     Parameters
     ----------
@@ -125,29 +125,28 @@ def geometric_range(min_value, max_value, number):
 def standardize(matrix, optional_matrix=None, return_factors=False):
     r"""Standardize columns of a matrix.
 
-    Returns the standardized ``matrix`` given in input.
-    Optionally standardizes an ``optional_matrix`` respect
-    mean and standard deviation calculated on ``matrix``.
+    Returns the standardized ``matrix`` given as input.
+    Optionally standardizes an ``optional_matrix`` with respect to
+    mean and standard deviation calculated for ``matrix``.
 
     Parameters
     ----------
     matrix : (N,) or (N, D) ndarray
-        Input matrix whose columns are to be standardize
-        to mean=0 and standard deviation=1.
+        Input matrix whose columns are to be standardized
+        to mean `0` and standard deviation `1`.
     optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
-        Optional matrix whose columns are to be standardize
+        Optional matrix whose columns are to be standardized
         using mean and standard deviation of ``matrix``.
-        It must have same columns number of ``matrix``.
+        It must have same number of columns as ``matrix``.
     return_factors : bool, optional (default is `False`)
-        If `True` returns used mean and standard deviation.
+        If `True`, returns mean and standard deviation of ``matrix``.
 
     Returns
     -------
     matrix_standardized : (N,) or (N, D) ndarray
         Standardized ``matrix``.
-        If ``matrix`` is an (N,) ndarray then returns its standardization.
     optional_matrix_standardized : (N,) or (N, D) ndarray, optional
-        Standardized ``optional_matrix`` respect to ``matrix``
+        Standardized ``optional_matrix`` with respect to ``matrix``
     mean : float or (D,) ndarray, optional
         Mean of ``matrix`` columns.
     std : float or (D,) ndarray, optional
@@ -190,28 +189,27 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 def center(matrix, optional_matrix=None, return_mean=False):
     r"""Center columns of a matrix.
 
-    Returns the centered ``matrix`` given in input.
-    Optionally centers an ``optional_matrix`` respect
-    mean calculated on ``matrix``.
+    Returns the centered ``matrix`` given as input.
+    Optionally centers an ``optional_matrix`` with respect to mean calculated
+    for ``matrix``.
 
     Parameters
     ----------
     matrix : (N,) or (N, D) ndarray
-        Input matrix whose columns are to be center.
+        Input matrix whose columns are to be centered.
     optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
-        Optional matrix whose columns are to be center
+        Optional matrix whose columns are to be centered
         using mean of ``matrix``.
-        It must have same columns number of ``matrix``.
+        It must have same number of columns as ``matrix``.
     return_mean : bool, optional (default is `False`)
-        If `True` returns used mean.
+        If `True` returns mean of ``matrix``.
 
     Returns
     -------
     matrix_centered : (N,) or (N, D) ndarray
         Centered ``matrix``.
-        If ``matrix`` is an (N,) ndarray then returns its centering.
     optional_matrix_centered : (N,) or (N, D) ndarray, optional
-        Centered ``optional_matrix`` respect to ``matrix``
+        Centered ``optional_matrix`` with respect to ``matrix``
     mean : float or (D,) ndarray, optional
         Mean of ``matrix`` columns.
 
@@ -252,11 +250,17 @@ def center(matrix, optional_matrix=None, return_mean=False):
 def classification_error(labels, predicted):
     r"""Returns classification error.
 
-    The classification error is based on the sign of the ``predicted`` values
-    respect the sign of the data ``labels``.
-    The functions assumes that ``labels`` contains positive number for one
-    class and negative numbers for the other one (see `Notes`).
-
+    The classification error is based on the sign of the ``predicted`` values,
+    with respect to the sign of the data ``labels``.
+    
+    The function assumes that ``labels`` contain positive number for first
+    class and negative numbers for the second one (see `Notes`).
+    
+    .. warning::
+    
+        The values contained in ``labels`` are not checked by the function for
+        efficiency.
+        
     Parameters
     ----------
     labels : array_like, shape (N,)
@@ -283,8 +287,11 @@ def classification_error(labels, predicted):
         error = \frac{\sum_{i=1}^N{f(l_i, p_i)}}{N} \qquad
                 l_i \in\ labels,\, p_i \in\ predicted
 
-    where :math:`f(l_i, p_i)=1` if :math:`sign(l_i) \neq sign(p_i)`;
-    otherwise :math:`f(l_i, p_i)=0`
+    .. math::
+    
+        f(l_i, p_i)=1 \quad if sign(l_i) \neq sign(p_i)
+    
+        f(l_i, p_i)=0 \quad otherwise
 
     Examples
     --------
@@ -306,9 +313,9 @@ def classification_error(labels, predicted):
 def balanced_classification_error(labels, predicted):
     r"""Returns classification error balanced across the size of classes.
 
-    This function is a variation of :func:`classification_error` which
-    returns a biased classification error, weighing more the errors
-    belonging to the smaller class.
+    Using similar algorithm as in :func:`classification_error`,
+    this function returns a biased classification error,
+    assigning greater weight to the errors belonging to the smaller class.
 
     Parameters
     ----------
@@ -333,18 +340,28 @@ def balanced_classification_error(labels, predicted):
 
     .. math::
 
-        error = \frac{\sum_{i=1}^N{f(l_i, p_i)} |l_i - mean(labels)|}
+        error = \frac{\sum_{i=1}^N{w_i \cdot f(l_i, p_i)}}
+                      {N}
+              =
+                \frac{\sum_{i=1}^N{|l_i - \overline{labels}| \cdot f(l_i, p_i)}}
                       {N}
                 \qquad
                 l_i \in\ labels,\, p_i \in\ predicted
 
-    where :math:`f(l_i, p_i)=1` if :math:`sign(l_i) \neq sign(p_i)`;
-    otherwise :math:`f(l_i, p_i)=0`
+    where
+    
+    .. math::
+    
+        f(l_i, p_i)=1 \quad if sign(l_i) \neq sign(p_i)
+    
+        f(l_i, p_i)=0 \quad otherwise
 
     .. warning::
 
-        If ``labels`` contains single class labels, the functions returns
-        always `0.0` because :math:`l_i - \overline{labels} = 0`.
+        If ``labels`` contains only values belonging to **one** class,
+        the functions returns always `0.0` because
+        :math:`l_i - \overline{labels} = 0`, than :math:`w_i=0` for
+        each :math:`i`.
 
     Examples
     --------
@@ -366,10 +383,10 @@ def balanced_classification_error(labels, predicted):
     return errors.sum() / float(len(labels))
 
 def regression_error(labels, predicted):
-    r"""Returns regression.
+    r"""Returns regression error.
 
-    The regression is the sum of the quadratic difference between the '`labels``
-    value and the ``predicted`` values, over the number of
+    The regression error is the sum of the quadratic difference between the
+    ``labels`` value and the ``predicted`` values, over the number of
     samples (see `Notes`).
 
     Parameters
@@ -391,7 +408,7 @@ def regression_error(labels, predicted):
 
     Notes
     -----
-    The classification error is calculated using this formula
+    The classification error is calculated using the formula
 
     .. math::
 
@@ -449,10 +466,10 @@ def kfold_splits(labels, k, rseed=0):
 def stratified_kfold_splits(labels, k, rseed=0):
     r"""Returns k-fold cross validation stratified splits.
 
-    This function is a variation of :func:`kfold_splits` which
+    This function is a variation of :func:`kfold_splits`, which
     returns stratified splits. The divisions are made by holding
-    the percentage of samples for each class, supposing to have a
-    two class problem.
+    the percentage of samples for each class, assuming that two-class problem
+    is given.
 
     Parameters
     ----------

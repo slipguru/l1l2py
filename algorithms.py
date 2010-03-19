@@ -1,4 +1,4 @@
-r"""Internal algorithms implementations.
+r"""Internal algorithms implementation.
 
 The :mod:`algorithms` module defines core numerical optimizazion algorithms:
 
@@ -13,7 +13,7 @@ __all__ = ['ridge_regression', 'l1l2_regularization', 'l1l2_path']
 import numpy as np
 
 def ridge_regression(data, labels, mu=0.0):
-    r"""Regularized Least Squares.
+    r"""Implementation of Regularized Least Squares.
 
     Finds the RLS model with ``mu`` parameter associated with its
     :math:`\ell_2` norm (see `Notes`).
@@ -52,7 +52,7 @@ def ridge_regression(data, labels, mu=0.0):
     :math:`\beta^*` ``beta``
     =============== ===============
 
-    Using ``mu`` = `0.0` the algorithm performs Ordinary Least Squares (OLS).
+    When ``mu`` = `0.0` the algorithm performs Ordinary Least Squares (OLS).
 
     Examples
     --------
@@ -83,16 +83,21 @@ def ridge_regression(data, labels, mu=0.0):
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
                         step_size=None):
-    r"""Regularized Least Squares path with :math:`\ell_1\ell_2` penalty.
+    r"""Implementation of Regularized Least Squares path with
+    :math:`\ell_1\ell_2` penalty.
 
-    Find the :math:`\ell_1\ell_2` regularization path for each value in
+    Finds the :math:`\ell_1\ell_2` regularization path for each value in
     ``tau_range`` and fixed value of ``mu``.
+    
+    The values in ``tau_range`` are used during the computation in reverse
+    order, while the output path has the same ordering of the `:math:`\tau`
+    values.
     
     .. warning ::
     
-        The number of models can differ the number of `tau` values.
+        The number of models can differ the number of :math:`\tau` values.
         The functions returns only the model with at least one nonzero feature.
-        For very high value of tau a model can have all `0s`.
+        For very high value of :math:`tau` a model could have all `0s`.
 
     Parameters
     ----------
@@ -107,17 +112,17 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
         Starting value of the iterations
         (see :func:`l1l2_regularization` `Notes`).
-        If is `None` iterations starts from the OLS solution.
+        If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is :math:`10^5`)
         Maximum number of iterations.
     step_size : float, optional (default is `None`)
         Iterations step size.
-        If is `None` the algorithm use default value
+        If `None`, the algorithm use default value
         (see :func:`l1l2_regularization` `Notes`).
 
     Returns
     -------
-    beta_path : list of (D,) or (D, 1) ndarray
+    beta_path : list of (D,) or (D, 1) ndarrays
         :math:`\ell_1\ell_2` models with at least one nonzero feature. 
 
     See Also
@@ -151,7 +156,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                         step_size=None, returns_iterations=False):
-    r"""Regularized Least Squares with :math:`\ell_1\ell_2` penalty.
+    r"""Implementation of Regularized Least Squares with
+    :math:`\ell_1\ell_2` penalty.
 
     Finds the :math:`\ell_1\ell_2` model with ``mu`` parameter associated with
     its :math:`\ell_2` norm and ``tau`` parameter associated with its
@@ -169,14 +175,14 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         :math:`\ell_1` norm penalty.
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
         Starting value of the iterations (see `Notes`).
-        If is `None` iterations starts from the OLS solution.
+        If `None`, then iterations starts from the OLS solution.
     kmax : int, optional (default is :math:`10^5`)
         Maximum number of iterations.
     step_size : float, optional (default is `None`)
         Iterations step size.
-        If is `None` the algorithm use default value (see `Notes`).
+        If `None`, the algorithm use default value (see `Notes`).
     returns_iterations : bool, optional (default is `False`)
-        If True, return the number of iterations performed.
+        If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `100`.
 
@@ -209,10 +215,10 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     :math:`\beta^*` ``beta``
     =============== ===============
 
-    Using ``mu`` = `0.0` the algorithm performs LASSO.
+    When ``mu`` = `0.0` the algorithm performs LASSO.
 
-    The computation is iterative, each step updates the value of beta until
-    the convergence is reached:
+    The computation is iterative, each step updates the value of :math:`\beta`
+    until the convergence is reached:
 
     .. math::
 

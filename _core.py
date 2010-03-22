@@ -18,8 +18,7 @@ __all__ = ['model_selection', 'minimal_model', 'nested_models']
 import numpy as np
 import itertools as it
 
-from algorithms import *
-from tools import *
+from algorithms import ridge_regression, l1l2_regularization, l1l2_path
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
@@ -56,10 +55,6 @@ def model_selection(data, labels, test_data, test_labels,
                                mu_range, tau_opt, lambda_opt,
                                error_function,
                                data_normalizer, labels_normalizer)
-    
-    beta_list, selected_list, err_tr_list, err_ts_list = stage2_out
-    print beta_list[0].shape
-    print selected_list[0].shape
 
     return stage1_out + stage2_out
 
@@ -165,11 +160,11 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     for train_idxs, test_idxs in cv_splits:
         # First create a view and then normalize (eventually)
-        data_tr, data_ts = data[train_idxs,:], data[test_idxs,:]
+        data_tr, data_ts = data[train_idxs, :], data[test_idxs, :]
         if not data_normalizer is None:
             data_tr, data_ts = data_normalizer(data_tr, data_ts)
 
-        labels_tr, labels_ts = labels[train_idxs,:], labels[test_idxs,:]
+        labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
         if not labels_normalizer is None:
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
 
@@ -182,15 +177,15 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
         # For each sparse model builds a
         # rls classifier for each value of lambda
-        for j, b in it.izip(xrange(max_tau_num), beta_casc):
-            selected = (b.flat != 0)
+        for j, beta in it.izip(xrange(max_tau_num), beta_casc):
+            selected = (beta.flat != 0)
             for k, lam in enumerate(lambda_range):
-                beta = ridge_regression(data_tr[:,selected], labels_tr, lam)
+                beta = ridge_regression(data_tr[:, selected], labels_tr, lam)
 
-                prediction = np.dot(data_ts[:,selected], beta)
+                prediction = np.dot(data_ts[:, selected], beta)
                 _err_ts[j, k] = error_function(labels_ts, prediction)
 
-                prediction = np.dot(data_tr[:,selected], beta)
+                prediction = np.dot(data_tr[:, selected], beta)
                 _err_tr[j, k] = error_function(labels_tr, prediction)
 
         err_ts.append(_err_ts)
@@ -311,15 +306,15 @@ def nested_models(data, labels, test_data, test_labels,
         beta = l1l2_regularization(data, labels, mu, tau)
         selected = (beta.flat != 0)
 
-        beta = ridge_regression(data[:,selected], labels, lambda_)
+        beta = ridge_regression(data[:, selected], labels, lambda_)
         
         beta_list.append(beta)
         selected_list.append(selected)
 
-        prediction = np.dot(data[:,selected], beta)
+        prediction = np.dot(data[:, selected], beta)
         err_tr_list.append(error_function(labels, prediction))
 
-        prediction = np.dot(test_data[:,selected], beta)
+        prediction = np.dot(test_data[:, selected], beta)
         err_ts_list.append(error_function(test_labels, prediction))
 
     return beta_list, selected_list, err_tr_list, err_ts_list

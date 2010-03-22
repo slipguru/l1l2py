@@ -175,6 +175,11 @@ htmlhelp_basename = 'biolearningdoc'
 # Pngmath should try to align formulas properly
 pngmath_use_preview = True
 
+# Pngmath options
+#pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
+pngmath_dvipng_args = ['-gamma 1.5', '-D 110', '-bg', 'Transparent']
+
+
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').

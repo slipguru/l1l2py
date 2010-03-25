@@ -225,6 +225,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     but the algorithm will be stop when the maximum number of iteration
     is reached.
     
+    .. note:: DESCRIVERE soft-thresholding
+    
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])

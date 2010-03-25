@@ -9,7 +9,7 @@ Biolearning Reference
 :Homepage: http://slipguru.disi.unige.it/homepage_code_url
 
 Insert :mod:`biolearning` description ...
-*TODO* citing references [DeMol09]_ [DeMol08]_
+*TODO* citing references [DeMol09]_ [DeMol08]_ [Beck09]_
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur lobortis
 tincidunt dolor, eu tincidunt elit imperdiet ut. Ut quis leo ac nisl
@@ -46,10 +46,14 @@ libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
 :ref:`genindex`
 
 
+.. [DeMol08] C. De Mol, E. De Vito, L. Rosasco,
+             "Elastic-net regularization in learning theory"
+             Journal of Complexity, n. 2, vol. 25, pp. 201-230, 2008.
 .. [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,
              "A Regularized Method for Selecting Nested Group of Genes from
              Microarray Data"
              Journal of Computational Biology, vol. 16, pp. 677-690, 2009.
-.. [DeMol08] C. De Mol, E. De Vito, L. Rosasco,
-             "Elastic-net regularization in learning theory"
-             Journal of Complexity, n. 2, vol. 25, pp. 201-230, 2008.
+.. [Beck09]  A. Beck, M. Teboulle,
+             "A Fast Iterative Shrinkage-Thresholding Algorithm
+             for Linear Inverse Problems"
+             SIAM J. Imaging Sciences, vol. 2, no. 1, pp. 183-202, 2009.

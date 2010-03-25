@@ -48,49 +48,34 @@ class TestAlgorithms(object):
         value = ridge_regression(X, Y)
         assert_true(np.allclose(expected, value, TOL))
         
-    def test_soft_thresholding(self):
-        from biolearning.algorithms import _soft_thresholding
-        
-        b = ridge_regression(self.X, self.Y, 0.1)
-        expected = mlab.thresholding(b, 0.2)
-        value = _soft_thresholding(b, 0.2)
-        assert_true(np.allclose(expected, value))
-        
-        value = _soft_thresholding(b, 0.0)
-        assert_true(np.allclose(b, value, TOL))
-
     def test_l1l2_regularization(self):
         from itertools import product
-        from biolearning.algorithms import _step_size
         n, m = self.X.shape
-        sigma = (1.0 / _step_size(self.X)) / n
         
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y, tau, mu,
-                                                  np.array([]), sigma,  nout=2)            
+                                                  nout=2)            
             beta, k = l1l2_regularization(self.X, self.Y, mu, tau,
                                           returns_iterations=True)
-             
+                        
             assert_true(np.allclose(exp_beta, beta, TOL))
-            assert_true(np.allclose(exp_k, k))
+            assert_true(np.allclose(exp_k, k+1))
                 
     @attr('slow')    
     def test_l1l2_regularization_slow(self):
         from itertools import product
-        from biolearning.algorithms import _step_size
         n, m = self.X.shape
-        sigma = (1.0 / _step_size(self.X)) / n
         
         values = np.linspace(0.0, 2.0, 10)
         for mu, tau in product(values, values):
             exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y, tau, mu,
-                                                  np.array([]), sigma,  nout=2)
+                                                  nout=2)
             beta, k = l1l2_regularization(self.X, self.Y, mu, tau,
                                           returns_iterations=True)
        
             assert_true(np.allclose(exp_beta, beta, TOL))
-            assert_true(np.allclose(exp_k, k))
+            assert_true(np.allclose(exp_k, k+1))
             
     def test_l1l2_path(self):
         values = np.linspace(0.1, 1.0, 5)

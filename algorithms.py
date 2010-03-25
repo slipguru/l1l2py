@@ -11,6 +11,7 @@ The :mod:`algorithms` module defines core numerical optimizazion algorithms:
 __all__ = ['ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 import numpy as np
+import math
 
 def ridge_regression(data, labels, mu=0.0):
     r"""Implementation of Regularized Least Squares.
@@ -40,19 +41,8 @@ def ridge_regression(data, labels, mu=0.0):
 
         \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2
 
-    finding the optimal model :math:`\beta^*`, where
-
-    =============== ===============
-    :math:`X`       ``data``
-    --------------- ---------------
-    :math:`Y`       ``labels``
-    --------------- ---------------
-    :math:`\mu`     ``mu``
-    --------------- ---------------
-    :math:`\beta^*` ``beta``
-    =============== ===============
-
-    When ``mu`` = `0.0` the algorithm performs Ordinary Least Squares (OLS).
+    finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
+    matrix and :math:`Y` contains the ``labels``.
 
     Examples
     --------
@@ -82,7 +72,7 @@ def ridge_regression(data, labels, mu=0.0):
         return np.dot(tmp, np.dot(data.T, labels))
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
-                        step_size=None):
+              tolerance=1e-6):
     r"""Implementation of Regularized Least Squares path with
     :math:`\ell_1\ell_2` penalty.
 
@@ -90,14 +80,14 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     ``tau_range`` and fixed value of ``mu``.
     
     The values in ``tau_range`` are used during the computation in reverse
-    order, while the output path has the same ordering of the `:math:`\tau`
+    order, while the output path has the same ordering of the :math:`\tau`
     values.
     
     .. warning ::
     
         The number of models can differ the number of :math:`\tau` values.
         The functions returns only the model with at least one nonzero feature.
-        For very high value of :math:`tau` a model could have all `0s`.
+        For very high value of :math:`\tau` a model could have all `0s`.
 
     Parameters
     ----------
@@ -115,9 +105,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is :math:`10^5`)
         Maximum number of iterations.
-    step_size : float, optional (default is `None`)
-        Iterations step size.
-        If `None`, the algorithm use default value
+    tolerance : float, optional (default is :math:`10^{-6}`)
+        Convergence tolerance.
         (see :func:`l1l2_regularization` `Notes`).
 
     Returns
@@ -145,7 +134,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
             beta_next = beta_ls
         else:
             beta_next = l1l2_regularization(data, labels, mu, tau, beta,
-                                            kmax, step_size)
+                                            kmax, tolerance)
 
         if len(beta_next.nonzero()[0]) > 0:
             out.appendleft(beta_next)
@@ -155,7 +144,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     return out
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
-                        step_size=None, returns_iterations=False):
+                        tolerance=1e-6, returns_iterations=False):
     r"""Implementation of Regularized Least Squares with
     :math:`\ell_1\ell_2` penalty.
 
@@ -175,16 +164,15 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         :math:`\ell_1` norm penalty.
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
         Starting value of the iterations (see `Notes`).
-        If `None`, then iterations starts from the OLS solution.
+        If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is :math:`10^5`)
         Maximum number of iterations.
-    step_size : float, optional (default is `None`)
-        Iterations step size.
-        If `None`, the algorithm use default value (see `Notes`).
+    tolerance : float, optional (default is :math:`10^{-6}`)
+        Convergence tolerance (see `Notes`).
     returns_iterations : bool, optional (default is `False`)
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
-        equal to `100`.
+        equal to `10`.
 
     Returns
     -------
@@ -192,6 +180,10 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         :math:`\ell_1\ell_2` model.
     k : int, optional
         Number of iterations performed.
+        
+    See Also
+    --------
+    l1l2_path
 
     Notes
     -----
@@ -201,100 +193,107 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
         \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2 + \tau \|\beta\|_1
 
-    finding the optimal model :math:`\beta^*`, where
-
-    =============== ===============
-    :math:`X`       ``data``
-    --------------- ---------------
-    :math:`Y`       ``labels``
-    --------------- ---------------
-    :math:`\mu`     ``mu``
-    --------------- ---------------
-    :math:`\tau`     ``tau``
-    --------------- ---------------
-    :math:`\beta^*` ``beta``
-    =============== ===============
-
-    When ``mu`` = `0.0` the algorithm performs LASSO.
+    finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
+    matrix and :math:`Y` contains the ``labels``.
 
     The computation is iterative, each step updates the value of :math:`\beta`
-    until the convergence is reached:
+    until the convergence is reached [DeMol08]_:
 
     .. math::
 
-        \beta^{(k+1)} = \frac{1}{1 + \frac{N\mu}{C}}
-                        \mathbf{S}_{\frac{N\tau}{C}} (
-                            \beta^k + \frac{1}{C}[X^TY - X^TX\beta^k]
+        \beta^{(k+1)} = \mathbf{S}_{\frac{\tau}{\sigma}} (
+                            (1 - \frac{\mu}{\sigma})\beta^k +
+                            \frac{1}{n\sigma}X^T[Y - X\beta^k]
                         )
 
+    Moreover, the function implements a *FISTA* [Beck09]_ modification, wich
+    increases with quadratic factor the convergence rate of the algorithm.
 
-    where we have to choice :math:`\frac{1}{C} < \frac{2}{\|X^T X\|}`.
-
-    The default value is close to the maximum step size:
+    The constant :math:`\sigma` is a (theorically optimal) step size wich
+    depends by the data:
 
     .. math::
 
-        \frac{1}{C} = \frac{2}{\|X^T X\| * 1.1} < \frac{2}{\|X^T X\|}
-
-    See Also
-    --------
-    l1l2_path
-
+        \sigma = \frac{\|X^T X\|}{N} + \mu
+        
+    The convergence is reached when:
+    
+    .. math::
+        
+        \|\beta^k - \beta^{k-1}\| \leq \|\beta^k\| * tolerance
+    
+    but the algorithm will be stop when the maximum number of iteration
+    is reached.
+    
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> beta_rls = biolearning.algorithms.l1l2_regularization(X, y, 0.0, 0.0)
+    >>> beta_rls = biolearning.algorithms.l1l2_regularization(X, y, 0.0, 1e-5)
     >>> numpy.allclose(beta, beta_rls)
     True
     >>> biolearning.algorithms.l1l2_regularization(X, y, 0.1, 0.1)
-    array([ 0.        ,  0.07715517,  0.        ])
+    array([ 0.        ,  0.04482757,  0.        ])
 
-    """
-    n = data.shape[0]
+    """   
+    n, d = data.shape
+    
+    # Useful quantities
+    sigma = _maximum_eigenvalue(data)/n + mu
+    mu_s = mu / sigma
+    tau_s = tau / sigma
+    XT = data.T / (n * sigma)
+    XTY = np.dot(XT, labels)
 
-    if step_size is None:
-        step_size = _step_size(data)    # 1/C
-    mu_s = (n * mu) * step_size         # (n mu)/C
-    tau_s = (n * tau) * step_size       # (n tau)/C
-
-    # Initializations
-    XT = data.T * step_size             # X^T / C
-    XTY = np.dot(XT, labels)            # (X^T Y) / C
-
+    # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
-        beta = ridge_regression(data, labels)
-
-    k, kmin, tol = 0, 100, 0.01
+        beta = np.zeros_like(XTY)
+    beta_prev = beta
+    
+    # Auxiliary beta (FISTA implementation), starts from 0
+    aux_beta = beta
+    t, t_next = 1, None     # t values initializations
+        
+    k, kmin = 0, 10
     th, difference = -np.inf, np.inf
-    while k < kmin or ((difference > th).any() and k < kmax):
+    while k < kmin or ((distance > th).any() and k < kmax):
         k += 1
 
-        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
-        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
+        # New solution
+        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
+        beta = _soft_thresholding(value, tau_s)
+                     
+        # New auxiliary beta (FISTA)
+        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        difference = (beta - beta_prev)
+        aux_beta = beta + ((t - 1.0)/t_next)*difference
 
-        difference = np.abs(beta_next - beta)
-        th = np.abs(beta) * (tol / k)
-        beta = beta_next
+        # Convergence values
+        distance = np.linalg.norm(difference)
+        th = np.linalg.norm(beta) * tolerance
+        
+        # Values update
+        beta_prev, t = beta, t_next
+
+    print beta
 
     if returns_iterations:
         return beta, k
     else:
         return beta
 
-def _step_size(matrix):
+def _maximum_eigenvalue(matrix):
     n, d = matrix.shape
 
     if d > n:
         tmp = np.dot(matrix, matrix.T)
     else:
         tmp = np.dot(matrix.T, matrix)
-    max_eig = np.linalg.eigvalsh(tmp).max()
-
-    return 2.0/(max_eig * 1.1)
+    
+    return np.linalg.eigvalsh(tmp).max()
 
 def _soft_thresholding(x, th):
-    out = x - (np.sign(x) * (th / 2.0))
-    out[np.abs(x) < (th / 2.0)] = 0.0
+    out = x - (np.sign(x) * th)
+    out[np.abs(x) < th] = 0.0
     return out

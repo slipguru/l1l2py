@@ -278,8 +278,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         # Values update
         beta_prev, t = beta, t_next
 
-    print beta
-
     if returns_iterations:
         return beta, k
     else:

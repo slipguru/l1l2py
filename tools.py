@@ -22,6 +22,8 @@ __all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits']
 
+import math
+import random
 import numpy as np
 
 # Ranges functions ------------------------------------------------------------
@@ -460,8 +462,26 @@ def kfold_splits(labels, k, rseed=0):
     ZeroDivisionError: float division
 
     """
-    import mlpy
-    return mlpy.kfold(len(labels), k, rseed)
+
+    if k > len(labels):
+        raise ValueError("'k' must be smaller than number of samples")
+        
+    random.seed(rseed)
+    indexes = range(len(labels))
+    random.shuffle(indexes)
+
+    return _splits(indexes, k)
+    
+def _splits(indexes, k):
+    size = int( round(len(indexes) / float(k)) )
+
+    splits = list()
+    for i in xrange(0, len(indexes), size):
+        test = indexes[i:i+size]
+        train = indexes[:i] + indexes[i+size:]
+        splits.append( (train, test) )
+    
+    return splits
 
 def stratified_kfold_splits(labels, k, rseed=0):
     r"""Returns k-fold cross validation stratified splits.
@@ -508,5 +528,29 @@ def stratified_kfold_splits(labels, k, rseed=0):
     ZeroDivisionError: float division
 
     """
-    import mlpy
-    return mlpy.kfoldS(labels, k, rseed)
+    classes = np.unique(labels)
+    if classes.size != 2:
+        raise ValueError("'labels' must contains only two class labels")
+        
+    random.seed(rseed)    
+    n_indexes = (np.where(labels == classes[0])[0]).tolist()
+    p_indexes = (np.where(labels == classes[1])[0]).tolist()
+    random.shuffle(n_indexes)
+    random.shuffle(p_indexes)
+    
+    try:
+        n_splits = _splits(n_indexes, k)
+        p_splits = _splits(p_indexes, k)
+    except ValueError:
+        raise ValueError("'k' must be smaller than number of positive and "
+                         "of negative samples")
+    
+    splits = list()
+    for ns, ps in zip(n_splits, p_splits):
+        train = ns[0] + ps[0]
+        test = ns[1] + ps[1]
+        splits.append( (train, test) )
+      
+    return splits
+
+# TODO: Document kcv functions AND IMPROVE TESTS!!!!!!!

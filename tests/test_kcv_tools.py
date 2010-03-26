@@ -20,9 +20,10 @@ class TestKCVTools(object):
         assert_equals((30, 1), self.Y.shape)
                     
     def test_kfold_splits(self):
-        splits = kfold_splits(self.Y, 2)
-        assert_equal(2, len(splits))
-        TestKCVTools._test_splits(self.Y.size, splits)
+        for k in (2, 4, 30):
+            splits = kfold_splits(self.Y, k)
+            assert_equal(k, len(splits))
+            TestKCVTools._test_splits(self.Y.size, splits)
         
     def test_stratified_kfold_splits(self):
         labels = np.ones(100)
@@ -70,15 +71,16 @@ class TestKCVTools(object):
                
     @staticmethod
     def _test_splits(labels_size, splits):
-        test1, test2 = splits[0][0], splits[1][0]
-        train1, train2 = splits[0][1], splits[1][1]
-        assert_equal(test1, train2)
-        assert_equal(test2, train1)
         
-        test_idxs = sorted(test1 + test2)
-        train_idxs = sorted(train1 + train2)
-        assert_equal(range(labels_size), test_idxs)
-        assert_equal(range(labels_size), train_idxs)
+        cum_train = list()
+        cum_test = list()
+        
+        for train, test in splits:
+            cum_train.extend(train)
+            cum_test.extend(test)
+            assert_equal(set(test), set(test) - set(train))
+            
+        assert_equal(set(cum_train), set(cum_test))
         
     @staticmethod
     def _test_balancing(labels, splits):

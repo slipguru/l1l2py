@@ -18,10 +18,29 @@ class TestKCVTools(object):
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
         assert_equals((30, 1), self.Y.shape)
+        
+    def test_exceptions(self):
+        assert_raises(ValueError, kfold_splits, self.Y, 0)
+        assert_raises(ValueError, kfold_splits, self.Y, len(self.Y) + 1)
+        
+        # Not two class
+        assert_raises(ValueError, stratified_kfold_splits, self.Y, 2)
+        
+        labels = np.ones(100)
+        labels[::2] = -1
+        
+        # k, out of range
+        assert_raises(ValueError, stratified_kfold_splits, labels, 0)
+        assert_raises(ValueError, stratified_kfold_splits, labels, 51)
+        
+        # More negatives (75 vs 25)
+        labels[:50] = -1
+        assert_raises(ValueError, stratified_kfold_splits, labels, 26)
                     
-    def test_kfold_splits(self):
-        for k in (2, 4, 30):
+    def test_kfold_splits(self):        
+        for k in xrange(2, self.X.shape[0]):
             splits = kfold_splits(self.Y, k)
+
             assert_equal(k, len(splits))
             TestKCVTools._test_splits(self.Y.size, splits)
         
@@ -76,9 +95,11 @@ class TestKCVTools(object):
         cum_test = list()
         
         for train, test in splits:
+            assert_equal(labels_size, len(train + test))
+            assert_true(set(test).isdisjoint(set(train)))
+            
             cum_train.extend(train)
             cum_test.extend(test)
-            assert_equal(set(test), set(test) - set(train))
             
         assert_equal(set(cum_train), set(cum_test))
         

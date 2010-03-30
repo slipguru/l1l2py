@@ -444,6 +444,11 @@ def kfold_splits(labels, k, rseed=0):
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
+        
+        Raises
+    ------
+    ValueError
+        If ``k`` is negative or greater than number of `labels`.
 
     See Also
     --------
@@ -452,37 +457,27 @@ def kfold_splits(labels, k, rseed=0):
     Examples
     --------
     >>> labels = range(10)
-    >>> biolearning.tools.kfold_splits(labels, 2)
+    >>> biolearning.tools.kfold_splits(labels, 2)   
     [([7, 1, 3, 6, 8], [9, 4, 0, 5, 2]), ([9, 4, 0, 5, 2], [7, 1, 3, 6, 8])]
     >>> biolearning.tools.kfold_splits(labels, 1)
     [([], [9, 4, 0, 5, 2, 7, 1, 3, 6, 8])]
     >>> biolearning.tools.kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
-    ZeroDivisionError: float division
+    ValueError: 'k' must be greater than zero and smaller or equal than number of samples
 
     """
 
-    if k > len(labels):
-        raise ValueError("'k' must be smaller than number of samples")
+    if not (0 < k <= len(labels)):
+        raise ValueError("'k' must be greater than zero and smaller or equal "
+                         "than number of samples")
         
     random.seed(rseed)
     indexes = range(len(labels))
     random.shuffle(indexes)
 
     return _splits(indexes, k)
-    
-def _splits(indexes, k):
-    size = int( round(len(indexes) / float(k)) )
-
-    splits = list()
-    for i in xrange(0, len(indexes), size):
-        test = indexes[i:i+size]
-        train = indexes[:i] + indexes[i+size:]
-        splits.append( (train, test) )
-    
-    return splits
-
+      
 def stratified_kfold_splits(labels, k, rseed=0):
     r"""Returns k-fold cross validation stratified splits.
 
@@ -505,6 +500,14 @@ def stratified_kfold_splits(labels, k, rseed=0):
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
+        
+    Raises
+    ------
+    ValueError
+        If `labels` contains more than two classes labels.
+    ValueError
+        If ``k`` is negative or greater than number of positive or negative
+        samples in `labels`.
 
     See Also
     --------
@@ -516,16 +519,16 @@ def stratified_kfold_splits(labels, k, rseed=0):
     >>> biolearning.tools.stratified_kfold_splits(labels, 2)
     Traceback (most recent call last):
         ...
-    ValueError: pncl() works only for two-classes
+    ValueError: 'labels' must contains only two class labels
     >>> labels = [1, 1, 1, 1, 1, 1, -1, -1, -1, -1]
     >>> biolearning.tools.stratified_kfold_splits(labels, 2)
-    [([1, 3, 5, 8, 7], [2, 4, 0, 9, 6]), ([2, 4, 0, 9, 6], [1, 3, 5, 8, 7])]
+    [([8, 9, 5, 2, 1], [7, 6, 3, 0, 4]), ([7, 6, 3, 0, 4], [8, 9, 5, 2, 1])]
     >>> biolearning.tools.stratified_kfold_splits(labels, 1)
-    [([], [2, 4, 0, 1, 3, 5, 9, 6, 8, 7])]
+    [([], [7, 6, 8, 9, 3, 0, 4, 5, 2, 1])]
     >>> biolearning.tools.stratified_kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
-    ZeroDivisionError: float division
+    ValueError: 'k' must be greater than zero and smaller or equal than number of positive and negative samples
 
     """
     classes = np.unique(labels)
@@ -535,15 +538,16 @@ def stratified_kfold_splits(labels, k, rseed=0):
     random.seed(rseed)    
     n_indexes = (np.where(labels == classes[0])[0]).tolist()
     p_indexes = (np.where(labels == classes[1])[0]).tolist()
-    random.shuffle(n_indexes)
-    random.shuffle(p_indexes)
     
-    try:
-        n_splits = _splits(n_indexes, k)
-        p_splits = _splits(p_indexes, k)
-    except ValueError:
-        raise ValueError("'k' must be smaller than number of positive and "
-                         "of negative samples")
+    if not (0 < k <= min(len(n_indexes), len(p_indexes))):
+        raise ValueError("'k' must be greater than zero and smaller or equal "
+                         "than number of positive and negative samples")
+    
+    random.shuffle(n_indexes)
+    n_splits = _splits(n_indexes, k)
+    
+    random.shuffle(p_indexes)
+    p_splits = _splits(p_indexes, k)
     
     splits = list()
     for ns, ps in zip(n_splits, p_splits):
@@ -553,4 +557,22 @@ def stratified_kfold_splits(labels, k, rseed=0):
       
     return splits
 
-# TODO: Document kcv functions AND IMPROVE TESTS!!!!!!!
+def _splits(indexes, k):
+    """Splits the 'indexes' list in input in k disjoint chunks."""
+    return [(indexes[:start] + indexes[end:], indexes[start:end])
+                for start, end in _split_dimensions(len(indexes), k)]
+
+def _split_dimensions(num_items, num_splits):
+    """Generator wich gives the pairs of indexes to split 'num_items' data
+       in 'num_splits' chunks. """
+    start = 0
+    remaining_items = float(num_items)
+
+    for remaining_splits in xrange(num_splits, 0, -1):
+        split_size = int(round(remaining_items / remaining_splits))
+        end = start + split_size
+        
+        yield start, end
+        
+        start = end
+        remaining_items -= split_size

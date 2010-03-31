@@ -64,7 +64,8 @@ class TestCore(object):
         assert_equals(len(mu_range), len(selected_list))
         assert_equals(len(mu_range), len(err_ts_list))
         assert_equals(len(mu_range), len(err_tr_list))
-            
+
+    @attr('slow')                
     def test_minimal_model(self):
         from biolearning import tools
         
@@ -83,7 +84,7 @@ class TestCore(object):
                                           error_function=tools.regression_error,
                                           data_normalizer=tools.standardize,
                                           labels_normalizer=tools.center)
-                                                   
+
             assert_almost_equals(tau_opt_exp, tau_opt)
             assert_almost_equals(lambda_opt_exp, lambda_opt)
             

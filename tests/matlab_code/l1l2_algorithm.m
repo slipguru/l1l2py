@@ -79,11 +79,11 @@ function [beta,k] = l1l2_algorithm(X,Y,tau,mu_fact,beta0,sigma0,kmax,tol)
     
     beta = beta_prev;
 
-function [beta] = thresholding(beta0,tau)
-%THRESHOLDING Soft-thresholding
-%   BETA = THRESHOLDING(BETA,TAU) returns the soft-thresholding of vector 
-%   BETA with threshold TAU.
-%
-    ind = logical(abs(beta0)<tau);
-    beta = beta0-sign(beta0).*tau;
-    beta(ind) = 0;
+%function [beta] = thresholding(beta0,tau)
+%%THRESHOLDING Soft-thresholding
+%%   BETA = THRESHOLDING(BETA,TAU) returns the soft-thresholding of vector 
+%%   BETA with threshold TAU.
+%%
+%    ind = logical(abs(beta0)<tau);
+%    beta = beta0-sign(beta0).*tau;
+%    beta(ind) = 0;

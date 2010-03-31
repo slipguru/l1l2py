@@ -63,7 +63,6 @@ if nargin<9, norm_mean = 0; end
 if nargin<10, norm_col = 0; end
 if nargin>10, error('too many input!'), end
 
-
 % given the parameters range, determines possibe values
 if isequal(size(tau_range),[3,1]); 
     tau = [tau_range(1) tau_range(1)*((tau_range(2)/tau_range(1))^(1/(tau_range(3)-1))).^(1:(tau_range(3)-1))]; 
@@ -84,7 +83,6 @@ err_train = zeros(length(sets),length(tau),length(lambda_LS));
 selected = cell(length(sets),length(tau));
 sparsity = zeros(length(sets),length(tau));
 
-
 for i = 1:length(sets);
     
     ind = setdiff(1:length(Y),sets{i}); %indexes of training set
@@ -103,7 +101,7 @@ for i = 1:length(sets);
     sigma0 = (a+b)/(ntr*2); %step size for mu_fact=0
     
     % evaluate all betas for all taus concurrently
-    [selected(i,:), sparsity(i,:)] = l1l2_regpath(Xtr,Ytr,tau,mu_fact,sigma0); 
+    [selected(i,:), sparsity(i,:)] = l1l2_regpath(Xtr,Ytr,tau,mu_fact,sigma0);
     
     % for each value of the l1 parameter, use the l1l2 solution for
     % selection and train rls on the selected features, then evaluate error
@@ -115,7 +113,6 @@ for i = 1:length(sets);
             err_train(i,t,j) = linear_test(Xtr(:,selected{i,t}),Ytr,beta,type,meanY);           
         end    
     end
-    
 end
 
 % evaluate avg. error over the splits

@@ -261,7 +261,7 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
     values = list()
     values.append(value_prev)
     
-    k, kmin = 0, 100
+    k, kmin = 0, 10
     th, difference = -np.inf, np.inf
     while k < kmin or (distance > th and k < kmax):
         k += 1
@@ -275,7 +275,7 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
         
         # MFISTA monotonicity check
-        if value_temp < value_prev:
+        if value_temp <= value_prev:
             beta = beta_temp
             value = value_temp
         
@@ -290,7 +290,7 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
             difference = (beta_temp - beta)
             aux_beta = beta + (t/t_next)*difference
             
-            distance = np.inf    
+            distance = np.linalg.norm(difference)  #np.inf??
             
         values.append(value)
 

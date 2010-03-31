@@ -18,7 +18,7 @@ def ridge_regression(data, labels, mu=0.0):
 
     Finds the RLS model with ``mu`` parameter associated with its
     :math:`\ell_2` norm (see `Notes`).
-
+    
     Parameters
     ----------
     data : (N, D) ndarray
@@ -143,7 +143,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     return out
 
-def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
+def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
                         tolerance=1e-6, returns_iterations=False):
     r"""Implementation of Regularized Least Squares with
     :math:`\ell_1\ell_2` penalty.
@@ -151,7 +151,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     Finds the :math:`\ell_1\ell_2` model with ``mu`` parameter associated with
     its :math:`\ell_2` norm and ``tau`` parameter associated with its
     :math:`\ell_1` norm (see `Notes`).
-
+    
     Parameters
     ----------
     data : (N, D) ndarray
@@ -252,19 +252,94 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     if beta is None:
         beta = np.zeros_like(XTY)
     beta_prev = beta
-    
+    value_prev = _functional(data, labels, beta_prev, tau, mu)
+        
     # Auxiliary beta (FISTA implementation), starts from 0
     aux_beta = beta
     t, t_next = 1, None     # t values initializations
         
+    values = list()
+    values.append(value_prev)
+    
+    k, kmin = 0, 100
+    th, difference = -np.inf, np.inf
+    while k < kmin or (distance > th and k < kmax):
+        k += 1
+
+        # New solution
+        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
+        beta_temp = _soft_thresholding(value, tau_s) #Z_k
+        value_temp = _functional(data, labels, beta_temp, tau, mu)
+        
+        # (M)FISTA step
+        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        
+        # MFISTA monotonicity check
+        if value_temp < value_prev:
+            beta = beta_temp
+            value = value_temp
+        
+            difference = (beta - beta_prev)    
+            aux_beta = beta + ((t - 1.0)/t_next)*difference
+            
+            distance = np.linalg.norm(difference)    
+        else:
+            beta = beta_prev
+            value = value_prev
+            
+            difference = (beta_temp - beta)
+            aux_beta = beta + (t/t_next)*difference
+            
+            distance = np.inf    
+            
+        values.append(value)
+
+        # Convergence threshold
+        th = np.linalg.norm(beta) * tolerance
+        
+        # Values update
+        beta_prev = beta
+        value_prev = value
+        t = t_next
+
+    if returns_iterations:
+        return beta, k, values
+    else:
+        return beta
+       
+def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
+                              tolerance=1e-6, returns_iterations=False):
+    n, d = data.shape
+    
+    # Useful quantities
+    sigma = _maximum_eigenvalue(data)/n + mu
+    mu_s = mu / sigma
+    tau_s = tau / sigma
+    XT = data.T / (n * sigma)
+    XTY = np.dot(XT, labels)
+
+    # beta starts from 0 and we assume also that the previous value is 0
+    if beta is None:
+        beta = np.zeros_like(XTY)
+    beta_prev = beta
+    
+    # Auxiliary beta (FISTA implementation), starts from 0
+    aux_beta = beta
+    t, t_next = 1, None     # t values initializations
+    
+    values = list()
+    values.append(_functional(data, labels, beta_prev, tau, mu))
+        
     k, kmin = 0, 10
     th, difference = -np.inf, np.inf
-    while k < kmin or ((distance > th).any() and k < kmax):
+    while k < kmin or (distance > th and k < kmax):
         k += 1
 
         # New solution
         value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
         beta = _soft_thresholding(value, tau_s)
+        
+        values.append(_functional(data, labels, beta, tau, mu))
                      
         # New auxiliary beta (FISTA)
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
@@ -279,7 +354,48 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         beta_prev, t = beta, t_next
 
     if returns_iterations:
-        return beta, k
+        return beta, k, values
+    else:
+        return beta
+
+def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
+                            tol=1e-6, returns_iterations=False):
+    n = data.shape[0] 
+    
+    # Useful quantities
+    sigma = _maximum_eigenvalue(data)/n + mu
+    mu_s = mu / sigma
+    tau_s = tau / sigma
+    XT = data.T / (n * sigma)
+    XTY = np.dot(XT, labels)
+
+    if beta is None:
+        beta = np.zeros_like(XTY)
+
+    values = list()
+    values.append(_functional(data, labels, beta, tau, mu))
+
+    k, kmin = 0, 100
+    th, difference = -np.inf, np.inf
+    #while k < kmin or ((difference > th).any() and k < kmax):
+    while k < kmin or (distance > th and k < kmax):
+        k += 1
+
+        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
+        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
+    
+        values.append(_functional(data, labels, beta_next, tau, mu))
+
+        # Convergence values
+        difference = np.abs(beta_next - beta)
+        distance = np.linalg.norm(difference)
+        th = np.linalg.norm(beta) * (tol)# / k)
+        #th = np.abs(beta) * (tol / k)
+        
+        beta = beta_next
+
+    if returns_iterations:
+        return beta, k, values
     else:
         return beta
 
@@ -294,6 +410,13 @@ def _maximum_eigenvalue(matrix):
     return np.linalg.eigvalsh(tmp).max()
 
 def _soft_thresholding(x, th):
-    out = x - (np.sign(x) * th)
-    out[np.abs(x) < th] = 0.0
+    out = x - (np.sign(x) * th/2.0)
+    out[np.abs(x) < th/2.0] = 0.0
     return out
+
+def _functional(X, Y, beta, tau, mu):
+    n = X.shape[0]
+    loss_norm = np.linalg.norm(Y - np.dot(X, beta), 2)
+    beta_norm = np.linalg.norm(beta, 2)
+    return ((loss_norm * loss_norm)/n + mu * (beta_norm * beta_norm)
+                                      + tau * np.linalg.norm(beta, 1))

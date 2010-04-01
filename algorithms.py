@@ -248,6 +248,8 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels)
 
+    print tau, tau_s
+
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         beta = np.zeros_like(XTY)
@@ -413,6 +415,33 @@ def _soft_thresholding(x, th):
     out = x - (np.sign(x) * th/2.0)
     out[np.abs(x) < th/2.0] = 0.0
     return out
+
+def _tau_bounds(X, Y, normalizations=None):
+    # bj = 0 if  [ 2||Y||(||X(:,j)|| + sqrt(mu)) ] < tau
+    # se [ 2||Y||(||X(:,j)|| + sqrt(mu)) ] = Cj
+    # tau max(Cj)_{j=1,...,d} -> b nulla
+    n, d = X.shape
+
+    M = 2.0 * np.linalg.norm(Y, 2)
+    C = np.empty(d)
+
+    for j in xrange(d):
+        C[j] = M * np.linalg.norm(X[:,j], 2)/n
+
+    print sorted(C)[-5:]
+    print C.min()
+    return C.max()
+
+def tau_bounds(X, Y, normalizations=None):
+    n = X.shape[0]
+
+    corr = np.abs(np.dot(X.T, Y)).ravel()
+    corr.sort() #argmax se e' richiesto solo il massimo!
+
+    tau = corr[-1] * (2.0/n) #limite di due variabili
+    print corr[0] * (2.0/n)
+
+    return tau
 
 def _functional(X, Y, beta, tau, mu):
     n = X.shape[0]

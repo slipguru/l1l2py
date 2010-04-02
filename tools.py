@@ -254,15 +254,15 @@ def classification_error(labels, predicted):
 
     The classification error is based on the sign of the ``predicted`` values,
     with respect to the sign of the data ``labels``.
-    
+
     The function assumes that ``labels`` contain positive number for first
     class and negative numbers for the second one (see `Notes`).
-    
+
     .. warning::
-    
+
         The values contained in ``labels`` are not checked by the function for
         efficiency.
-        
+
     Parameters
     ----------
     labels : array_like, shape (N,)
@@ -290,9 +290,9 @@ def classification_error(labels, predicted):
                 l_i \in\ labels,\, p_i \in\ predicted
 
     .. math::
-    
+
         f(l_i, p_i)=1 \quad if sign(l_i) \neq sign(p_i)
-    
+
         f(l_i, p_i)=0 \quad otherwise
 
     Examples
@@ -351,11 +351,11 @@ def balanced_classification_error(labels, predicted):
                 l_i \in\ labels,\, p_i \in\ predicted
 
     where
-    
+
     .. math::
-    
+
         f(l_i, p_i)=1 \quad if sign(l_i) \neq sign(p_i)
-    
+
         f(l_i, p_i)=0 \quad otherwise
 
     .. warning::
@@ -444,7 +444,7 @@ def kfold_splits(labels, k, rseed=0):
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
-        
+
         Raises
     ------
     ValueError
@@ -457,7 +457,7 @@ def kfold_splits(labels, k, rseed=0):
     Examples
     --------
     >>> labels = range(10)
-    >>> biolearning.tools.kfold_splits(labels, 2)   
+    >>> biolearning.tools.kfold_splits(labels, 2)
     [([7, 1, 3, 6, 8], [9, 4, 0, 5, 2]), ([9, 4, 0, 5, 2], [7, 1, 3, 6, 8])]
     >>> biolearning.tools.kfold_splits(labels, 1)
     [([], [9, 4, 0, 5, 2, 7, 1, 3, 6, 8])]
@@ -471,13 +471,13 @@ def kfold_splits(labels, k, rseed=0):
     if not (0 < k <= len(labels)):
         raise ValueError("'k' must be greater than zero and smaller or equal "
                          "than number of samples")
-        
+
     random.seed(rseed)
     indexes = range(len(labels))
     random.shuffle(indexes)
 
     return _splits(indexes, k)
-      
+
 def stratified_kfold_splits(labels, k, rseed=0):
     r"""Returns k-fold cross validation stratified splits.
 
@@ -500,7 +500,7 @@ def stratified_kfold_splits(labels, k, rseed=0):
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
-        
+
     Raises
     ------
     ValueError
@@ -534,27 +534,27 @@ def stratified_kfold_splits(labels, k, rseed=0):
     classes = np.unique(labels)
     if classes.size != 2:
         raise ValueError("'labels' must contains only two class labels")
-        
-    random.seed(rseed)    
+
+    random.seed(rseed)
     n_indexes = (np.where(labels == classes[0])[0]).tolist()
     p_indexes = (np.where(labels == classes[1])[0]).tolist()
-    
+
     if not (0 < k <= min(len(n_indexes), len(p_indexes))):
         raise ValueError("'k' must be greater than zero and smaller or equal "
                          "than number of positive and negative samples")
-    
+
     random.shuffle(n_indexes)
     n_splits = _splits(n_indexes, k)
-    
+
     random.shuffle(p_indexes)
     p_splits = _splits(p_indexes, k)
-    
+
     splits = list()
     for ns, ps in zip(n_splits, p_splits):
         train = ns[0] + ps[0]
         test = ns[1] + ps[1]
         splits.append( (train, test) )
-      
+
     return splits
 
 def _splits(indexes, k):
@@ -571,8 +571,8 @@ def _split_dimensions(num_items, num_splits):
     for remaining_splits in xrange(num_splits, 0, -1):
         split_size = int(round(remaining_items / remaining_splits))
         end = start + split_size
-        
+
         yield start, end
-        
+
         start = end
         remaining_items -= split_size

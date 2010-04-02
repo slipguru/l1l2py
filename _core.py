@@ -32,14 +32,14 @@ def model_selection(data, labels, test_data, test_labels,
     concatenated output.
 
     .. warning::
-    
+
         See the function documentation for details on each stage and the meaning
         of each parameter.
 
     See Also
     --------
     minimal_model
-    nested_models  
+    nested_models
 
     """
 
@@ -63,29 +63,29 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
                   data_normalizer=None, labels_normalizer=None,
                   returns_kcv_errors=False):
     r"""Performs the minimal model selection.
-    
+
     Given a supervised training set (``data`` and ``labels``), for the fixed
     value of ``mu`` (should be minimum), finds the values in ``tau_range``
     and ``lambda_range`` with minimum performance error via cross validation.
     (see error functions in :mod:`biolearning.tools`).
-    
+
     Cross validation splits must be provided (``cv_splits``) as a list
     of pairs containing traning-set and validation-set indexes
     (see cross validation tools in :mod:`biolearning.tools`).
-    
+
     Data and labels will be normalized on each split using the function
     ``data_normalizer`` and ``labels_normalizer``.
     (see data normalization functions in :mod:`biolearning.tools`).
-    
+
     .. warning ::
-    
+
         On each cross validation split the number of nonempty model could be
         different (on high value of tau).
-        
+
         The function calculates the optimum value of tau for wich the model is
         nonempty on every cross validation split.
-    
-    
+
+
     Parameters
     ----------
     data : (N, D) ndarray
@@ -116,33 +116,33 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     Returns
     -------
     tau_opt : float
-        Optimal value of tau selected in ``tau_range``.        
+        Optimal value of tau selected in ``tau_range``.
     lambda_opt : float
         Optimal value of lambda selected in ``lambda_range``.
     err_ts : (T, L) ndarray, optional (see `Notes`)
         Matrix with cross validation error on the training set.
     err_tr : (T, L) ndarray, optional (see `Notes`)
         Matrix with cross validation error on the training set.
-        
+
     Notes
     -----
     The function performs exactly the pesudocode described in
     [DeMol09]_ (pag.7 - Stage I).
-    
+
     The computation of the models for different value of :math:`\lambda`, fixed
     the value of :math:`\tau` is performed by
     :func:`biolearning.algorithms.l1l2_path` followed with a series of execution
     of :func:`biolearning.algorithms.ridge_regression`.
-    
+
     For this reason, the dimension of thw error matrices
     (``err_ts`` and ``err_ts``) is T x L where:
-    
+
         - T < ``len(tau_range)``
         - L = ``len(lambda_range)``
-        
+
     The value of T depends on the maximum value of :math:`\tau` with wich is
     possible to calculate a nonempty model on each cross vaidation split.
-        
+
 
     See Also
     --------
@@ -151,7 +151,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     biolearning.tools
     biolearning.algorithms.l1l2_path
     biolearning.algorithms.ridge_regression
-    
+
     """
 
     err_ts = list()
@@ -208,21 +208,21 @@ def nested_models(data, labels, test_data, test_labels,
                   mu_range, tau, lambda_, error_function,
                   data_normalizer=None, labels_normalizer=None):
     r"""Generates the models with the almost nested lists of features.
-    
+
     Given a supervised training set (``data`` and ``labels``) and test set
     (``test_data`` and ``test_labels``), for the fixed value of ``tau``
     and ``lambda`` (should be the optimum calculated
     with :func:`minimal_model`), calculates one model for each incerasing value
     in ``mu_range``.
-       
+
     Data and labels will be normalized using the function ``data_normalizer``
     and ``labels_normalizer``.
     (see data normalization functions in :mod:`biolearning.tools`).
-    
+
     The function also returns test and training error using the
     ``error_function`` provided.
     (see error functions in :mod:`biolearning.tools`).
-    
+
         Parameters
     ----------
     data : (N, D) ndarray
@@ -258,29 +258,29 @@ def nested_models(data, labels, test_data, test_labels,
         Training error for the models calculated.
     err_ts_list : list of M float (see `Notes`)
         Testing error for the models calculated.
-            
+
     Notes
     -----
     The function performs exactly the pesudocode described in
     [DeMol09]_ (pag.7 - Stage II).
-    
+
     The computation of the models for different value of :math:`\mu`, fixed
     the value of :math:`\tau_{opt}` and :math:`\lambda_{opt}` is performed by
-    :func:`biolearning.algorithms.l1l2_regularization` followed by 
+    :func:`biolearning.algorithms.l1l2_regularization` followed by
     :func:`biolearning.algorithms.ridge_regression`.
-    
+
     Each output list has dimension M = ``len(mu_range)``.
-    
+
     Moreover, if :math:`\beta^*_i` is the model selected by the
     :math:`\ell_1\ell_2` regularization, each final model :math:`\beta_i`
     has dimension :math:`S_i \times 1` where
     :math:`S_i` is the :math:`\ell_0` norm of :math:`\beta^*_i`
     (number of feature selected).
-    
+
     The ndarrays in ``selected_list`` have dimension D and each elements is
     `True` if and only if it's selected by :math:`\ell_1\ell_2`
-    regularization step.   
-    
+    regularization step.
+
     See Also
     --------
     model_selection
@@ -288,7 +288,7 @@ def nested_models(data, labels, test_data, test_labels,
     biolearning.tools
     biolearning.algorithms.l1l2_regularization
     biolearning.algorithms.ridge_regression
-    
+
     """
 
     if not data_normalizer is None:
@@ -307,7 +307,7 @@ def nested_models(data, labels, test_data, test_labels,
         selected = (beta.flat != 0)
 
         beta = ridge_regression(data[:, selected], labels, lambda_)
-        
+
         beta_list.append(beta)
         selected_list.append(selected)
 

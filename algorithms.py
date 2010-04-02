@@ -248,8 +248,6 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels)
 
-    print tau, tau_s
-
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         beta = np.zeros_like(XTY)
@@ -433,13 +431,22 @@ def _tau_bounds(X, Y, normalizations=None):
     return C.max()
 
 def tau_bounds(X, Y, normalizations=None):
-    n = X.shape[0]
+    n,d = X.shape
+
+    #import tools
+    #X = tools.standardize(X)
+    #Y = tools.center(Y)
+
+    #XTXI = np.linalg.pinv(np.dot(X.T, X))
+    #corr = np.abs(np.dot(XTXI, np.dot(X.T, Y))).ravel()
 
     corr = np.abs(np.dot(X.T, Y)).ravel()
+#    corr = np.abs(ridge_regression(X, Y, 0.0)).ravel()
     corr.sort() #argmax se e' richiesto solo il massimo!
 
     tau = corr[-1] * (2.0/n) #limite di due variabili
-    print corr[0] * (2.0/n)
+    print corr[-min(n,d)] * (2.0/n)
+    print corr[-d] * (2.0/n)
 
     return tau
 

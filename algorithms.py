@@ -433,22 +433,26 @@ def _tau_bounds(X, Y, normalizations=None):
 def tau_bounds(X, Y, normalizations=None):
     n,d = X.shape
 
-    #import tools
-    #X = tools.standardize(X)
-    #Y = tools.center(Y)
+    corr = np.abs(np.dot(X.T, Y))
+    tau_max = corr.max() * (2.0/n) # una variabile
 
-    #XTXI = np.linalg.pinv(np.dot(X.T, X))
-    #corr = np.abs(np.dot(XTXI, np.dot(X.T, Y))).ravel()
+    # Mi serve un modello con n-2 variabili col quale calcolare corr!
+    beta_ls = np.abs(ridge_regression(X, Y, 0.0))
 
-    corr = np.abs(np.dot(X.T, Y)).ravel()
-#    corr = np.abs(ridge_regression(X, Y, 0.0)).ravel()
-    corr.sort() #argmax se e' richiesto solo il massimo!
+    #----------------------------------------
+    s = np.sign(beta_ls)
+    Xa = X * s.T
+    G = np.dot(Xa.T, Xa)
+    A = 1.0 / np.sqrt(np.linalg.inv(G).sum())
+    print np.linalg.inv(G)
+    print np.linalg.inv(G).sum()
+    #----------------------------------------
 
-    tau = corr[-1] * (2.0/n) #limite di due variabili
-    print corr[-min(n,d)] * (2.0/n)
-    print corr[-d] * (2.0/n)
+    #corr = np.abs(np.dot(X.T, Y - np.dot(X, beta_prec)))
+    #tau_min = corr.max() * (2.0/n) # n-1 variabili?
+    tau_min = 1
 
-    return tau
+    return tau_min, tau_max
 
 def _functional(X, Y, beta, tau, mu):
     n = X.shape[0]

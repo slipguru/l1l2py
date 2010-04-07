@@ -143,7 +143,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     return out
 
-def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
+def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                         tolerance=1e-6, returns_iterations=False):
     r"""Implementation of Regularized Least Squares with
     :math:`\ell_1\ell_2` penalty.
@@ -258,8 +258,9 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
     aux_beta = beta
     t, t_next = 1, None     # t values initializations
 
-    values = list()
-    values.append(value_prev)
+    # TODO: remove
+    #values = list()
+    #values.append(value_prev)
 
     k, kmin = 0, 10
     th, difference = -np.inf, np.inf
@@ -292,7 +293,8 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
 
             distance = np.linalg.norm(difference)  #np.inf??
 
-        values.append(value)
+        # TODO: remove
+        #values.append(value)
 
         # Convergence threshold
         th = np.linalg.norm(beta) * tolerance
@@ -303,99 +305,7 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
         t = t_next
 
     if returns_iterations:
-        return beta, k, values
-    else:
-        return beta
-
-def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
-                              tolerance=1e-6, returns_iterations=False):
-    n, d = data.shape
-
-    # Useful quantities
-    sigma = _maximum_eigenvalue(data)/n + mu
-    mu_s = mu / sigma
-    tau_s = tau / sigma
-    XT = data.T / (n * sigma)
-    XTY = np.dot(XT, labels)
-
-    # beta starts from 0 and we assume also that the previous value is 0
-    if beta is None:
-        beta = np.zeros_like(XTY)
-    beta_prev = beta
-
-    # Auxiliary beta (FISTA implementation), starts from 0
-    aux_beta = beta
-    t, t_next = 1, None     # t values initializations
-
-    values = list()
-    values.append(_functional(data, labels, beta_prev, tau, mu))
-
-    k, kmin = 0, 10
-    th, difference = -np.inf, np.inf
-    while k < kmin or (distance > th and k < kmax):
-        k += 1
-
-        # New solution
-        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
-        beta = _soft_thresholding(value, tau_s)
-
-        values.append(_functional(data, labels, beta, tau, mu))
-
-        # New auxiliary beta (FISTA)
-        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
-        difference = (beta - beta_prev)
-        aux_beta = beta + ((t - 1.0)/t_next)*difference
-
-        # Convergence values
-        distance = np.linalg.norm(difference)
-        th = np.linalg.norm(beta) * tolerance
-
-        # Values update
-        beta_prev, t = beta, t_next
-
-    if returns_iterations:
-        return beta, k, values
-    else:
-        return beta
-
-def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
-                            tol=1e-6, returns_iterations=False):
-    n = data.shape[0]
-
-    # Useful quantities
-    sigma = _maximum_eigenvalue(data)/n + mu
-    mu_s = mu / sigma
-    tau_s = tau / sigma
-    XT = data.T / (n * sigma)
-    XTY = np.dot(XT, labels)
-
-    if beta is None:
-        beta = np.zeros_like(XTY)
-
-    values = list()
-    values.append(_functional(data, labels, beta, tau, mu))
-
-    k, kmin = 0, 100
-    th, difference = -np.inf, np.inf
-    #while k < kmin or ((difference > th).any() and k < kmax):
-    while k < kmin or (distance > th and k < kmax):
-        k += 1
-
-        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
-        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
-
-        values.append(_functional(data, labels, beta_next, tau, mu))
-
-        # Convergence values
-        difference = np.abs(beta_next - beta)
-        distance = np.linalg.norm(difference)
-        th = np.linalg.norm(beta) * (tol)# / k)
-        #th = np.abs(beta) * (tol / k)
-
-        beta = beta_next
-
-    if returns_iterations:
-        return beta, k, values
+        return beta, k#, values
     else:
         return beta
 
@@ -413,46 +323,6 @@ def _soft_thresholding(x, th):
     out = x - (np.sign(x) * th/2.0)
     out[np.abs(x) < th/2.0] = 0.0
     return out
-
-def _tau_bounds(X, Y, normalizations=None):
-    # bj = 0 if  [ 2||Y||(||X(:,j)|| + sqrt(mu)) ] < tau
-    # se [ 2||Y||(||X(:,j)|| + sqrt(mu)) ] = Cj
-    # tau max(Cj)_{j=1,...,d} -> b nulla
-    n, d = X.shape
-
-    M = 2.0 * np.linalg.norm(Y, 2)
-    C = np.empty(d)
-
-    for j in xrange(d):
-        C[j] = M * np.linalg.norm(X[:,j], 2)/n
-
-    print sorted(C)[-5:]
-    print C.min()
-    return C.max()
-
-def tau_bounds(X, Y, normalizations=None):
-    n,d = X.shape
-
-    corr = np.abs(np.dot(X.T, Y))
-    tau_max = corr.max() * (2.0/n) # una variabile
-
-    # Mi serve un modello con n-2 variabili col quale calcolare corr!
-    beta_ls = np.abs(ridge_regression(X, Y, 0.0))
-
-    #----------------------------------------
-    s = np.sign(beta_ls)
-    Xa = X * s.T
-    G = np.dot(Xa.T, Xa)
-    A = 1.0 / np.sqrt(np.linalg.inv(G).sum())
-    print np.linalg.inv(G)
-    print np.linalg.inv(G).sum()
-    #----------------------------------------
-
-    #corr = np.abs(np.dot(X.T, Y - np.dot(X, beta_prec)))
-    #tau_min = corr.max() * (2.0/n) # n-1 variabili?
-    tau_min = 1
-
-    return tau_min, tau_max
 
 def _functional(X, Y, beta, tau, mu):
     n = X.shape[0]

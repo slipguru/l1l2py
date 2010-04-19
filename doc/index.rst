@@ -33,7 +33,7 @@ molestie, mi nisl mollis ante, a dignissim arcu orci et lectus. Nulla facilisi.
 Phasellus a tincidunt diam. Nam quis justo diam. Lorem ipsum dolor sit amet,
 consectetur adipiscing elit. Sed posuere neque quis nisl vehicula ullamcorper.
 Phasellus id nulla in lectus tincidunt consectetur ut quis quam. Integer in mi
-libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum. 
+libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
 
 
 .. toctree::
@@ -42,7 +42,7 @@ libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
     core.rst
     algorithms.rst
     tools.rst
-    
+
 :ref:`genindex`
 
 
@@ -54,6 +54,7 @@ libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
              Microarray Data"
              Journal of Computational Biology, vol. 16, pp. 677-690, 2009.
 .. [Beck09]  A. Beck, M. Teboulle,
-             "A Fast Iterative Shrinkage-Thresholding Algorithm
-             for Linear Inverse Problems"
-             SIAM J. Imaging Sciences, vol. 2, no. 1, pp. 183-202, 2009.
+             "Fast Gradient-Based Algorithms for Constrained Total Variation
+             Image Denoising and Deblurring Problems"
+             IEEE Transactions on Image Processing, vol. 18, issue 11,
+             pp.  2419-2434, 2009

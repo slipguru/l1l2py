@@ -31,7 +31,7 @@ def model_selection(data, labels, test_data, test_labels,
     :func:`minimal_model` and :func:`nested_models`, and returns their
     concatenated output.
 
-    .. warning::
+    .. note::
 
         See the function documentation for details on each stage and the meaning
         of each parameter.
@@ -79,11 +79,11 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     .. warning ::
 
-        On each cross validation split the number of nonempty model could be
+        On each cross validation split the number of non-empty model could be
         different (on high value of tau).
 
         The function calculates the optimum value of tau for wich the model is
-        nonempty on every cross validation split.
+        non-empty on every cross validation split.
 
 
     Parameters
@@ -111,7 +111,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         A function like the data normalization functions in
         :mod:`biolearning.tools`.
     returns_kcv_errors : boolean
-        If True returns the cross validation errors calculated.
+        If `True` returns the cross validation errors calculated.
 
     Returns
     -------
@@ -134,14 +134,14 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     :func:`biolearning.algorithms.l1l2_path` followed with a series of execution
     of :func:`biolearning.algorithms.ridge_regression`.
 
-    For this reason, the dimension of thw error matrices
+    For this reason, the dimension of the error matrices
     (``err_ts`` and ``err_ts``) is T x L where:
 
         - T < ``len(tau_range)``
         - L = ``len(lambda_range)``
 
     The value of T depends on the maximum value of :math:`\tau` with wich is
-    possible to calculate a nonempty model on each cross vaidation split.
+    possible to calculate a non-empty model on each cross validation split.
 
 
     See Also

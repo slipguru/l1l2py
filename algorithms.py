@@ -86,7 +86,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     .. warning ::
 
         The number of models can differ the number of :math:`\tau` values.
-        The functions returns only the model with at least one nonzero feature.
+        The functions returns only the model with at least one non-zero feature.
         For very high value of :math:`\tau` a model could have all `0s`.
 
     Parameters
@@ -206,7 +206,13 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                             \frac{1}{n\sigma}X^T[Y - X\beta^k]
                         )
 
-    Moreover, the function implements a *FISTA* [Beck09]_ modification, wich
+    where, :math:`\mathbf{S}_{\gamma > 0}` is the soft-thresholding function
+
+    .. math::
+
+        \mathbf{S}_{\gamma}(x) = sign(x) max(0, |x| - \frac{\gamma}{2})
+
+    Moreover, the function implements a *MFISTA* [Beck09]_ modification, wich
     increases with quadratic factor the convergence rate of the algorithm.
 
     The constant :math:`\sigma` is a (theorically optimal) step size wich
@@ -224,8 +230,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     but the algorithm will be stop when the maximum number of iteration
     is reached.
-
-    .. note:: DESCRIVERE soft-thresholding
 
     Examples
     --------

@@ -27,7 +27,7 @@ def correlated_dataset(samples, groups, variables, true_model):
     return X, Y
 
 def tau_bound(X, Y):
-    """ Matrixes assumed nonmalized """
+    """ Matrixes assumed normalized """
     n = X.shape[0]
     corr = np.abs(np.dot(X.T, Y))
     return corr.max() * (2.0/n) # one variable

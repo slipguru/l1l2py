@@ -1,13 +1,8 @@
-1. Documentazione:
-    * ricontrollo
-    * note nei file rst (snellimento)
-2. Funzione di errore (sign)
-3. Eliminazione mlwrap per i test
-4. Funzione Bound
-5. Funzione Dataset correlato
-6. Tutorial
-7. Etichette = 0 (?) per non usare quei sample. (??)
-
+1. Funzione di errore (sign)
+2. Funzione Bound
+3. Funzione Dataset correlato
+4. Tutorial
+5. Etichette = 0 (?) per non usare quei sample. (??)
 
 Riorganizzazione Struttura
 ---------------------------

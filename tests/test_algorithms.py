@@ -6,114 +6,90 @@ from nose.plugins.attrib import attr
 
 from biolearning.algorithms import *
 
-from mlabwrap import mlab
-mlab.addpath('tests/matlab_code')
-
-TOL = 1e-3
-
 class TestAlgorithms(object):
     """
     Results generated with the original matlab code
     """
 
-    def setup(self):     
+    def setup(self):
         data = sio.loadmat('tests/toy_dataA.mat', struct_as_record=False)
         self.X = data['X']
         self.Y = data['Y']
-        
+
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
         assert_equals((30, 1), self.Y.shape)
-              
+
     def test_rls(self):
         # case n >= d
         for penalty in np.linspace(0.0, 1.0, 5):
-            expected = mlab.rls_algorithm(self.X, self.Y, penalty)
             value = ridge_regression(self.X, self.Y, penalty)
-            assert_true(np.allclose(expected, value, TOL))
-        
+            assert_equal(value.shape, (self.X.shape[1], 1))
+
         expected = ridge_regression(self.X, self.Y, 0.0)
         value = ridge_regression(self.X, self.Y)
-        assert_true(np.allclose(expected, value, TOL))
-        
+        assert_true(np.allclose(expected, value))
+
         # case d > n
         X = self.X.T
         Y = self.X[0:1,:].T
         for penalty in np.linspace(0.0, 1.0, 5):
-            expected = mlab.rls_algorithm(X, Y, penalty)
             value = ridge_regression(X, Y, penalty)
-            assert_true(np.allclose(expected, value, TOL))
-            
+            assert_equal(value.shape, (X.shape[1], 1))
+
         expected = ridge_regression(X, Y, 0.0)
         value = ridge_regression(X, Y)
-        assert_true(np.allclose(expected, value, TOL))
-        
+        assert_true(np.allclose(expected, value))
+
     def test_l1l2_regularization(self):
         from itertools import product
         n, m = self.X.shape
-        
+
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):
-            exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y, tau, mu,
-                                                  nout=2)            
-            beta, k = l1l2_regularization(self.X, self.Y, mu, tau,
-                                          returns_iterations=True)
-                        
-            assert_true(np.allclose(exp_beta, beta, TOL))
-            assert_true(np.allclose(exp_k, k+1))
-                
-    @attr('slow')    
-    def test_l1l2_regularization_slow(self):
-        from itertools import product
-        n, m = self.X.shape
-        
-        values = np.linspace(0.0, 2.0, 10)
-        for mu, tau in product(values, values):
-            exp_beta, exp_k = mlab.l1l2_algorithm(self.X, self.Y, tau, mu,
-                                                  nout=2)
-            beta, k = l1l2_regularization(self.X, self.Y, mu, tau,
-                                          returns_iterations=True)
-       
-            assert_true(np.allclose(exp_beta, beta, TOL))
-            assert_true(np.allclose(exp_k, k+1))
-            
+            beta, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                           returns_iterations=True)
+            assert_equal(beta.shape, (self.X.shape[1], 1))
+
+            beta, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                           tolerance=1e-3,
+                                           returns_iterations=True)
+            assert_true(k2 < k1)
+
+            beta, k3 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                           tolerance=1e-3, kmax=10,
+                                           returns_iterations=True)
+            assert_true(k3 < k2)
+            assert_true(k3 == 10)
+
+            beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                            returns_iterations=True)
+            beta2, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                            beta=beta,
+                                            returns_iterations=True)
+            assert_true(k2 < k1)
+
     def test_l1l2_path(self):
         values = np.linspace(0.1, 1.0, 5)
-        beta_path = l1l2_path(self.X, self.Y, 0.1, values, kmax=np.inf)        
-        exp_selected = mlab.l1l2_regpath(self.X, self.Y,
-                                         values, 0.1, kmax=np.inf)
-        for i, b in enumerate(beta_path):
-            s = mlab.double(mlab.cell_element(exp_selected, i+1))
-            assert_true(np.all((b != 0) == s))
-            
+        beta_path = l1l2_path(self.X, self.Y, 0.1, values)
+
+        assert_true(len(beta_path) <= len(values))
+        for i in xrange(1, len(beta_path)):
+
+            b = beta_path[i]
+            b_prev = beta_path[i-1]
+
+            selected_prev = len(b_prev[b_prev != 0.0])
+            selected = len(b[b != 0.0])
+            assert_true(selected <= selected_prev)
+
     def test_l1l2_path_saturation(self):
-        values = [0.1, 1.0, 1e3, 1e4]
-        beta_path = l1l2_path(self.X, self.Y, 0.1, values, kmax=np.inf)
+        values = [0.1, 1e1, 1e3, 1e4]
+        beta_path = l1l2_path(self.X, self.Y, 0.1, values)
         assert_equals(len(beta_path), 2)
-        
-        exp_selected = mlab.l1l2_regpath(self.X, self.Y,
-                                         values, 0.1, kmax=np.inf)
-        for i, b in enumerate(beta_path):
-            s = mlab.double(mlab.cell_element(exp_selected, i+1))
-            assert_true(np.all((b != 0) == s))
-            
-        b = np.zeros_like(beta_path[0])
-        for i in (3, 4):
-            s = mlab.double(mlab.cell_element(exp_selected, i))
-            assert_true(np.all((b != 0) == s))    
-                     
-    @staticmethod
-    def _get_matlab_splitting(labels, K):
-        mlab_sets = mlab.splitting(labels, 5, 0)
-        mlab_sets = mlab.double(mlab.cell2mat(mlab_sets)).T #row = set
-        mlab_sets -= 1 #matlab starts from 1
-    
-        indexes = np.arange(labels.size)
-        sets = list()
-        for ts in mlab_sets:
-            ts = np.array(ts, dtype=np.int)
-            tr = np.array(list(set(indexes) - set(ts)))
-            sets.append((tr, ts))
-            
-        return sets
-    
+
+        for i in xrange(2):
+            b = beta_path[i]
+            selected = len(b[b != 0.0])
+
+            assert_true(selected <= len(b))

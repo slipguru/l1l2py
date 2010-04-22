@@ -445,7 +445,7 @@ def kfold_splits(labels, k, rseed=0):
         Each tuple contains two lists with the training set and testing set
         indexes.
 
-        Raises
+    Raises
     ------
     ValueError
         If ``k`` is negative or greater than number of `labels`.

@@ -46,6 +46,11 @@ def l1_bounds(data, labels, eps=1e-5):
         Minimum tau + ``eps``
     tau_max : float
         Maximum tau - ``eps``
+        
+    Raises
+    ------
+    ValueError
+        If ``tau_max`` or ``tau_min`` are negative or ``tau_max`` <= ``tau_min``
     
     """
     n = data.shape[0]
@@ -293,7 +298,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     array([ 0.        ,  0.04482757,  0.        ])
 
     """
-    n, d = data.shape
+    n = data.shape[0]
 
     # Useful quantities
     sigma = _maximum_eigenvalue(data)/n + mu
@@ -317,7 +322,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     #values.append(value_prev)
 
     k, kmin = 0, 10
-    th, difference = -np.inf, np.inf
+    th, distance = -np.inf, np.inf
     while k < kmin or (distance > th and k < kmax):
         k += 1
 

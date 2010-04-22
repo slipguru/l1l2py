@@ -1,4 +1,7 @@
 from algorithms import *
+from algorithms import _functional, _maximum_eigenvalue, _soft_thresholding
+
+import numpy as np
 
 def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
                             tol=1e-6, returns_iterations=False):
@@ -14,8 +17,8 @@ def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
     if beta is None:
         beta = np.zeros_like(XTY)
 
-    values = list()
-    values.append(_functional(data, labels, beta, tau, mu))
+    #values = list()
+    #values.append(_functional(data, labels, beta, tau, mu))
 
     k, kmin = 0, 100
     th, difference = -np.inf, np.inf
@@ -26,7 +29,7 @@ def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
         value = beta +  XTY - np.dot(XT, np.dot(data, beta))
         beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
 
-        values.append(_functional(data, labels, beta_next, tau, mu))
+        #values.append(_functional(data, labels, beta_next, tau, mu))
 
         # Convergence values
         difference = np.abs(beta_next - beta)
@@ -37,7 +40,7 @@ def l1l2_regularization_STD(data, labels, mu, tau, beta=None, kmax=1e5,
         beta = beta_next
 
     if returns_iterations:
-        return beta, k, values
+        return beta, k#, values
     else:
         return beta
 

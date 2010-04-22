@@ -237,7 +237,7 @@ def nested_models(data, labels, test_data, test_labels,
         :math:`\ell_2` norm penalties.
     tau : float
         :math:`\ell_1` norm penalty.
-    lambda : float
+    lambda_: float
         :math:`\ell_1` norm penalty.
     error_function : function object
         A function like the error functions in :mod:`biolearning.tools`.

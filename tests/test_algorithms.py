@@ -93,3 +93,18 @@ class TestAlgorithms(object):
             selected = len(b[b != 0.0])
 
             assert_true(selected <= len(b))
+            
+    def test_l1_bounds(self):
+        out = l1_bounds(self.X, self.Y)
+        
+        assert_equals(2, len(out))
+        assert_true(out[0] < out[1])
+        
+        out_ = l1_bounds(self.X, self.Y, 1e0)
+        assert_true(out[0] < out_[0])
+        assert_true(out[1] > out_[1])    
+        assert_true(out_[0] < out_[1])
+        
+        assert_raises(ValueError, l1_bounds, self.X, self.Y, out[1])
+        assert_raises(ValueError, l1_bounds, self.X, self.Y, -out[0]*2)
+        assert_raises(ValueError, l1_bounds, self.X, self.Y, out[1]*2)

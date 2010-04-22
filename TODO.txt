@@ -3,6 +3,8 @@
 3. Funzione Dataset correlato
 4. Tutorial
 5. Etichette = 0 (?) per non usare quei sample. (??)
+6. Check Reg path initialization
+7. Modifica per Reg path?? (vedi paper pag. 8)
 
 Riorganizzazione Struttura
 ---------------------------

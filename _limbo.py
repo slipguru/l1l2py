@@ -1,12 +1,14 @@
 import numpy as np
 
+from algorithms import _maximum_eigenvalue, ridge_regression
+
 def correlated_dataset(samples, groups, variables, true_model):
     """
     >>> correlated_dataset(30, (5, 5, 5), 40, [3.0]*15 + [0.0]*(40-15))
     ...
     """
-    print len(true_model), variables
-    assert sum(groups) < variables
+    #print len(true_model), variables
+    assert sum(groups) <= variables
     assert len(true_model) == variables
 
     X = np.zeros((samples, variables))
@@ -26,8 +28,4 @@ def correlated_dataset(samples, groups, variables, true_model):
 
     return X, Y
 
-def tau_bound(X, Y):
-    """ Matrixes assumed normalized """
-    n = X.shape[0]
-    corr = np.abs(np.dot(X.T, Y))
-    return corr.max() * (2.0/n) # one variable
+

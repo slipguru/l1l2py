@@ -1,10 +1,11 @@
 1. Funzione di errore (sign)
-2. Funzione Bound
+2. Tornare errori kcv interni comopleti, in modo da poter plottare un error bar!
 3. Funzione Dataset correlato
 4. Tutorial
 5. Etichette = 0 (?) per non usare quei sample. (??)
 6. Check Reg path initialization
 7. Modifica per Reg path?? (vedi paper pag. 8)
+8. In core indicare che si ritornano gli errori medi sugli split!
 
 Riorganizzazione Struttura
 ---------------------------

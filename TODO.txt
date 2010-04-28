@@ -1,5 +1,5 @@
 1. Funzione di errore (sign)
-2. Tornare errori kcv interni comopleti, in modo da poter plottare un error bar!
+2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
 3. Funzione Dataset correlato
 4. Tutorial
 5. Etichette = 0 (?) per non usare quei sample. (??)

@@ -307,7 +307,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels)
 
-    # beta starts from 0 and we assume also that the previous value is 0
+    # beta starts from 0 and we assume the previous value is also 0
     if beta is None:
         beta = np.zeros_like(XTY)
     beta_prev = beta
@@ -315,11 +315,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     # Auxiliary beta (FISTA implementation), starts from 0
     aux_beta = beta
-    t, t_next = 1, None     # t values initializations
-
-    # TODO: remove
-    #values = list()
-    #values.append(value_prev)
+    t, t_next = 1., None     # t values initializations
 
     k, kmin = 0, 10
     th, distance = -np.inf, np.inf
@@ -328,32 +324,25 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
         # New solution
         value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
-        beta_temp = _soft_thresholding(value, tau_s) #Z_k
+        beta_temp = _soft_thresholding(value, tau_s)
         value_temp = _functional(data, labels, beta_temp, tau, mu)
 
         # (M)FISTA step
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        difference = (beta_temp - beta_prev)
+        distance = np.linalg.norm(difference)
 
         # MFISTA monotonicity check
         if value_temp <= value_prev:
             beta = beta_temp
             value = value_temp
-
-            difference = (beta - beta_prev)
+            
             aux_beta = beta + ((t - 1.0)/t_next)*difference
-
-            distance = np.linalg.norm(difference)
         else:
             beta = beta_prev
             value = value_prev
 
-            difference = (beta_temp - beta)
             aux_beta = beta + (t/t_next)*difference
-
-            distance = np.linalg.norm(difference)  #np.inf??
-
-        # TODO: remove
-        #values.append(value)
 
         # Convergence threshold
         th = np.linalg.norm(beta) * tolerance
@@ -364,7 +353,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         t = t_next
 
     if returns_iterations:
-        return beta, k#, values
+        return beta, k
     else:
         return beta
 

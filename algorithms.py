@@ -3,6 +3,7 @@ r"""Internal algorithms implementation.
 The :mod:`algorithms` module defines core numerical optimizazion algorithms:
 
 * :func:`ridge_regression`
+* :func:`l1_bounds`
 * :func:`l1l2_regularization`
 * :func:`l1l2_path`
 

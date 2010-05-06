@@ -369,9 +369,7 @@ def _maximum_eigenvalue(matrix):
     return np.linalg.eigvalsh(tmp).max()
 
 def _soft_thresholding(x, th):
-    out = x - (np.sign(x) * th/2.0)
-    out[np.abs(x) < th/2.0] = 0.0
-    return out
+    return np.sign(x) * np.maximum(0, np.abs(x) - th/2.0)
 
 def _functional(X, Y, beta, tau, mu):
     n = X.shape[0]

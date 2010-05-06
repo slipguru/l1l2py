@@ -5,6 +5,7 @@ from nose.tools import *
 from nose.plugins.attrib import attr
 
 from biolearning.algorithms import *
+from biolearning.algorithms import _soft_thresholding
 
 class TestAlgorithms(object):
     """
@@ -108,3 +109,14 @@ class TestAlgorithms(object):
         assert_raises(ValueError, l1_bounds, self.X, self.Y, out[1])
         assert_raises(ValueError, l1_bounds, self.X, self.Y, -out[0]*2)
         assert_raises(ValueError, l1_bounds, self.X, self.Y, out[1]*2)
+        
+    def test_soft_thresholding(self):
+        beta = ridge_regression(self.X, self.Y)
+        for th in np.linspace(0.0, 10.0, 50):
+            out = _soft_thresholding(beta, th)
+    
+            # Verbose and slow version
+            out_exp = beta - (np.sign(beta) * th/2.0)
+            out_exp[np.abs(beta) <= th/2.0] = 0.0
+            
+            assert_true(np.allclose(out, out_exp))

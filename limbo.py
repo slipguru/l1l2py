@@ -29,10 +29,6 @@ def correlated_dataset(samples, groups, variables, true_model):
     return X, Y
 
 
-def _soft_thresholding2(x, th):
-    return np.sign(x) * np.maximum(0, np.abs(x) - th/2.0)
-    
-
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                         tolerance=1e-5, returns_iterations=False):
     r"""Implementation of Regularized Least Squares with

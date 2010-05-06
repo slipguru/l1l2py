@@ -6,6 +6,8 @@
 6. Check Reg path initialization
 7. Modifica per Reg path?? (vedi paper pag. 8)
 8. In core indicare che si ritornano gli errori medi sugli split!
+9. use nonzero!
+10. TESTARE PARAMETRI INPUT SU TUTTE LE FUNZIONI (liste, array, dimensioni vuote)
 
 Riorganizzazione Struttura
 ---------------------------

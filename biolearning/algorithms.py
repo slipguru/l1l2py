@@ -184,7 +184,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         beta = np.zeros((d, 1))
 
     out = deque()
-    nonzero = 0
+    nonzero = 0 # <<---- CHECK!!!
     for tau in reversed(tau_range):
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls

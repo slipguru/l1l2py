@@ -1,3 +1,4 @@
+0. Ripulire dalle novità troppo spinte!
 1. Funzione di errore (sign)
 2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
 3. Funzione Dataset correlato

@@ -85,20 +85,9 @@ def ridge_regression(data, labels, mu=0.0):
         :math:`\ell_2` norm penalty.
 
     Returns
-    -------
+    --------
     beta : (D,) or (D, 1) ndarray
         RLS model.
-
-    Notes
-    -----
-    RLS minimizes the following objective function:
-
-    .. math::
-
-        \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2
-
-    finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
-    matrix and :math:`Y` contains the ``labels``.
 
     Examples
     --------
@@ -170,10 +159,6 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     beta_path : list of (D,) or (D, 1) ndarrays
         :math:`\ell_1\ell_2` models with at least one nonzero feature.
 
-    See Also
-    --------
-    l1l2_regularization
-
     """
     from collections import deque
     n, d = data.shape
@@ -200,14 +185,14 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     return out
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
-                        tolerance=1e-6, returns_iterations=False):
+                        tolerance=1e-5, returns_iterations=False):
     r"""Implementation of Regularized Least Squares with
     :math:`\ell_1\ell_2` penalty.
 
     Finds the :math:`\ell_1\ell_2` model with ``mu`` parameter associated with
     its :math:`\ell_2` norm and ``tau`` parameter associated with its
     :math:`\ell_1` norm (see `Notes`).
-
+    
     Parameters
     ----------
     data : (N, D) ndarray
@@ -229,64 +214,15 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `10`.
-
+        
     Returns
     -------
     beta : (D,) or (D, 1) ndarray
         :math:`\ell_1\ell_2` model.
     k : int, optional
         Number of iterations performed.
-
-    See Also
-    --------
-    l1l2_path
-
-    Notes
-    -----
-    :math:`\ell_1\ell_2` minimizes the following objective function:
-
-    .. math::
-
-        \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2 + \tau \|\beta\|_1
-
-    finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
-    matrix and :math:`Y` contains the ``labels``.
-
-    The computation is iterative, each step updates the value of :math:`\beta`
-    until the convergence is reached [DeMol08]_:
-
-    .. math::
-
-        \beta^{(k+1)} = \mathbf{S}_{\frac{\tau}{\sigma}} (
-                            (1 - \frac{\mu}{\sigma})\beta^k +
-                            \frac{1}{n\sigma}X^T[Y - X\beta^k]
-                        )
-
-    where, :math:`\mathbf{S}_{\gamma > 0}` is the soft-thresholding function
-
-    .. math::
-
-        \mathbf{S}_{\gamma}(x) = sign(x) max(0, |x| - \frac{\gamma}{2})
-
-    Moreover, the function implements a *MFISTA* [Beck09]_ modification, wich
-    increases with quadratic factor the convergence rate of the algorithm.
-
-    The constant :math:`\sigma` is a (theorically optimal) step size wich
-    depends by the data:
-
-    .. math::
-
-        \sigma = \frac{\|X^T X\|}{N} + \mu
-
-    The convergence is reached when:
-
-    .. math::
-
-        \|\beta^k - \beta^{k-1}\| \leq \|\beta^k\| * tolerance
-
-    but the algorithm will be stop when the maximum number of iteration
-    is reached.
-
+        
+   
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
@@ -302,82 +238,46 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     n = data.shape[0]
 
     # Useful quantities
-    sigma = _maximum_eigenvalue(data)/n + mu
+    sigma = _sigma(data, mu)
     mu_s = mu / sigma
     tau_s = tau / sigma
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels)
 
-    # beta starts from 0 and we assume the previous value is also 0
     if beta is None:
         beta = np.zeros_like(XTY)
-    beta_prev = beta
-    value_prev = _functional(data, labels, beta_prev, tau, mu)
 
-    # Auxiliary beta (FISTA implementation), starts from 0
-    aux_beta = beta
-    t, t_next = 1., None     # t values initializations
-
-    k, kmin = 0, 10
-    th, distance = -np.inf, np.inf
-    while k < kmin or (distance > th and k < kmax):
+    k, kmin = 0, 100
+    th, difference = -np.inf, np.inf
+    while k < kmin or ((difference > th).any() and k < kmax):
         k += 1
 
-        # New solution
-        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
-        beta_temp = _soft_thresholding(value, tau_s)
-        value_temp = _functional(data, labels, beta_temp, tau, mu)
+        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
+        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
 
-        # (M)FISTA step
-        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
-        difference = (beta_temp - beta_prev)
-        distance = np.linalg.norm(difference)
+        # Convergence values
+        difference = np.abs(beta_next - beta)
+        th = np.abs(beta) * (tolerance / k)
 
-        # MFISTA monotonicity check
-        if value_temp <= value_prev:
-            beta = beta_temp
-            value = value_temp
-            
-            aux_beta = beta + ((t - 1.0)/t_next)*difference
-        else:
-            beta = beta_prev
-            value = value_prev
-
-            aux_beta = beta + (t/t_next)*difference
-
-        # Convergence threshold
-        th = np.linalg.norm(beta) * tolerance
-
-        # Values update
-        beta_prev = beta
-        value_prev = value
-        t = t_next
+        beta = beta_next
 
     if returns_iterations:
         return beta, k
     else:
         return beta
-
-def _maximum_eigenvalue(matrix):
+    
+def _sigma(matrix, mu):
     n, d = matrix.shape
 
     if d > n:
         tmp = np.dot(matrix, matrix.T)
+        num = np.linalg.eigvalsh(tmp).max()
     else:
         tmp = np.dot(matrix.T, matrix)
+        evals = np.linalg.eigvalsh(tmp)
+        num = evals.max() + evals.min()
 
-    return np.linalg.eigvalsh(tmp).max()
+    return (num/(2.*n)) + mu
 
 def _soft_thresholding(x, th):
     return np.sign(x) * np.maximum(0, np.abs(x) - th/2.0)
-
-def _functional(X, Y, beta, tau, mu):
-    n = X.shape[0]
-
-    loss = Y - np.dot(X, beta)
-    loss_quadratic_norm = (loss * loss).sum()
-    beta_quadratic_norm = (beta * beta).sum()
-    beta_l1_norm = np.abs(beta).sum()
-
-    return (loss_quadratic_norm/n + mu  * beta_quadratic_norm
-                                  + tau * beta_l1_norm)

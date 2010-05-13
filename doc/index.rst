@@ -1,60 +1,50 @@
 .. _biolearning:
 
-**********************
-Biolearning Reference
-**********************
+***********************
+l1l2_learning Reference
+***********************
 
 :Release: |version|
 :Date: |today|
 :Homepage: http://slipguru.disi.unige.it/homepage_code_url
 
-Insert :mod:`biolearning` description ...
-*TODO* citing references [DeMol09]_ [DeMol08]_ [Beck09]_
+**l1l2_learning** is a Python package to perform feature selection by means
+of l1l2 regularization with double optimization following the procedure
+described in [DeMol09b]_.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur lobortis
-tincidunt dolor, eu tincidunt elit imperdiet ut. Ut quis leo ac nisl
-sollicitudin luctus. Vestibulum ullamcorper lacinia imperdiet. Ut et tortor in
-tortor consequat tempor vitae faucibus nibh. Etiam ac diam non erat vestibulum
-bibendum. Pellentesque sapien dui, vehicula nec venenatis at, tempor vel dolor.
-Sed eget felis dolor, ac euismod tellus. Fusce quis nisi nisl, id fringilla
-erat. Curabitur eget nibh justo. Nullam hendrerit ornare rutrum.
-Nullam lacinia, purus non aliquam tincidunt, enim sem interdum massa, a
-faucibus velit dui et arcu. Fusce vulputate justo vel dui mattis a sodales
-dolor fermentum. Proin tincidunt leo id justo accumsan ultricies. In metus
-odio, euismod eget iaculis vitae, faucibus eu massa. Sed magna sapien, tempor
-eu suscipit vel, fermentum vel metus.
+l1l2_learning makes use of Numpy (ref.) to provide fast N-dimensional array
+manipulation. It is licensed under GNU GPL (?).
 
-Sed pellentesque mollis lorem, sit amet auctor quam rutrum ut. Nullam porttitor
-pretium purus, congue faucibus nulla commodo id. Phasellus dictum urna a diam
-posuere imperdiet. Maecenas tempus, lectus vel ultrices laoreet, elit magna
-tristique tellus, eget semper massa leo id mi. Integer commodo est a ligula
-eleifend eu venenatis velit aliquam. Mauris tristique, magna quis vestibulum
-molestie, mi nisl mollis ante, a dignissim arcu orci et lectus. Nulla facilisi.
-Phasellus a tincidunt diam. Nam quis justo diam. Lorem ipsum dolor sit amet,
-consectetur adipiscing elit. Sed posuere neque quis nisl vehicula ullamcorper.
-Phasellus id nulla in lectus tincidunt consectetur ut quis quam. Integer in mi
-libero. Nulla ac magna vel purus vulputate feugiat nec aliquet ipsum.
+l1l2_learning is based on the minimization of the (naive) l1l2 functional
+introduced in [Zou05]_ using the algorithm studied from the
+theoretical viewpoint in [DeMol09a]_.
 
+l1l2_learning is the Python implementation of the one proposed and applied
+in [DeMol09b]_.
+It consists of two stages. The first one identifies the minimal
+set of relevant variables (in terms of prediction error).
+Starting from the minimal list, the second stage selects the family of
+(almost completely) nested lists of relevant variables for increasing values
+of linear correlation.
+
+The package is divided in three modules:
 
 .. toctree::
-    :maxdepth: 2
+   :maxdepth: 2
 
-    core.rst
-    algorithms.rst
-    tools.rst
+   core.rst
+   algorithms.rst
+   tools.rst
 
 :ref:`genindex`
 
-
-.. [DeMol08] C. De Mol, E. De Vito, L. Rosasco,
-             "Elastic-net regularization in learning theory"
-             Journal of Complexity, n. 2, vol. 25, pp. 201-230, 2008.
-.. [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,
-             "A Regularized Method for Selecting Nested Group of Genes from
-             Microarray Data"
-             Journal of Computational Biology, vol. 16, pp. 677-690, 2009.
-.. [Beck09]  A. Beck, M. Teboulle,
-             "Fast Gradient-Based Algorithms for Constrained Total Variation
-             Image Denoising and Deblurring Problems"
-             IEEE Transactions on Image Processing, vol. 18, issue 11,
-             pp.  2419-2434, 2009
+.. [Zou05]    H. Zou, T. Hastie,
+              "Regularization and variable selection via the elastic net"
+              J.R. Statist. Soc. B, 67 (2) pp. 301-320, 2005
+.. [DeMol09a] C. De Mol, E. De Vito, L. Rosasco,
+              "Elastic-net regularization in learning theory"
+              Journal of Complexity, n. 2, vol. 25, pp. 201-230, 2009.
+.. [DeMol09b] C. De Mol, S. Mosci, M. Traskine, A. Verri,
+              "A Regularized Method for Selecting Nested Group of Genes from
+              Microarray Data"
+              Journal of Computational Biology, vol. 16, pp. 677-690, 2009.

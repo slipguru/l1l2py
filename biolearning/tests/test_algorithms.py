@@ -55,20 +55,20 @@ class TestAlgorithms(object):
             beta, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
                                            tolerance=1e-3,
                                            returns_iterations=True)
-            assert_true(k2 < k1)
+            assert_true(k2 <= k1)
 
             beta, k3 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                           tolerance=1e-3, kmax=10,
+                                           tolerance=1e-3, kmax=100,
                                            returns_iterations=True)
-            assert_true(k3 < k2)
-            assert_true(k3 == 10)
+            assert_true(k3 <= k2)
+            assert_true(k3 == 100)
 
             beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
                                             returns_iterations=True)
             beta2, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                            beta=beta,
+                                            beta=beta1,
                                             returns_iterations=True)
-            assert_true(k2 < k1)
+            assert_true(k2 <= k1)
 
     def test_l1l2_path(self):
         values = np.linspace(0.1, 1.0, 5)

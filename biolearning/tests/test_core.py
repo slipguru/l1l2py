@@ -34,18 +34,20 @@ class TestCore(object):
 
         out = model_selection(data, labels, test_data, test_labels,
                               mu_range, tau_range, lambda_range,
-                              int_splits, tools.regression_error,
+                              int_splits,
+                              tools.regression_error,
+                              tools.regression_error,
                               data_normalizer=tools.standardize,
-                              labels_normalizer=tools.center,
-                              returns_kcv_errors=False)
-        assert_equals(6, len(out))
+                              labels_normalizer=tools.center)
+        assert_equals(8, len(out))
 
         out = model_selection(data, labels, test_data, test_labels,
                               mu_range, tau_range, lambda_range,
-                              int_splits, tools.regression_error,
+                              int_splits,
+                              tools.regression_error,
+                              tools.regression_error,
                               data_normalizer=tools.standardize,
-                              labels_normalizer=tools.center,
-                              returns_kcv_errors=True)
+                              labels_normalizer=tools.center)
         assert_equals(8, len(out))
 
         (tau_opt, lambda_opt,
@@ -77,11 +79,10 @@ class TestCore(object):
             out = minimal_model(self.X, self.Y, mu, tau_range, lambda_range,
                                 splits, error_function=tools.regression_error,
                                 data_normalizer=tools.standardize,
-                                labels_normalizer=tools.center,
-                                returns_kcv_errors=True)
-            assert_equals(4, len(out))
+                                labels_normalizer=tools.center)
+            assert_equals(2, len(out))
 
-            (tau_opt, lambda_opt, kcv_err_ts, kcv_err_tr) = out
+            (kcv_err_ts, kcv_err_tr) = out
 
             assert_equals((len(tau_range), len(lambda_range)), kcv_err_ts.shape)
             assert_equals(kcv_err_tr.shape, kcv_err_ts.shape)
@@ -97,10 +98,9 @@ class TestCore(object):
             out = minimal_model(self.X, self.Y, mu, tau_range, lambda_range,
                                 splits, error_function=tools.regression_error,
                                 data_normalizer=tools.standardize,
-                                labels_normalizer=tools.center,
-                                returns_kcv_errors=True)
+                                labels_normalizer=tools.center)
 
-            (tau_opt, lambda_opt, kcv_err_ts, kcv_err_tr) = out
+            (kcv_err_ts, kcv_err_tr) = out
 
             assert_equals((1, len(lambda_range)), kcv_err_ts.shape)
             assert_equals(kcv_err_tr.shape, kcv_err_ts.shape)
@@ -112,15 +112,7 @@ class TestCore(object):
         data, test_data = self.X[tr_idx, :], self.X[ts_idx, :]
         labels, test_labels = self.Y[tr_idx, :], self.Y[ts_idx, :]
 
-        int_splits = tools.kfold_splits(labels, 3)
-        tau_range = tools.linear_range(0.1, 1.0, 5)
-        lambda_range = tools.linear_range(0.1, 1.0, 5)
-
-        out = minimal_model(data, labels, 0.1, tau_range, lambda_range,
-                            int_splits, error_function=tools.regression_error,
-                            data_normalizer=tools.standardize,
-                            labels_normalizer=tools.center)
-        tau_opt, lambda_opt = out
+        tau_opt, lambda_opt = (0.1, 0.1)
 
         mu_range = tools.linear_range(0.1, 1.0, 10)
         out = nested_models(data, labels, test_data, test_labels,

@@ -1,7 +1,7 @@
 .. _l1l2py:
 
 ***********************
-l1l2py Reference
+L1L2Py Reference
 ***********************
 
 :Release: |version|
@@ -11,18 +11,19 @@ l1l2py Reference
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. moduleauthor:: Annalisa Barla <annalisa.barla@disi.unige.it>
 
-**l1l2py** is a Python package to perform feature selection by means
+**L1L2Py** is a Python package to perform feature selection by means
 of l1l2 regularization with double optimization following the procedure
 described in [DeMol09b]_.
 
-l1l2py makes use of `NumPy <http://numpy.scipy.org/>`_ to provide fast
-N-dimensional array manipulation. It is licensed under GNU GPL (?).
+L1L2Py makes use of `NumPy <http://numpy.scipy.org>`_ to provide fast
+N-dimensional array manipulation. It is licensed under
+`GNU GPL <http://www.gnu.org/licenses/gpl.html>`_.
 
-l1l2py is based on the minimization of the (naive) l1l2 functional
+L1L2Py is based on the minimization of the (naive) l1l2 functional
 introduced in [Zou05]_ using the algorithm studied from the
 theoretical viewpoint in [DeMol09a]_.
 
-l1l2py is the Python implementation of the one proposed and applied
+L1L2Py is the Python implementation of the one proposed and applied
 in [DeMol09b]_.
 It consists of two stages. The first one identifies the minimal
 set of relevant variables (in terms of prediction error).

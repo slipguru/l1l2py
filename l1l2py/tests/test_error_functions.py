@@ -3,8 +3,8 @@ import scipy.io as sio
 
 from nose.tools import *
 
-from biolearning.tools import *
-import biolearning.algorithms as alg
+from l1l2py.tools import *
+import l1l2py.algorithms as alg
 
 class TestErrorFunctions(object):
     """

@@ -3,7 +3,7 @@ import scipy.io as sio
 
 from nose.tools import *
 
-from biolearning.tools import *
+from l1l2py.tools import *
 
 class TestDataTools(object):
     """

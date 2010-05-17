@@ -4,8 +4,8 @@ import scipy.io as sio
 from nose.tools import *
 from nose.plugins.attrib import attr
 
-from biolearning.algorithms import *
-from biolearning.algorithms import _soft_thresholding
+from l1l2py.algorithms import *
+from l1l2py.algorithms import _soft_thresholding
 
 class TestAlgorithms(object):
     """

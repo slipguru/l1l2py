@@ -234,7 +234,7 @@ latex_preamble = r'''
 latex_use_modindex = False
 
 # Intersphinx configuration
-intersphinx_mapping = {'http://docs.python.org/dev': None,
+intersphinx_mapping = {'http://docs.python.org': None,
                        'http://docs.scipy.org/doc/numpy': None}
 
 # Make numpydoc to generate plots for example sections

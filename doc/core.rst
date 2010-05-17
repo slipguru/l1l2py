@@ -1,7 +1,7 @@
 .. _core:
 
 *************************************
-XXX functions (:class:`biolearning`)
+Main functions (:class:`biolearning`)
 *************************************
 .. currentmodule:: biolearning
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>

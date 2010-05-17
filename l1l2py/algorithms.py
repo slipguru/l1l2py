@@ -94,7 +94,7 @@ def ridge_regression(data, labels, mu=0.0):
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> beta_rls = biolearning.algorithms.ridge_regression(X, y)
+    >>> beta_rls = l1l2py.algorithms.ridge_regression(X, y)
     >>> numpy.allclose(beta, beta_rls)
     True
 
@@ -228,11 +228,11 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> y = numpy.dot(X, beta)
-    >>> beta_rls = biolearning.algorithms.l1l2_regularization(X, y, 0.0, 1e-5)
+    >>> beta_rls = l1l2py.algorithms.l1l2_regularization(X, y, 0.0, 0.0)
     >>> numpy.allclose(beta, beta_rls)
     True
-    >>> biolearning.algorithms.l1l2_regularization(X, y, 0.1, 0.1)
-    array([ 0.        ,  0.04482757,  0.        ])
+    >>> l1l2py.algorithms.l1l2_regularization(X, y, 0.1, 0.1)
+    array([ 0.        ,  0.07715517,  0.        ])
 
     """
     n = data.shape[0]

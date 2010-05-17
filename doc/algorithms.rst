@@ -1,21 +1,21 @@
 .. _algorithms:
 
 ******************************************
-Algorithms (:mod:`biolearning.algorithms`)
+Algorithms (:mod:`l1l2py.algorithms`)
 ******************************************
-.. currentmodule:: biolearning.algorithms
+.. currentmodule:: l1l2py.algorithms
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 
-   import biolearning.algorithms
+   import l1l2py.algorithms
    import numpy
 
 
 Introduction
 ============
-.. automodule:: biolearning.algorithms
+.. automodule:: l1l2py.algorithms
     
 RLS minimizes the following objective function:
 

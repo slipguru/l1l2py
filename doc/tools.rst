@@ -1,20 +1,20 @@
 .. _tools:
 
 *********************************
-Tools (:mod:`biolearning.tools`)
+Tools (:mod:`l1l2py.tools`)
 *********************************
-.. currentmodule:: biolearning.tools
+.. currentmodule:: l1l2py.tools
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 
-   import biolearning.tools
+   import l1l2py.tools
    import numpy
 
 Introduction
 ============
-.. automodule:: biolearning.tools
+.. automodule:: l1l2py.tools
 
 Range generators
 ================

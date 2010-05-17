@@ -45,13 +45,13 @@ def linear_range(min_value, max_value, number):
 
     Examples
     --------    
-    >>> biolearning.tools.linear_range(0.0, 10.0, 4)
+    >>> l1l2py.tools.linear_range(0.0, 10.0, 4)
     array([  0.        ,   3.33333333,   6.66666667,  10.        ])
-    >>> biolearning.tools.linear_range(0.0, 10.0, 2)
+    >>> l1l2py.tools.linear_range(0.0, 10.0, 2)
     array([  0.,  10.])
-    >>> biolearning.tools.linear_range(0.0, 10.0, 1)
+    >>> l1l2py.tools.linear_range(0.0, 10.0, 1)
     array([ 0.])
-    >>> biolearning.tools.linear_range(0.0, 10.0, 0)
+    >>> l1l2py.tools.linear_range(0.0, 10.0, 0)
     array([], dtype=float64)
 
     """
@@ -80,19 +80,19 @@ def geometric_range(min_value, max_value, number):
 
     Examples
     --------
-    >>> biolearning.tools.geometric_range(0.0, 10.0, 4)
+    >>> l1l2py.tools.geometric_range(0.0, 10.0, 4)
     Traceback (most recent call last):
         ...
     ZeroDivisionError: float division
-    >>> biolearning.tools.geometric_range(0.1, 10.0, 4)
+    >>> l1l2py.tools.geometric_range(0.1, 10.0, 4)
     array([ 0.1       ,  0.46415888,  2.15443469, 10.        ])
-    >>> biolearning.tools.geometric_range(0.1, 10.0, 2)
+    >>> l1l2py.tools.geometric_range(0.1, 10.0, 2)
     array([  0.1,  10. ])
-    >>> biolearning.tools.geometric_range(0.1, 10.0, 1)
+    >>> l1l2py.tools.geometric_range(0.1, 10.0, 1)
     Traceback (most recent call last):
         ...
     ZeroDivisionError: float division
-    >>> biolearning.tools.geometric_range(0.1, 10.0, 0)
+    >>> l1l2py.tools.geometric_range(0.1, 10.0, 0)
     array([], dtype=float64)
 
     """
@@ -133,14 +133,14 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     Examples
     --------
     >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
-    >>> biolearning.tools.standardize(X)
+    >>> l1l2py.tools.standardize(X)
     array([[-0.70710678, -0.70710678, -0.70710678],
            [ 0.70710678,  0.70710678,  0.70710678]])
-    >>> biolearning.tools.standardize(X, return_factors=True)
+    >>> l1l2py.tools.standardize(X, return_factors=True)
     (array([[-0.70710678, -0.70710678, -0.70710678],
            [ 0.70710678,  0.70710678,  0.70710678]]), array([ 2.5,  3.5,  4.5]), array([ 2.12132034,  2.12132034,  2.12132034]))
     >>> x = numpy.array([1, 2, 3])
-    >>> biolearning.tools.standardize(x)
+    >>> l1l2py.tools.standardize(x)
     array([-1.,  0.,  1.])
 
     """
@@ -190,14 +190,14 @@ def center(matrix, optional_matrix=None, return_mean=False):
     Examples
     --------
     >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
-    >>> biolearning.tools.center(X)
+    >>> l1l2py.tools.center(X)
     array([[-1.5, -1.5, -1.5],
            [ 1.5,  1.5,  1.5]])
-    >>> biolearning.tools.center(X, return_mean=True)
+    >>> l1l2py.tools.center(X, return_mean=True)
     (array([[-1.5, -1.5, -1.5],
            [ 1.5,  1.5,  1.5]]), array([ 2.5,  3.5,  4.5]))
     >>> x = numpy.array([1, 2, 3])
-    >>> biolearning.tools.center(x)
+    >>> l1l2py.tools.center(x)
     array([-1.,  0.,  1.])
 
     """
@@ -245,15 +245,15 @@ def classification_error(labels, predicted):
    
     Examples
     --------    
-    >>> biolearning.tools.classification_error([1, 1, 1], [1, 1, 1])
+    >>> l1l2py.tools.classification_error([1, 1, 1], [1, 1, 1])
     0.0
-    >>> biolearning.tools.classification_error([1, 1, 1], [1, 1, -1])
+    >>> l1l2py.tools.classification_error([1, 1, 1], [1, 1, -1])
     0.33333333333333331
-    >>> biolearning.tools.classification_error([1, 1, 1], [1, -1, -1])
+    >>> l1l2py.tools.classification_error([1, 1, 1], [1, -1, -1])
     0.66666666666666663
-    >>> biolearning.tools.classification_error([1, 1, 1], [-1, -1, -1])
+    >>> l1l2py.tools.classification_error([1, 1, 1], [-1, -1, -1])
     1.0
-    >>> biolearning.tools.classification_error([1, 1, 1], [10, -2, -3])
+    >>> l1l2py.tools.classification_error([1, 1, 1], [10, -2, -3])
     0.66666666666666663
 
     """
@@ -281,15 +281,15 @@ def balanced_classification_error(labels, predicted):
 
     Examples
     --------    
-    >>> biolearning.tools.balanced_classification_error([1, 1, 1], [-1, -1, -1])
+    >>> l1l2py.tools.balanced_classification_error([1, 1, 1], [-1, -1, -1])
     0.0
-    >>> biolearning.tools.balanced_classification_error([-1, 1, 1], [-1, 1, 1])
+    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [-1, 1, 1])
     0.0
-    >>> biolearning.tools.balanced_classification_error([-1, 1, 1], [1, -1, -1])
+    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [1, -1, -1])
     0.88888888888888895
-    >>> biolearning.tools.balanced_classification_error([-1, 1, 1], [1, 1, 1])
+    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [1, 1, 1])
     0.44444444444444442
-    >>> biolearning.tools.balanced_classification_error([-1, 1, 1], [-1, 1, -1])
+    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [-1, 1, -1])
     0.22222222222222224
 
     """
@@ -356,11 +356,11 @@ def kfold_splits(labels, k, rseed=0):
     Examples
     
     >>> labels = range(10)
-    >>> biolearning.tools.kfold_splits(labels, 2)
+    >>> l1l2py.tools.kfold_splits(labels, 2)
     [([7, 1, 3, 6, 8], [9, 4, 0, 5, 2]), ([9, 4, 0, 5, 2], [7, 1, 3, 6, 8])]
-    >>> biolearning.tools.kfold_splits(labels, 1)
+    >>> l1l2py.tools.kfold_splits(labels, 1)
     [([], [9, 4, 0, 5, 2, 7, 1, 3, 6, 8])]
-    >>> biolearning.tools.kfold_splits(labels, 0)
+    >>> l1l2py.tools.kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
     ValueError: 'k' must be greater than zero and smaller or equal than number of samples
@@ -415,16 +415,16 @@ def stratified_kfold_splits(labels, k, rseed=0):
     Examples
     
     >>> labels = range(10)
-    >>> biolearning.tools.stratified_kfold_splits(labels, 2)
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
     Traceback (most recent call last):
         ...
     ValueError: 'labels' must contains only two class labels
     >>> labels = [1, 1, 1, 1, 1, 1, -1, -1, -1, -1]
-    >>> biolearning.tools.stratified_kfold_splits(labels, 2)
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
     [([8, 9, 5, 2, 1], [7, 6, 3, 0, 4]), ([7, 6, 3, 0, 4], [8, 9, 5, 2, 1])]
-    >>> biolearning.tools.stratified_kfold_splits(labels, 1)
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 1)
     [([], [7, 6, 8, 9, 3, 0, 4, 5, 2, 1])]
-    >>> biolearning.tools.stratified_kfold_splits(labels, 0)
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
     ValueError: 'k' must be greater than zero and smaller or equal than number of positive and negative samples

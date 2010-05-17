@@ -1,15 +1,15 @@
 .. _core:
 
 *************************************
-Main functions (:class:`biolearning`)
+Main functions (:class:`l1l2py`)
 *************************************
-.. currentmodule:: biolearning
+.. currentmodule:: l1l2py
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 
-   import biolearning
+   import l1l2py
    import numpy
 
 

@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'biolearning'
+project = u'L1L2Py'
 copyright = u'2010, SlipGURU'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -171,7 +171,7 @@ html_use_modindex = False
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'biolearningdoc'
+htmlhelp_basename = 'l1l2pydoc'
 
 # Pngmath should try to align formulas properly
 pngmath_use_preview = True
@@ -192,7 +192,7 @@ latex_paper_size = 'a4'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'biolearning.tex', u'biolearning Documentation',
+  ('index', 'l1l2py.tex', u'L1L2Py Documentation',
    u'SlipGURU', 'manual'),
 ]
 

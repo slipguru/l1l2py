@@ -4,8 +4,6 @@
 Algorithms (:mod:`l1l2py.algorithms`)
 ******************************************
 .. currentmodule:: l1l2py.algorithms
-.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
-.. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 

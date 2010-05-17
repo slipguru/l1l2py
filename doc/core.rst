@@ -4,8 +4,6 @@
 Main functions (:class:`l1l2py`)
 *************************************
 .. currentmodule:: l1l2py
-.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
-.. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 

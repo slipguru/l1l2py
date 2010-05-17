@@ -1,4 +1,4 @@
-.. _biolearning:
+.. _l1l2py:
 
 ***********************
 l1l2py Reference
@@ -7,6 +7,9 @@ l1l2py Reference
 :Release: |version|
 :Date: |today|
 :Homepage: http://slipguru.disi.unige.it/homepage_code_url
+
+.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
+.. moduleauthor:: Annalisa Barla <annalisa.barla@disi.unige.it>
 
 **l1l2py** is a Python package to perform feature selection by means
 of l1l2 regularization with double optimization following the procedure

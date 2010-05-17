@@ -4,8 +4,6 @@
 Tools (:mod:`l1l2py.tools`)
 *********************************
 .. currentmodule:: l1l2py.tools
-.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
-.. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 
 .. testsetup:: *
 

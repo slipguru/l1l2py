@@ -36,7 +36,7 @@ The optimal solution is found in two different stages:
   loop for a fixed and small value of the correlation parameter :math:`\mu`.
        
   The function performs exactly the pesudocode described in
-  [DeMol09b]_ (pag.7).
+  [DeMol09b]_ (pag.7 - Stage I).
 
 
 * **Stage II** (:func:`nested_models`)

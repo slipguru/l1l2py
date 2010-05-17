@@ -12,8 +12,8 @@ l1l2py Reference
 of l1l2 regularization with double optimization following the procedure
 described in [DeMol09b]_.
 
-l1l2py makes use of Numpy (ref.) to provide fast N-dimensional array
-manipulation. It is licensed under GNU GPL (?).
+l1l2py makes use of `NumPy <http://numpy.scipy.org/>`_ to provide fast
+N-dimensional array manipulation. It is licensed under GNU GPL (?).
 
 l1l2py is based on the minimization of the (naive) l1l2 functional
 introduced in [Zou05]_ using the algorithm studied from the

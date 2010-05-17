@@ -21,22 +21,23 @@ def model_selection(data, labels, test_data, test_labels,
     r"""Implements the complete model selection procedure.
 
     It executes two stages implemented in ``minimal_model`` and
-    ``nested_models``, and returns their concatenated output.
+    ``nested_models``, and returns their output wrapped in a dictionary.
     
-    Note that the error function calculated in the Stage I could have more than
-    one minimum.
+    Note that the error function calculated in the *Stage I* could have more
+    than one minimum.
     
     Default is to select, **in the set of (tau, lambda) pairs
     with minimum error**, the less sparse but more regularized
     solution (minimum value of ``tau`` and maximum value of ``lambda``).
     
-    Is possible to set the boolean parameters ``sparse`` and ``regularized`` to
-    change this behaviour.
+    It's possible to set the boolean parameters ``sparse`` and ``regularized``
+    to change this behaviour.
 
     .. note::
 
-        See the function documentation for details on each stage and the meaning
-        of each parameter.
+        See the functions documentation for details on each stage and the
+        meaning of each parameter. In the following section **Parameters** are
+        described only ``sparse`` and ``regularized`` parameters.
         
     Parameters
     ----------
@@ -65,9 +66,9 @@ def model_selection(data, labels, test_data, test_labels,
             [STAGE II] Models calculated for each value in ``mu_range``.
         **selected_list** : list of M (D,) ndarray of boolean
             [STAGE II] Selected variables for each models calculated.
-        **err_ts_list** : list of M float
+        **err_ts_list** : list of M floats
             [STAGE II] Testing error for the models calculated.
-        **err_tr_list** : list of M float
+        **err_tr_list** : list of M floats
             [STAGE II] Training error for the models calculated.
         **prediction_ts_list** : list of M two dimensional ndarray, optional
             [STAGE II] Prediction vectors for the models calculated on the test
@@ -136,24 +137,24 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     Given a supervised training set (``data`` and ``labels``), for the fixed
     value of ``mu`` (should be minimum), finds the values in ``tau_range``
-    and ``lambda_range`` with minimum performance error via cross validation.
-    (see error functions in :mod:`biolearning.tools`).
+    and ``lambda_range`` with minimum performance error via cross validation
+    (see error functions in :mod:`l1l2py.tools`).
 
     Cross validation splits must be provided (``cv_splits``) as a list
     of pairs containing traning-set and validation-set indexes
-    (see cross validation tools in :mod:`biolearning.tools`).
+    (see cross validation tools in :mod:`l1l2py.tools`).
 
     Data and labels will be normalized on each split using the function
     ``data_normalizer`` and ``labels_normalizer``.
-    (see data normalization functions in :mod:`biolearning.tools`).
+    (see data normalization functions in :mod:`l1l2py.tools`).
 
     .. warning ::
 
         On each cross validation split the number of non-empty model could be
-        different (on high value of tau).
+        different (on high value of ``tau``).
 
-        The function calculates the optimum value of tau for wich the model is
-        non-empty on every cross validation split.
+        The function calculates the optimum value of ``tau`` for wich the model
+        is non-empty on every cross validation split.
 
     Parameters
     ----------
@@ -163,29 +164,30 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         Labels vector.
     mu : float
         Minimum `l2` norm penalty (`l1l2` functional).
-    tau_range : array_like of float
+    tau_range : array_like of floats
         `l1` norm penalties (`l1l2` functional).
-    lambda_range : array_like of float
+    lambda_range : array_like of floats
         `l2` norm penalties (`RLS` functional).
     cv_splits : array_like of tuples
         Each tuple contains two lists with the training set and testing set
-        indexes, like the output of the cross validation tools
-        in :mod:`biolearning.tools`.
+        indexes.
     error_function : function object
-        A function like the error functions in :mod:`biolearning.tools`.
-    data_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
-    labels_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
+        Cross validation error function.
+    data_normalizer : function object, optional (default is `None`)
+        Data normalization function.
+    labels_normalizer : function object, optional (default is `None`)
+        Labels normalization function.
 
     Returns
     -------
-    err_ts : (T, L) ndarray, optional (see `Notes`)
+    err_ts : (T, L) ndarray
         Matrix with cross validation error on the training set.
-    err_tr : (T, L) ndarray, optional (see `Notes`)
+    err_tr : (T, L) ndarray
         Matrix with cross validation error on the training set.
+
+    See Also
+    --------
+    l1l2py.tools
 
     """
 
@@ -236,46 +238,44 @@ def nested_models(data, labels, test_data, test_labels,
                   mu_range, tau, lambda_, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   return_predictions=False):
-    r"""Generates the models with the almost nested lists of features.
+    r"""Generates the models with the (almost) nested lists of selected
+    variables.
 
     Given a supervised training set (``data`` and ``labels``) and test set
     (``test_data`` and ``test_labels``), for the fixed value of ``tau``
-    and ``lambda`` (should be the optimum calculated
-    with :func:`minimal_model`), calculates one model for each incerasing value
-    in ``mu_range``.
+    and ``lambda`` (should be the optimums calculated after the Stage I),
+    calculates one model for each incerasing value in ``mu_range``.
 
     Data and labels will be normalized using the function ``data_normalizer``
-    and ``labels_normalizer``.
-    (see data normalization functions in :mod:`biolearning.tools`).
+    and ``labels_normalizer`` (see data normalization
+    functions in :mod:`l1l2py.tools`).
 
-    The function also returns test and training error using the
-    ``error_function`` provided.
-    (see error functions in :mod:`biolearning.tools`).
+    The function returns test and training error using the
+    ``error_function`` provided (see error functions
+    in :mod:`l1l2py.tools`).
 
     Parameters
     ----------
-    data : (N1, D) ndarray
+    data : (N, D) ndarray
         Data matrix.
-    labels : (N1,)  or (N1, 1) ndarray
+    labels : (N,)  or (N, 1) ndarray
         Labels vector.
-    test_data : (N2, D) ndarray
+    test_data : (T, D) ndarray
         Test set matrix.
-    test_labels : (N2,)  or (N2, 1) ndarray
+    test_labels : (T,)  or (T, 1) ndarray
         Test set labels vector.
-    mu_range : array_like of float
+    mu_range : array_like of M floats
         `l2` norm penalties (`l1l2` functional).
     tau : float
         Optimal `l1` norm penalty (`l1l2` functional).
     lambda_: float
         Optimal `l2` norm penalty (`RLS` functional).
     error_function : function object
-        A function like the error functions in :mod:`biolearning.tools`.
-    data_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
-    labels_normalizer : function object
-        A function like the data normalization functions in
-        :mod:`biolearning.tools`.
+        Error function.
+    data_normalizer : function object, optional (default is `None`)
+        Data normalization function.
+    labels_normalizer : function object, optional (default is `None`)
+        Labels normalization function.
 
     Returns
     -------
@@ -283,16 +283,20 @@ def nested_models(data, labels, test_data, test_labels,
         Models calculated for each value in ``mu_range``.
     selected_list : list of M (D,) ndarray of boolean
         Selected feature for each models calculated.
-    err_ts_list : list of M float
+    err_ts_list : list of M floats
         Testing error for the models calculated.
-    err_tr_list : list of M float
+    err_tr_list : list of M floats
         Training error for the models calculated.
-    prediction_ts_list : list of M (N2, 1) ndarray
+    prediction_ts_list : list of M (T, 1) ndarray
         Prediction vector calculated for each value in ``mu_range`` on the
         test set.
-    prediction_tr_list : list of M (N1, 1) ndarray
+    prediction_tr_list : list of M (N, 1) ndarray
         Prediction vector calculated for each value in ``mu_range`` on the
         training set.
+        
+    See Also
+    --------
+    l1l2py.tools
 
     """
 

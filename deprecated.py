@@ -4,7 +4,62 @@ from limbo import _functional, _sigma
 
 import numpy as np
 import math
- 
+
+def l1_bounds(data, labels, eps=1e-5):
+    r"""Estimation of useful bounds for the l1 penalty term.
+    
+    Finds the minimum and maximum value for the :math:`tau` parameter in the
+    :math:`\ell_1\ell_2` regularization.
+    
+    Fixing :math:`\mu` close to `0.0`, and using the maximum value,
+    the model will contain only one variable, instead
+    using the minimum value, the model will contain (approximately) a number
+    of variables equal to the number of different correlated groups
+    of variables.
+    
+    .. warning
+    
+        ``data`` and ``labels`` parameters are assumed already normalized.
+        That is, bounds are right if you run the :math:`\ell_1\ell_2`
+        regularization algorithm with the same data.
+    
+    Parameters
+    ----------
+    data : (N, D) ndarray
+        Data matrix.
+    labels : (N,)  or (N, 1) ndarray
+        Labels vector.
+    eps : float, optional (default is `1e-5`)
+        Correction parametr (see `Returns`).
+        
+    Returns
+    -------
+    tau_min : float
+        Minimum tau + ``eps``
+    tau_max : float
+        Maximum tau - ``eps``
+        
+    Raises
+    ------
+    ValueError
+        If ``tau_max`` or ``tau_min`` are negative or ``tau_max`` <= ``tau_min``
+    
+    """
+    n = data.shape[0]
+    corr = np.abs(np.dot(data.T, labels))
+
+    tau_min = (corr.min() * (2.0/n)) + eps    
+    tau_max = (corr.max() * (2.0/n)) - eps
+      
+    if tau_max < 0:
+        raise ValueError("'eps' has produced negative 'tau_max'")
+    if tau_min < 0:
+        raise ValueError("'eps' has produced negative 'tau_min'")
+    if tau_max <= tau_min:
+        raise ValueError("'eps' has produced 'tau_max' less or equal 'tau_min'")
+    
+    return tau_min, tau_max
+
     
 def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
                               tolerance=1e-5, returns_iterations=False):

@@ -1,36 +1,29 @@
-r"""Internal algorithms implementation.
+r"""Internal algorithms implementations.
 
-The :mod:`algorithms` module defines core numerical optimizazion algorithms:
-
-* :func:`ridge_regression`
-* :func:`l1_bounds`
-* :func:`l1l2_regularization`
-* :func:`l1l2_path`
+This module contains the functions strictly related with the statistical
+elaboration of the data.
 
 """
 
-__all__ = ['l1_bounds', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
+__all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 import numpy as np
 import math
 
-def l1_bounds(data, labels, eps=1e-5):
-    r"""Estimation of useful bounds for the l1 penalty term.
+def l1_bound(data, labels):
+    r"""Estimation of an useful maximum bound for the `l1` penalty term.
+       
+    Fixing ``mu`` close to `0.0` and using the maximum value calculated with
+    this function as ``tau`` in the `l1l2` regularization, the solution vector
+    contains only zero elements.
     
-    Finds the minimum and maximum value for the :math:`tau` parameter in the
-    :math:`\ell_1\ell_2` regularization.
-    
-    Fixing :math:`\mu` close to `0.0`, and using the maximum value,
-    the model will contain only one variable, instead
-    using the minimum value, the model will contain (approximately) a number
-    of variables equal to the number of different correlated groups
-    of variables.
-    
+    For each value of ``tau`` smaller than the maximum bound the solution vector
+    contains at least one non zero element.
+        
     .. warning
     
-        ``data`` and ``labels`` parameters are assumed already normalized.
-        That is, bounds are right if you run the :math:`\ell_1\ell_2`
-        regularization algorithm with the same data.
+        That is, bounds are right if you run the `l1l2` regularization
+        algorithm with the same data matrices.
     
     Parameters
     ----------
@@ -38,42 +31,36 @@ def l1_bounds(data, labels, eps=1e-5):
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
-    eps : float, optional (default is `1e-5`)
-        Correction parametr (see `Returns`).
         
     Returns
     -------
-    tau_min : float
-        Minimum tau + ``eps``
     tau_max : float
-        Maximum tau - ``eps``
+        Maximum ``tau``.
         
-    Raises
-    ------
-    ValueError
-        If ``tau_max`` or ``tau_min`` are negative or ``tau_max`` <= ``tau_min``
-    
+    Examples
+    --------
+    >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
+    >>> beta = numpy.array([0.1, 0.1, 0.0])
+    >>> Y = numpy.dot(X, beta)
+    >>> tau_max = l1l2py.algorithms.l1_bound(X, Y)
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max)
+    array([ 0.,  0.,  0.])
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5)
+    array([  0.00000000e+00,   3.45622120e-06,   0.00000000e+00])
+           
     """
     n = data.shape[0]
     corr = np.abs(np.dot(data.T, labels))
 
-    tau_min = (corr.min() * (2.0/n)) + eps    
-    tau_max = (corr.max() * (2.0/n)) - eps
-      
-    if tau_max < 0:
-        raise ValueError("'eps' has produced negative 'tau_max'")
-    if tau_min < 0:
-        raise ValueError("'eps' has produced negative 'tau_min'")
-    if tau_max <= tau_min:
-        raise ValueError("'eps' has produced 'tau_max' less or equal 'tau_min'")
-    
-    return tau_min, tau_max
+    tau_max = (corr.max() * (2.0/n))
+         
+    return tau_max
 
 def ridge_regression(data, labels, mu=0.0):
-    r"""Implementation of Regularized Least Squares.
+    r"""Implementation of the Regularized Least Squares solver.
 
-    Finds the RLS model with ``mu`` parameter associated with its
-    :math:`\ell_2` norm (see `Notes`).
+    Solves the ridge regression problem with parameter ``mu`` on the
+    `l2-norm`.
 
     Parameters
     ----------
@@ -82,20 +69,22 @@ def ridge_regression(data, labels, mu=0.0):
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
     mu : float, optional (default is `0.0`)
-        :math:`\ell_2` norm penalty.
+        `l2-norm` penalty.
 
     Returns
     --------
     beta : (D,) or (D, 1) ndarray
-        RLS model.
+        Ridge regression solution.
 
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
-    >>> y = numpy.dot(X, beta)
-    >>> beta_rls = l1l2py.algorithms.ridge_regression(X, y)
-    >>> numpy.allclose(beta, beta_rls)
+    >>> Y = numpy.dot(X, beta)
+    >>> l1l2py.algorithms.ridge_regression(X, Y, 1e3)
+    array([  2.92871765e-05,   1.69054825e-04,   5.45274610e-05])
+    >>> beta_ls = l1l2py.algorithms.ridge_regression(X, Y)
+    >>> numpy.allclose(beta, beta_ls)
     True
 
     """
@@ -116,23 +105,30 @@ def ridge_regression(data, labels, mu=0.0):
 
         return np.dot(tmp, np.dot(data.T, labels))
 
-def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
-              tolerance=1e-6):
-    r"""Implementation of Regularized Least Squares path with
-    :math:`\ell_1\ell_2` penalty.
+    r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
+    to solve a least squares problem with `l1l2` penalty.
 
-    Finds the :math:`\ell_1\ell_2` regularization path for each value in
-    ``tau_range`` and fixed value of ``mu``.
+    Solves the `l1l2` regularization problem with parameter ``mu`` on the
+    `l2-norm` and parameter ``tau`` on the `l1-norm`."""
+
+
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
+              tolerance=1e-5):
+    r"""Efficient solution of different `l1l2` regularization problems on
+    increasing values of the `l1-norm` parameter.
+
+    Finds the `l1l2` regularization path for each value in ``tau_range`` and
+    fixed value of ``mu``.
 
     The values in ``tau_range`` are used during the computation in reverse
-    order, while the output path has the same ordering of the :math:`\tau`
-    values.
+    order, while the output path has the same ordering of the `tau` values.
 
     .. warning ::
 
-        The number of models can differ the number of :math:`\tau` values.
-        The functions returns only the model with at least one non-zero feature.
-        For very high value of :math:`\tau` a model could have all `0s`.
+        The number of solutions can differ the lenght of ``tau_range``.
+        The functions returns only the solutions with at least one non-zero
+        element.
+        For very high value of `tau` a solution could have all zero values.
 
     Parameters
     ----------
@@ -141,23 +137,21 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     labels : (N,) or (N, 1) ndarray
         Labels vector.
     mu : float
-        :math:`\ell_2` norm penalty.
+        `l2-norm` penalty.
     tau_range : array_like of float
-        :math:`\ell_1` norm penalties.
+        `l1-norm` penalties in increasing order.
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
-        Starting value of the iterations
-        (see :func:`l1l2_regularization` `Notes`).
+        Starting value of the iterations.
         If `None`, then iterations starts from the empty model.
-    kmax : int, optional (default is :math:`10^5`)
+    kmax : int, optional (default is `1e5`)
         Maximum number of iterations.
-    tolerance : float, optional (default is :math:`10^{-6}`)
+    tolerance : float, optional (default is `1e-6`)
         Convergence tolerance.
-        (see :func:`l1l2_regularization` `Notes`).
 
     Returns
     -------
     beta_path : list of (D,) or (D, 1) ndarrays
-        :math:`\ell_1\ell_2` models with at least one nonzero feature.
+        `l1l2` solutions with at least one non-zero element.
 
     """
     from collections import deque
@@ -169,7 +163,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         beta = np.zeros((d, 1))
 
     out = deque()
-    nonzero = 0 # <<---- CHECK!!!
+    nonzero = 0
     for tau in reversed(tau_range):
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls
@@ -177,7 +171,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
             beta_next = l1l2_regularization(data, labels, mu, tau, beta,
                                             kmax, tolerance)
 
-        if len(beta_next.nonzero()[0]) > 0:
+        nonzero = len(beta_next.nonzero()[0])
+        if nonzero > 0:
             out.appendleft(beta_next)
 
         beta = beta_next
@@ -186,12 +181,11 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                         tolerance=1e-5, returns_iterations=False):
-    r"""Implementation of Regularized Least Squares with
-    :math:`\ell_1\ell_2` penalty.
+    r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
+    to solve a least squares problem with `l1l2` penalty.
 
-    Finds the :math:`\ell_1\ell_2` model with ``mu`` parameter associated with
-    its :math:`\ell_2` norm and ``tau`` parameter associated with its
-    :math:`\ell_1` norm (see `Notes`).
+    Solves the `l1l2` regularization problem with parameter ``mu`` on the
+    `l2-norm` and parameter ``tau`` on the `l1-norm`.
     
     Parameters
     ----------
@@ -200,16 +194,16 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     labels : (N,) or (N, 1) ndarray
         Labels vector.
     mu : float
-        :math:`\ell_2` norm penalty.
+        `l2-norm` penalty.
     tau : float
-        :math:`\ell_1` norm penalty.
+        `l1-norm` penalty.
     beta : (D,) or (D, 1) ndarray, optional (default is `None`)
-        Starting value of the iterations (see `Notes`).
+        Starting value for the iterations.
         If `None`, then iterations starts from the empty model.
-    kmax : int, optional (default is :math:`10^5`)
+    kmax : int, optional (default is `1e5`)
         Maximum number of iterations.
-    tolerance : float, optional (default is :math:`10^{-6}`)
-        Convergence tolerance (see `Notes`).
+    tolerance : float, optional (default is `1e-6`)
+        Convergence tolerance.
     returns_iterations : bool, optional (default is `False`)
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
@@ -218,21 +212,20 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     Returns
     -------
     beta : (D,) or (D, 1) ndarray
-        :math:`\ell_1\ell_2` model.
+        `l1l2` solution.
     k : int, optional
         Number of iterations performed.
         
-   
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
-    >>> y = numpy.dot(X, beta)
-    >>> beta_rls = l1l2py.algorithms.l1l2_regularization(X, y, 0.0, 0.0)
-    >>> numpy.allclose(beta, beta_rls)
-    True
-    >>> l1l2py.algorithms.l1l2_regularization(X, y, 0.1, 0.1)
+    >>> Y = numpy.dot(X, beta)
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1)
     array([ 0.        ,  0.07715517,  0.        ])
+    >>> beta_ls = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0)
+    >>> numpy.allclose(beta, beta_ls)
+    True
 
     """
     n = data.shape[0]

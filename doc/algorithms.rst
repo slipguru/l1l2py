@@ -1,8 +1,8 @@
 .. _algorithms:
 
-******************************************
+*************************************
 Algorithms (:mod:`l1l2py.algorithms`)
-******************************************
+*************************************
 .. currentmodule:: l1l2py.algorithms
 
 .. testsetup:: *
@@ -11,62 +11,87 @@ Algorithms (:mod:`l1l2py.algorithms`)
    import numpy
 
 
-Introduction
-============
-.. automodule:: l1l2py.algorithms
+In order to describe the function implemented in this module, we have to assume
+some notation.
+
+Assuming to have a centered data matrix
+:math:`\mathbf{X} \in \mathbb{R}^{n \times d}` and a column vector of
+regression values :math:`\mathbf{Y} \in \mathbb{R}^n` or binary labels
+:math:`\mathbf{Y} \in \{-1, 1\}^n`, we want to minimize the
+regression/classification error solving a Regularized Least Square (RLS)
+problem.
+
+In this module are implemented two main algorithms. The first one solves a
+classical RLS problem with a penalty on the :math:`\ell_2\text{-norm}`
+of the vector :math:`\boldsymbol{\beta}` (also called :func:`ridge_regression`)
+
+.. math::
+    \boldsymbol{\beta^*} =
+        {\text{argmin}}_{\boldsymbol{\beta}}
+            \Big\{
+            \frac{1}{n} \| \mathbf{Y} - \mathbf{X}\boldsymbol{\beta} \|_2^2
+            + \mu \|\boldsymbol{\beta}\|_2^2
+            \Big\},
+    :label: rls
+
+with :math:`\mu > 0`.
+
+The second one minimize a functional with a linear combination of two penalties
+on the :math:`\ell_1\text{-norm}` and :math:`\ell_2\text{-norm}` fo the vector
+:math:`\boldsymbol{\beta}` (also called :func:`l1l2_regularization`)
     
-RLS minimizes the following objective function:
+.. math::
+    \boldsymbol{\beta^*} =
+        {\text{argmin}}_{\boldsymbol{\beta}}
+            \Big\{
+            \frac{1}{n} \| \mathbf{Y} - \mathbf{X}\boldsymbol{\beta} \|_2^2
+            + \mu \|\boldsymbol{\beta}\|_2^2 
+            + \tau \|\boldsymbol{\beta}\|_1  
+            \Big\},
+    :label: l1l2
+
+with :math:`\mu > 0` and :math:`\tau > 0`.
+
+
+Implementation details
+======================
+While :eq:`rls` has closed solution, for :eq:`l1l2` there are many different
+approachs. In this module we provide an Iterative Shrinkage-Thresholding
+Algorithm (ISTA) proposed in [DeMol09a]_.
+
+Starting from a zero vector, each step updates the value of
+:math:`\boldsymbol{\beta}` until convergence:
 
 .. math::
-
-    \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2
-
-finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
-matrix and :math:`Y` contains the ``labels``.
-
-:math:`\ell_1\ell_2` minimizes the following objective function:
-
-.. math::
-
-    \frac{1}{N} \| Y - X\beta \|_2^2 + \mu \|\beta\|_2^2 + \tau \|\beta\|_1
-
-finding the optimal model :math:`\beta^*`, where :math:`X` is the ``data``
-matrix and :math:`Y` contains the ``labels``.
-
-The computation is iterative, each step updates the value of :math:`\beta`
-until the convergence is reached ??:
-
-.. math::
-
-    \beta^{(k+1)} = \mathbf{S}_{\frac{\tau}{\sigma}} (
-                        (1 - \frac{\mu}{\sigma})\beta^k +
-                        \frac{1}{n\sigma}X^T[Y - X\beta^k]
+    \boldsymbol{\beta}^{(k+1)} =
+        \mathbf{S}_{\frac{\tau}{\sigma}} (
+                        (1 - \frac{\mu}{\sigma})\boldsymbol{\beta}^k +
+                        \frac{1}{n\sigma}
+                            \mathbf{X^T}[\mathbf{Y} -
+                                         \mathbf{X}\boldsymbol{\beta}^k]
                     )
 
 where, :math:`\mathbf{S}_{\gamma > 0}` is the soft-thresholding function
 
-    .. math::
-
-    \mathbf{S}_{\gamma}(x) = sign(x) max(0, | x | - \frac{\gamma}{2})
-
-Moreover, the function implements a *MFISTA* modification, wich
-increases with quadratic factor the convergence rate of the algorithm.
+.. math::
+    \mathbf{S}_{\gamma}(x) = \text{sign}(x) \text{max}(0, | x | - \gamma/2)
 
 The constant :math:`\sigma` is a (theorically optimal) step size wich
 depends by the data:
 
 .. math::
+    \sigma = \frac{a + b}{2n} + \mu,
+    
+where :math:`a` and :math:`b` are the maximum and the minimum eigenvalues of
+the matrix :math:`\mathbf{X^T}\mathbf{X}`.
 
-    \sigma = \frac{\|X^T X\|}{N} + \mu
-
-The convergence is reached when:
+The convergence is reached when for each :math:`j \in \{0,\dots,d\}`:
 
 .. math::
+    | \beta_j^k - \beta_j^{k-1} | \leq | \beta_j^k | * (tol/k),
 
-    \|\beta^k - \beta^{k-1}\| \leq \|\beta^k\| * tolerance
-
-but the algorithm will be stop when the maximum number of iteration
-is reached.
+where :math:`tol > 0` and until :math:`k` is under a fixed maximum number of
+iteration.
 
 Regularization Algorithms
 =========================
@@ -75,5 +100,5 @@ Regularization Algorithms
 
 Utility Functions
 =================
-.. autofunction:: l1_bounds
+.. autofunction:: l1_bound
 .. autofunction:: l1l2_path

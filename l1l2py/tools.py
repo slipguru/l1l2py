@@ -1,20 +1,7 @@
 r"""Miscellaneous useful tools.
 
-The :mod:`tools` module contains four type of functions:
-
-* Range generators
-    - :func:`linear_range`
-    - :func:`geometric_range`
-* Data Normalization
-    - :func:`center`
-    - :func:`standardize`
-* Error calculation
-    - :func:`classification_error`
-    - :func:`balanced_classification_error`
-    - :func:`regression_error`
-* Cross Validation utilities
-    - :func:`kfold_splits`
-    - :func:`stratified_kfold_splits`
+In this module are implemented some common function to use in combination
+with the rest of the package.
 
 """
 
@@ -41,17 +28,17 @@ def linear_range(min_value, max_value, number):
 
     Returns
     -------
-    range : ndarray
+    range : (``number``, ) ndarray
 
     Examples
     --------    
-    >>> l1l2py.tools.linear_range(0.0, 10.0, 4)
+    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=4)
     array([  0.        ,   3.33333333,   6.66666667,  10.        ])
-    >>> l1l2py.tools.linear_range(0.0, 10.0, 2)
+    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=2)
     array([  0.,  10.])
-    >>> l1l2py.tools.linear_range(0.0, 10.0, 1)
+    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=1)
     array([ 0.])
-    >>> l1l2py.tools.linear_range(0.0, 10.0, 0)
+    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=0)
     array([], dtype=float64)
 
     """
@@ -71,7 +58,7 @@ def geometric_range(min_value, max_value, number):
 
     Returns
     -------
-    range : ndarray
+    range : (``number``, ) ndarray
 
     Raises
     ------
@@ -80,19 +67,19 @@ def geometric_range(min_value, max_value, number):
 
     Examples
     --------
-    >>> l1l2py.tools.geometric_range(0.0, 10.0, 4)
+    >>> l1l2py.tools.geometric_range(min_value=0.0, max_value=10.0, number=4)
     Traceback (most recent call last):
         ...
     ZeroDivisionError: float division
-    >>> l1l2py.tools.geometric_range(0.1, 10.0, 4)
+    >>> l1l2py.tools.geometric_range(min_value=0.1, max_value=10.0, number=4)
     array([ 0.1       ,  0.46415888,  2.15443469, 10.        ])
-    >>> l1l2py.tools.geometric_range(0.1, 10.0, 2)
+    >>> l1l2py.tools.geometric_range(min_value=0.1, max_value=10.0, number=2)
     array([  0.1,  10. ])
-    >>> l1l2py.tools.geometric_range(0.1, 10.0, 1)
+    >>> l1l2py.tools.geometric_range(min_value=0.1, max_value=10.0, number=1)
     Traceback (most recent call last):
         ...
     ZeroDivisionError: float division
-    >>> l1l2py.tools.geometric_range(0.1, 10.0, 0)
+    >>> l1l2py.tools.geometric_range(min_value=0.1, max_value=10.0, number=0)
     array([], dtype=float64)
 
     """
@@ -100,72 +87,16 @@ def geometric_range(min_value, max_value, number):
     return min_value * (ratio ** np.arange(number))
 
 # Normalization ---------------------------------------------------------------
-def standardize(matrix, optional_matrix=None, return_factors=False):
-    r"""Standardize columns of a matrix.
-
-    Returns the standardized ``matrix`` given as input.
-    Optionally standardizes an ``optional_matrix`` with respect to
-    mean and standard deviation calculated for ``matrix``.
-
-    Parameters
-    ----------
-    matrix : (N,) or (N, D) ndarray
-        Input matrix whose columns are to be standardized
-        to mean `0` and standard deviation `1`.
-    optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
-        Optional matrix whose columns are to be standardized
-        using mean and standard deviation of ``matrix``.
-        It must have same number of columns as ``matrix``.
-    return_factors : bool, optional (default is `False`)
-        If `True`, returns mean and standard deviation of ``matrix``.
-
-    Returns
-    -------
-    matrix_standardized : (N,) or (N, D) ndarray
-        Standardized ``matrix``.
-    optional_matrix_standardized : (N,) or (N, D) ndarray, optional
-        Standardized ``optional_matrix`` with respect to ``matrix``
-    mean : float or (D,) ndarray, optional
-        Mean of ``matrix`` columns.
-    std : float or (D,) ndarray, optional
-        Standard deviation of ``matrix`` columns.
-
-    Examples
-    --------
-    >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
-    >>> l1l2py.tools.standardize(X)
-    array([[-0.70710678, -0.70710678, -0.70710678],
-           [ 0.70710678,  0.70710678,  0.70710678]])
-    >>> l1l2py.tools.standardize(X, return_factors=True)
-    (array([[-0.70710678, -0.70710678, -0.70710678],
-           [ 0.70710678,  0.70710678,  0.70710678]]), array([ 2.5,  3.5,  4.5]), array([ 2.12132034,  2.12132034,  2.12132034]))
-    >>> x = numpy.array([1, 2, 3])
-    >>> l1l2py.tools.standardize(x)
-    array([-1.,  0.,  1.])
-
-    """
-    mean = matrix.mean(axis=0)
-    std = matrix.std(axis=0, ddof=1)
-
-    # Simple case
-    if optional_matrix is None and return_factors is False:
-        return (matrix - mean)/std
-
-    if optional_matrix is None: # than return_factors is True
-        return (matrix - mean)/std, mean, std
-
-    if return_factors is False: # ... with p not None
-        return (matrix - mean)/std, (optional_matrix - mean)/std
-
-    # Full case
-    return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
-
 def center(matrix, optional_matrix=None, return_mean=False):
     r"""Center columns of a matrix.
 
     Returns the centered ``matrix`` given as input.
     Optionally centers an ``optional_matrix`` with respect to mean calculated
     for ``matrix``.
+    
+    .. note::
+    
+        A one dimensional matrix is considered as a column vector.
 
     Parameters
     ----------
@@ -196,10 +127,17 @@ def center(matrix, optional_matrix=None, return_mean=False):
     >>> l1l2py.tools.center(X, return_mean=True)
     (array([[-1.5, -1.5, -1.5],
            [ 1.5,  1.5,  1.5]]), array([ 2.5,  3.5,  4.5]))
-    >>> x = numpy.array([1, 2, 3])
-    >>> l1l2py.tools.center(x)
-    array([-1.,  0.,  1.])
-
+    >>> x = numpy.array([[1, 2, 3]])             # 2-dimensional matrix
+    >>> l1l2py.tools.center(x, return_mean=True)
+    (array([[ 0.,  0.,  0.]]), array([ 1.,  2.,  3.]))
+    >>> x = numpy.array([1, 2, 3])               # 1-dimensional matrix
+    >>> l1l2py.tools.center(x, return_mean=True) # centered as a (3, 1) matrix
+    (array([-1.,  0.,  1.]), 2.0)
+    >>> l1l2py.tools.center(X, X[:,:2])
+    Traceback (most recent call last):
+        ...
+    ValueError: shape mismatch: objects cannot be broadcast to a single shape
+    
     """
     mean = matrix.mean(axis=0)
 
@@ -216,15 +154,97 @@ def center(matrix, optional_matrix=None, return_mean=False):
     # Full case
     return (matrix - mean, optional_matrix - mean, mean)
 
+def standardize(matrix, optional_matrix=None, return_factors=False):
+    r"""Standardize columns of a matrix.
+
+    Returns the standardized ``matrix`` given as input.
+    Optionally standardizes an ``optional_matrix`` with respect to
+    mean and standard deviation calculated for ``matrix``.
+    
+    .. note::
+    
+        A one dimensional matrix is considered as a column vector.
+
+    Parameters
+    ----------
+    matrix : (N,) or (N, D) ndarray
+        Input matrix whose columns are to be standardized
+        to mean `0` and standard deviation `1`.
+    optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
+        Optional matrix whose columns are to be standardized
+        using mean and standard deviation of ``matrix``.
+        It must have same number of columns as ``matrix``.
+    return_factors : bool, optional (default is `False`)
+        If `True`, returns mean and standard deviation of ``matrix``.
+
+    Returns
+    -------
+    matrix_standardized : (N,) or (N, D) ndarray
+        Standardized ``matrix``.
+    optional_matrix_standardized : (N,) or (N, D) ndarray, optional
+        Standardized ``optional_matrix`` with respect to ``matrix``
+    mean : float or (D,) ndarray, optional
+        Mean of ``matrix`` columns.
+    std : float or (D,) ndarray, optional
+        Standard deviation of ``matrix`` columns.
+        
+    Raises
+    ------
+    ValueError
+        If ``matrix`` has only one row.
+
+    Examples
+    --------
+    >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
+    >>> l1l2py.tools.standardize(X)
+    array([[-0.70710678, -0.70710678, -0.70710678],
+           [ 0.70710678,  0.70710678,  0.70710678]])
+    >>> l1l2py.tools.standardize(X, return_factors=True)
+    (array([[-0.70710678, -0.70710678, -0.70710678],
+           [ 0.70710678,  0.70710678,  0.70710678]]), array([ 2.5,  3.5,  4.5]), array([ 2.12132034,  2.12132034,  2.12132034]))
+    >>> x = numpy.array([[1, 2, 3]])                     # 1 row matrix
+    >>> l1l2py.tools.standardize(x, return_factors=True)
+    Traceback (most recent call last):
+        ...
+    ValueError: 'matrix' must have more than one row
+    >>> x = numpy.array([1, 2, 3])                       # 1-dimensional matrix
+    >>> l1l2py.tools.standardize(x, return_factors=True) # standardized as a (3, 1) matrix
+    (array([-1.,  0.,  1.]), 2.0, 1.0)
+    >>> l1l2py.tools.center(X, X[:,:2])
+    Traceback (most recent call last):
+        ...
+    ValueError: shape mismatch: objects cannot be broadcast to a single shape
+
+    """
+    
+    if matrix.ndim == 2 and matrix.shape[0] == 1:
+        raise ValueError("'matrix' must have more than one row")
+    
+    mean = matrix.mean(axis=0)
+    std = matrix.std(axis=0, ddof=1)
+
+    # Simple case
+    if optional_matrix is None and return_factors is False:
+        return (matrix - mean)/std
+
+    if optional_matrix is None: # than return_factors is True
+        return (matrix - mean)/std, mean, std
+
+    if return_factors is False: # ... with p not None
+        return (matrix - mean)/std, (optional_matrix - mean)/std
+
+    # Full case
+    return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
+
 # Error functions -------------------------------------------------------------
-def classification_error(labels, predicted):
+def classification_error(labels, predictions):
     r"""Returns classification error.
 
-    The classification error is based on the sign of the ``predicted`` values,
+    The classification error is based on the sign of the ``predictions`` values,
     with respect to the sign of the data ``labels``.
 
     The function assumes that ``labels`` contain positive number for first
-    class and negative numbers for the second one (see `Notes`).
+    class and negative numbers for the second one.
 
     .. warning::
 
@@ -235,7 +255,7 @@ def classification_error(labels, predicted):
     ----------
     labels : array_like, shape (N,)
         Classification labels (usually contains only 1s and -1s).
-    predicted : array_like, shape (N,)
+    predictions : array_like, shape (N,)
         Classification labels predicted.
 
     Returns
@@ -245,34 +265,37 @@ def classification_error(labels, predicted):
    
     Examples
     --------    
-    >>> l1l2py.tools.classification_error([1, 1, 1], [1, 1, 1])
+    >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[1, 1, 1])
     0.0
-    >>> l1l2py.tools.classification_error([1, 1, 1], [1, 1, -1])
+    >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[1, 1, -1])
     0.33333333333333331
-    >>> l1l2py.tools.classification_error([1, 1, 1], [1, -1, -1])
+    >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[1, -1, -1])
     0.66666666666666663
-    >>> l1l2py.tools.classification_error([1, 1, 1], [-1, -1, -1])
+    >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[-1, -1, -1])
     1.0
-    >>> l1l2py.tools.classification_error([1, 1, 1], [10, -2, -3])
+    >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[10, -2, -3])
     0.66666666666666663
 
     """
-    difference = (np.sign(labels) != np.sign(predicted))
-    return difference[difference].size / float(len(labels))
+    difference = (np.sign(labels) != np.sign(predictions))
+    return len(*difference.nonzero()) / float(len(labels))
 
-def balanced_classification_error(labels, predicted):
+def balanced_classification_error(labels, predictions, error_weights=None):
     r"""Returns classification error balanced across the size of classes.
 
-    Using similar algorithm as in :func:`classification_error`,
-    this function returns a biased classification error,
-    assigning greater weight to the errors belonging to the smaller class.
+    This function returns a biased classification error.
+    With the default value for ``error_weights``, the function
+    assign greater weight to the errors belonging to the smaller class.
 
     Parameters
     ----------
     labels : array_like, shape (N,)
         Classification labels (usually contains only 1s and -1s).
-    predicted : array_like, shape (N,)
+    predictions : array_like, shape (N,)
         Classification labels predicted.
+    error_weights : array_line, shape (N,), optional (default is None)
+        Classification error weigths. If `None` the default weights are calculated
+        removing from each value in ``labels`` their mean value.
 
     Returns
     -------
@@ -281,35 +304,38 @@ def balanced_classification_error(labels, predicted):
 
     Examples
     --------    
-    >>> l1l2py.tools.balanced_classification_error([1, 1, 1], [-1, -1, -1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[1, 1, 1], predictions=[-1, -1, -1])
     0.0
-    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [-1, 1, 1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, 1])
     0.0
-    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [1, -1, -1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[1, -1, -1])
     0.88888888888888895
-    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [1, 1, 1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[1, 1, 1])
     0.44444444444444442
-    >>> l1l2py.tools.balanced_classification_error([-1, 1, 1], [-1, 1, -1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, -1])
     0.22222222222222224
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, -1], error_weights=[1, 1, 1])
+    0.33333333333333331
 
     """
-    balance_factors = np.abs(center(np.asarray(labels)))
+    if error_weights is None:
+        error_weights = np.abs(center(np.asarray(labels)))
 
-    errors = (np.sign(labels) != np.sign(predicted)) * balance_factors
+    errors = (np.sign(labels) != np.sign(predictions)) * error_weights
     return errors.sum() / float(len(labels))
 
-def regression_error(labels, predicted):
+def regression_error(labels, predictions):
     r"""Returns regression error.
 
     The regression error is the sum of the quadratic difference between the
-    ``labels`` value and the ``predicted`` values, over the number of
-    samples (see `Notes`).
+    ``labels`` values and the ``predictions`` values, over the number of
+    samples.
 
     Parameters
     ----------
     labels : array_like, shape (N,)
         Regression labels.
-    predicted : array_like, shape (N,)
+    predictions : array_like, shape (N,)
         Regression labels predicted.
 
     Returns
@@ -318,7 +344,7 @@ def regression_error(labels, predicted):
         Regression error calculated.
 
     """
-    difference = np.asarray(labels) - np.asarray(predicted)
+    difference = np.asarray(labels) - np.asarray(predictions)
     return np.dot(difference.T, difference) / float(len(labels))
 
 # KCV tools -------------------------------------------------------------------
@@ -330,45 +356,39 @@ def kfold_splits(labels, k, rseed=0):
     and the indexes of the testing set.
 
     Parameters
-    
+    ----------
     labels : array_like, shape (N,)
-        Data labels (for this function is important only its length).
+        Data labels.
     k : int, greater than `0`
         Number of splits.
     rseed : int, optional (default is `0`)
         Random seed.
 
     Returns
-    
+    -------
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
 
     Raises
-    
+    ------
     ValueError
-        If ``k`` is negative or greater than number of `labels`.
-
-    See Also
-    
-    stratified_kfold_splits
+        If ``k`` is lesser than 2 or greater than number of `labels`.
 
     Examples
-    
+    --------
     >>> labels = range(10)
     >>> l1l2py.tools.kfold_splits(labels, 2)
     [([7, 1, 3, 6, 8], [9, 4, 0, 5, 2]), ([9, 4, 0, 5, 2], [7, 1, 3, 6, 8])]
     >>> l1l2py.tools.kfold_splits(labels, 1)
-    [([], [9, 4, 0, 5, 2, 7, 1, 3, 6, 8])]
-    >>> l1l2py.tools.kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
-    ValueError: 'k' must be greater than zero and smaller or equal than number of samples
+    ValueError: 'k' must be greater than one and smaller or equal than number of samples
 
     """
 
-    if not (0 < k <= len(labels)):
-        raise ValueError("'k' must be greater than zero and smaller or equal "
+    if not (2 <= k <= len(labels)):
+        raise ValueError("'k' must be greater than one and smaller or equal "
                          "than number of samples")
 
     random.seed(rseed)
@@ -378,15 +398,15 @@ def kfold_splits(labels, k, rseed=0):
     return _splits(indexes, k)
 
 def stratified_kfold_splits(labels, k, rseed=0):
-    r"""Returns k-fold cross validation stratified splits.
+    r"""Returns stratified k-fold cross validation splits.
 
-    This function is a variation of :func:`kfold_splits`, which
+    This function is a variation of ``kfold_splits``, which
     returns stratified splits. The divisions are made by holding
     the percentage of samples for each class, assuming that two-class problem
     is given.
 
     Parameters
-    
+    ----------
     labels : array_like, shape (N,)
         Data labels (usually contains only 1s and -1s).
     k : int, greater than `0`
@@ -395,25 +415,21 @@ def stratified_kfold_splits(labels, k, rseed=0):
         Random seed.
 
     Returns
-    
+    -------
     splits : list of ``k`` tuples
         Each tuple contains two lists with the training set and testing set
         indexes.
 
     Raises
-    
+    ------
     ValueError
         If `labels` contains more than two classes labels.
     ValueError
-        If ``k`` is negative or greater than number of positive or negative
+        If ``k`` is lesser than 2 or greater than number of positive or negative
         samples in `labels`.
 
-    See Also
-    
-    kfold_splits
-
     Examples
-    
+    --------
     >>> labels = range(10)
     >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
     Traceback (most recent call last):
@@ -423,11 +439,9 @@ def stratified_kfold_splits(labels, k, rseed=0):
     >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
     [([8, 9, 5, 2, 1], [7, 6, 3, 0, 4]), ([7, 6, 3, 0, 4], [8, 9, 5, 2, 1])]
     >>> l1l2py.tools.stratified_kfold_splits(labels, 1)
-    [([], [7, 6, 8, 9, 3, 0, 4, 5, 2, 1])]
-    >>> l1l2py.tools.stratified_kfold_splits(labels, 0)
     Traceback (most recent call last):
         ...
-    ValueError: 'k' must be greater than zero and smaller or equal than number of positive and negative samples
+    ValueError: 'k' must be greater than one and smaller or equal than number of positive and negative samples
 
     """
     classes = np.unique(labels)
@@ -438,8 +452,8 @@ def stratified_kfold_splits(labels, k, rseed=0):
     n_indexes = (np.where(labels == classes[0])[0]).tolist()
     p_indexes = (np.where(labels == classes[1])[0]).tolist()
 
-    if not (0 < k <= min(len(n_indexes), len(p_indexes))):
-        raise ValueError("'k' must be greater than zero and smaller or equal "
+    if not (2 <= k <= min(len(n_indexes), len(p_indexes))):
+        raise ValueError("'k' must be greater than oen and smaller or equal "
                          "than number of positive and negative samples")
 
     random.shuffle(n_indexes)
@@ -457,13 +471,17 @@ def stratified_kfold_splits(labels, k, rseed=0):
     return splits
 
 def _splits(indexes, k):
-    """Splits the 'indexes' list in input in k disjoint chunks."""
+    r"""Splits the 'indexes' list in input in k disjoint chunks.
+    
+    """
     return [(indexes[:start] + indexes[end:], indexes[start:end])
                 for start, end in _split_dimensions(len(indexes), k)]
 
 def _split_dimensions(num_items, num_splits):
-    """Generator wich gives the pairs of indexes to split 'num_items' data
-       in 'num_splits' chunks. """
+    r"""Generator wich gives the pairs of indexes to split 'num_items' data
+       in 'num_splits' chunks.
+    
+    """
     start = 0
     remaining_items = float(num_items)
 

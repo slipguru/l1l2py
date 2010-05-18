@@ -22,37 +22,58 @@ class TestErrorFunctions(object):
 
     def test_classification_error(self):
         labels = np.ones(100)
-        predicted = labels.copy()
+        predictions = labels.copy()
         for exp_error in (0.0, 0.5, 0.75, 1.0):
             index = exp_error*100
-            predicted[0:index] = -1
-            error = classification_error(labels, predicted)
+            predictions[0:index] = -1
+            error = classification_error(labels, predictions)
             assert_almost_equals(exp_error, error)
 
     def test_regression_error(self):
         beta = alg.ridge_regression(self.X, self.Y)
-        predicted = np.dot(self.X, beta)
+        predictions = np.dot(self.X, beta)
 
-        error = regression_error(self.Y, predicted)
+        error = regression_error(self.Y, predictions)
         assert_almost_equals(0.0, error)
 
-        predicted_mod = predicted.copy()
+        predictions_mod = predictions.copy()
         for num in np.arange(0, self.Y.size, 5):
-            predicted_mod[0:num] = predicted[0:num] + 1.0
+            predictions_mod[0:num] = predictions[0:num] + 1.0
             exp_error = num / float(self.Y.size)
 
-            error = regression_error(self.Y, predicted_mod)
+            error = regression_error(self.Y, predictions_mod)
             assert_almost_equals(exp_error, error)
 
     def test_balanced_classification_error(self):
         labels = np.ones(100)
-        predicted = np.ones(100)
+        predictions = np.ones(100)
 
         for imbalance in np.linspace(10, 90, 9):
             labels[:imbalance] = -1
             exp_error = (imbalance * abs(-1 - labels.mean()))/ 100.0
 
-            error = balanced_classification_error(labels, predicted)
+            error = balanced_classification_error(labels, predictions)
 
             assert_almost_equals(exp_error, error)
+            
+    def test_balance_weights(self):
+        labels = [1, 1, -1, -1, -1]
+        predictions = [-1, -1, 1, 1, 1] # all errors
+        default_weights = np.abs(center(np.asarray(labels)))
+        
+        exp_error = balanced_classification_error(labels, predictions)
+        error = balanced_classification_error(labels, predictions, default_weights)
+        assert_equals(exp_error, error)
+        
+        null_weights = np.ones_like(labels)
+        exp_error = classification_error(labels, predictions)
+        error = balanced_classification_error(labels, predictions, null_weights)
+        assert_equals(exp_error, error)
+        
+        # Balanced classes
+        labels = [1, 1, 1, -1, -1, -1]
+        predictions = [-1, -1, -1, 1, 1, 1] # all errors
+        exp_error = classification_error(labels, predictions)
+        error = balanced_classification_error(labels, predictions)
+        assert_equals(exp_error, error)
 

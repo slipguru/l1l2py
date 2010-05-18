@@ -30,7 +30,7 @@ class TestKCVTools(object):
         labels[::2] = -1
         
         # k, out of range
-        assert_raises(ValueError, stratified_kfold_splits, labels, 0)
+        assert_raises(ValueError, stratified_kfold_splits, labels, 1)
         assert_raises(ValueError, stratified_kfold_splits, labels, 51)
         
         # More negatives (75 vs 25)

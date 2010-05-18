@@ -62,6 +62,9 @@ class TestDataTools(object):
 
         Xstd, Xstd2 = standardize(self.X, self.X)
         assert_true(np.allclose(Xstd, Xstd2))
+        
+        # One row matrix
+        assert_raises(ValueError, standardize, np.array([[1, 2, 3]]))
 
     def test_standardization_outputs(self):
         assert_equals(np.ndarray, type(standardize(self.X)))

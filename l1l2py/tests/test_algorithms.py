@@ -49,25 +49,25 @@ class TestAlgorithms(object):
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):
             beta, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                           returns_iterations=True)
+                                           return_iterations=True)
             assert_equal(beta.shape, (self.X.shape[1], 1))
 
             beta, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
                                            tolerance=1e-3,
-                                           returns_iterations=True)
+                                           return_iterations=True)
             assert_true(k2 <= k1)
 
             beta, k3 = l1l2_regularization(self.X, self.Y, mu, tau,
                                            tolerance=1e-3, kmax=100,
-                                           returns_iterations=True)
+                                           return_iterations=True)
             assert_true(k3 <= k2)
             assert_true(k3 == 100)
 
             beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                            returns_iterations=True)
+                                            return_iterations=True)
             beta2, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
                                             beta=beta1,
-                                            returns_iterations=True)
+                                            return_iterations=True)
             assert_true(k2 <= k1)
 
     def test_l1l2_path(self):
@@ -94,23 +94,23 @@ class TestAlgorithms(object):
             selected = len(b[b != 0.0])
 
             assert_true(selected <= len(b))
-            
+
     def test_l1_bound(self):
         tau_max = l1_bound(self.X, self.Y)
-        
+
         beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max)
         assert_equals(0, len(beta.nonzero()[0]))
-        
+
         beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-5)
         assert_equals(1, len(beta.nonzero()[0]))
-        
+
     def test_soft_thresholding(self):
         beta = ridge_regression(self.X, self.Y)
         for th in np.linspace(0.0, 10.0, 50):
             out = _soft_thresholding(beta, th)
-    
+
             # Verbose and slow version
             out_exp = beta - (np.sign(beta) * th/2.0)
             out_exp[np.abs(beta) <= th/2.0] = 0.0
-            
+
             assert_true(np.allclose(out, out_exp))

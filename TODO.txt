@@ -7,6 +7,3 @@
 10. TESTARE PARAMETRI INPUT SU TUTTE LE FUNZIONI (liste, array, dimensioni vuote)
     Soprattuto per la Y!!
 12. In nested models il valore di tau potrebbe generare una lista vuota? SI!
-13. Corregere "returns"
-14. Corregere tau_opt, lambda_opt!!
-

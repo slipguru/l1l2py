@@ -12,31 +12,31 @@ import math
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.
-       
+
     Fixing ``mu`` close to `0.0` and using the maximum value calculated with
     this function as ``tau`` in the `l1l2` regularization, the solution vector
     contains only zero elements.
-    
+
     For each value of ``tau`` smaller than the maximum bound the solution vector
     contains at least one non zero element.
-        
+
     .. warning
-    
+
         That is, bounds are right if you run the `l1l2` regularization
         algorithm with the same data matrices.
-    
+
     Parameters
     ----------
     data : (N, D) ndarray
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
-        
+
     Returns
     -------
     tau_max : float
         Maximum ``tau``.
-        
+
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
@@ -47,13 +47,13 @@ def l1_bound(data, labels):
     array([ 0.,  0.,  0.])
     >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5)
     array([  0.00000000e+00,   3.45622120e-06,   0.00000000e+00])
-           
+
     """
     n = data.shape[0]
     corr = np.abs(np.dot(data.T, labels))
 
     tau_max = (corr.max() * (2.0/n))
-         
+
     return tau_max
 
 def ridge_regression(data, labels, mu=0.0):
@@ -122,9 +122,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     The values in ``tau_range`` are used during the computation in reverse
     order, while the output path has the same ordering of the `tau` values.
-    
+
     .. note ::
-        
+
         For efficency purposes, if ``mu = 0.0`` and the number of non-zero
         values is higher than `N` for a given value of tau (that means k has
         reached the limit of allowed iterations), the following solutions (for
@@ -187,13 +187,13 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     return out
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
-                        tolerance=1e-5, returns_iterations=False):
+                        tolerance=1e-5, return_iterations=False):
     r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
     It solves the `l1l2` regularization problem with parameter ``mu`` on the
     `l2-norm` and parameter ``tau`` on the `l1-norm`.
-    
+
     Parameters
     ----------
     data : (N, D) ndarray
@@ -215,14 +215,14 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `10`.
-        
+
     Returns
     -------
     beta : (D,) or (D, 1) ndarray
         `l1l2` solution.
     k : int, optional
         Number of iterations performed.
-        
+
     Examples
     --------
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
@@ -261,11 +261,11 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
         beta = beta_next
 
-    if returns_iterations:
+    if return_iterations:
         return beta, k
     else:
         return beta
-    
+
 def _sigma(matrix, mu):
     n, d = matrix.shape
 

@@ -43,10 +43,10 @@ def l1_bound(data, labels):
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> Y = numpy.dot(X, beta)
     >>> tau_max = l1l2py.algorithms.l1_bound(X, Y)
-    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max)
-    array([ 0.,  0.,  0.])
-    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5)
-    array([  0.00000000e+00,   3.45622120e-06,   0.00000000e+00])
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max).T
+    array([[ 0.,  0.,  0.]])
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5).T
+    array([[  0.00000000e+00,   3.45622120e-06,   0.00000000e+00]])
 
     """
     n = data.shape[0]
@@ -73,7 +73,7 @@ def ridge_regression(data, labels, mu=0.0):
 
     Returns
     --------
-    beta : (D,) or (D, 1) ndarray
+    beta : (D, 1) ndarray
         Ridge regression solution.
 
     Examples
@@ -81,11 +81,10 @@ def ridge_regression(data, labels, mu=0.0):
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> Y = numpy.dot(X, beta)
-    >>> l1l2py.algorithms.ridge_regression(X, Y, 1e3)
-    array([  2.92871765e-05,   1.69054825e-04,   5.45274610e-05])
-    >>> beta_ls = l1l2py.algorithms.ridge_regression(X, Y)
-    >>> numpy.allclose(beta, beta_ls)
-    True
+    >>> l1l2py.algorithms.ridge_regression(X, Y, 1e3).T
+    array([[  2.92871765e-05,   1.69054825e-04,   5.45274610e-05]])
+    >>> l1l2py.algorithms.ridge_regression(X, Y).T
+    array([[  1.00000000e-01,   1.00000000e-01,   1.59093116e-16]])
 
     """
     n, d = data.shape
@@ -96,21 +95,14 @@ def ridge_regression(data, labels, mu=0.0):
             tmp += mu*n*np.eye(n)
         tmp = np.linalg.pinv(tmp)
 
-        return np.dot(np.dot(data.T, tmp), labels)
+        return np.dot(np.dot(data.T, tmp), labels.reshape(-1, 1))
     else:
         tmp = np.dot(data.T, data)
         if mu:
             tmp += mu*n*np.eye(d)
         tmp = np.linalg.pinv(tmp)
 
-        return np.dot(tmp, np.dot(data.T, labels))
-
-    r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
-    to solve a least squares problem with `l1l2` penalty.
-
-    Solves the `l1l2` regularization problem with parameter ``mu`` on the
-    `l2-norm` and parameter ``tau`` on the `l1-norm`."""
-
+        return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
               tolerance=1e-5):
@@ -218,7 +210,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     Returns
     -------
-    beta : (D,) or (D, 1) ndarray
+    beta : (D, 1) ndarray
         `l1l2` solution.
     k : int, optional
         Number of iterations performed.
@@ -228,11 +220,10 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
     >>> beta = numpy.array([0.1, 0.1, 0.0])
     >>> Y = numpy.dot(X, beta)
-    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1)
-    array([ 0.        ,  0.07715517,  0.        ])
-    >>> beta_ls = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0)
-    >>> numpy.allclose(beta, beta_ls)
-    True
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1).T
+    array([[ 0.        ,  0.07715517,  0.        ]])
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0).T
+    array([[  1.00000000e-01,   1.00000000e-01,  -1.88737914e-15]])
 
     """
     n = data.shape[0]
@@ -242,10 +233,12 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     mu_s = mu / sigma
     tau_s = tau / sigma
     XT = data.T / (n * sigma)
-    XTY = np.dot(XT, labels)
+    XTY = np.dot(XT, labels.reshape(-1, 1))
 
     if beta is None:
         beta = np.zeros_like(XTY)
+    else:
+        beta = beta.reshape(-1, 1)
 
     k, kmin = 0, 100
     th, difference = -np.inf, np.inf

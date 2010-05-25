@@ -66,9 +66,17 @@ class TestAlgorithms(object):
             beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
                                             return_iterations=True)
             beta2, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                            beta=beta1,
+                                            beta=beta1.squeeze(),
                                             return_iterations=True)
             assert_true(k2 <= k1)
+
+            beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+                                            return_iterations=True)
+            beta2, k2 = l1l2_regularization(self.X, self.Y.squeeze(), mu, tau,
+                                            return_iterations=True)
+            assert_equal(k1, k2)
+            assert_true(beta1.shape, beta2.shape)
+            assert_true(np.allclose(beta1, beta2))
 
     def test_l1l2_path(self):
         values = np.linspace(0.1, 1.0, 5)

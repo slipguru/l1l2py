@@ -55,21 +55,21 @@ class TestErrorFunctions(object):
             error = balanced_classification_error(labels, predictions)
 
             assert_almost_equals(exp_error, error)
-            
+
     def test_balance_weights(self):
         labels = [1, 1, -1, -1, -1]
         predictions = [-1, -1, 1, 1, 1] # all errors
         default_weights = np.abs(center(np.asarray(labels)))
-        
+
         exp_error = balanced_classification_error(labels, predictions)
         error = balanced_classification_error(labels, predictions, default_weights)
         assert_equals(exp_error, error)
-        
+
         null_weights = np.ones_like(labels)
         exp_error = classification_error(labels, predictions)
         error = balanced_classification_error(labels, predictions, null_weights)
         assert_equals(exp_error, error)
-        
+
         # Balanced classes
         labels = [1, 1, 1, -1, -1, -1]
         predictions = [-1, -1, -1, 1, 1, 1] # all errors
@@ -77,3 +77,21 @@ class TestErrorFunctions(object):
         error = balanced_classification_error(labels, predictions)
         assert_equals(exp_error, error)
 
+    def test_input_shape_errors(self):
+        from itertools import product
+
+        values = [1, 1, -1, -1, -1]
+        values_array = np.asarray(values)
+        values_array_2d = values_array.reshape(-1, 1)
+        values_array_2dT = values_array_2d.T
+
+        list_of_values = [values, values_array,
+                          values_array_2d, values_array_2dT]
+
+        for l, p in product(list_of_values, list_of_values):
+            assert_equal(0.0, regression_error(l, p))
+            assert_equal(0.0, classification_error(l, p))
+            assert_equal(0.0, balanced_classification_error(l, p))
+
+        print regression_error(np.asarray([[1, 1, 1],[1, 1, 1]]),
+                               np.asarray([[1, 1, 1],[1, 1, 1]]))

@@ -1,5 +1,3 @@
 1. Funzione di errore (sign)
 2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
 9. use nonzero!
-10. TESTARE PARAMETRI INPUT SU TUTTE LE FUNZIONI (liste, array, dimensioni vuote)
-    Soprattuto per la Y!!

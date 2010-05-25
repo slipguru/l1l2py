@@ -31,7 +31,7 @@ def linear_range(min_value, max_value, number):
     range : (``number``, ) ndarray
 
     Examples
-    --------    
+    --------
     >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=4)
     array([  0.        ,   3.33333333,   6.66666667,  10.        ])
     >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=2)
@@ -93,9 +93,9 @@ def center(matrix, optional_matrix=None, return_mean=False):
     Returns the centered ``matrix`` given as input.
     Optionally centers an ``optional_matrix`` with respect to mean calculated
     for ``matrix``.
-    
+
     .. note::
-    
+
         A one dimensional matrix is considered as a column vector.
 
     Parameters
@@ -137,7 +137,7 @@ def center(matrix, optional_matrix=None, return_mean=False):
     Traceback (most recent call last):
         ...
     ValueError: shape mismatch: objects cannot be broadcast to a single shape
-    
+
     """
     mean = matrix.mean(axis=0)
 
@@ -161,9 +161,9 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     Returns the standardized ``matrix`` given as input.
     Optionally standardizes an ``optional_matrix`` with respect to
     mean and standard deviation calculated for ``matrix``.
-    
+
     .. note::
-    
+
         A one dimensional matrix is considered as a column vector.
 
     Parameters
@@ -188,7 +188,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
         Mean of ``matrix`` columns.
     std : float or (D,) ndarray, optional
         Standard deviation of ``matrix`` columns.
-        
+
     Raises
     ------
     ValueError
@@ -217,10 +217,10 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     ValueError: shape mismatch: objects cannot be broadcast to a single shape
 
     """
-    
+
     if matrix.ndim == 2 and matrix.shape[0] == 1:
         raise ValueError("'matrix' must have more than one row")
-    
+
     mean = matrix.mean(axis=0)
     std = matrix.std(axis=0, ddof=1)
 
@@ -263,9 +263,9 @@ def classification_error(labels, predictions):
     -------
     error : float
         Classification error calculated.
-   
+
     Examples
-    --------    
+    --------
     >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[1, 1, 1])
     0.0
     >>> l1l2py.tools.classification_error(labels=[1, 1, 1], predictions=[1, 1, -1])
@@ -278,6 +278,9 @@ def classification_error(labels, predictions):
     0.66666666666666663
 
     """
+    labels = np.asarray(labels).squeeze()
+    predictions = np.asarray(predictions).squeeze()
+
     difference = (np.sign(labels) != np.sign(predictions))
     return len(*difference.nonzero()) / float(len(labels))
 
@@ -305,7 +308,7 @@ def balanced_classification_error(labels, predictions, error_weights=None):
         Classification error calculated.
 
     Examples
-    --------    
+    --------
     >>> l1l2py.tools.balanced_classification_error(labels=[1, 1, 1], predictions=[-1, -1, -1])
     0.0
     >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, 1])
@@ -320,8 +323,11 @@ def balanced_classification_error(labels, predictions, error_weights=None):
     0.33333333333333331
 
     """
+    labels = np.asarray(labels).squeeze()
+    predictions = np.asarray(predictions).squeeze()
+
     if error_weights is None:
-        error_weights = np.abs(center(np.asarray(labels)))
+        error_weights = np.abs(center(labels))
 
     errors = (np.sign(labels) != np.sign(predictions)) * error_weights
     return errors.sum() / float(len(labels))
@@ -346,7 +352,10 @@ def regression_error(labels, predictions):
         Regression error calculated.
 
     """
-    difference = np.asarray(labels) - np.asarray(predictions)
+    labels = np.asarray(labels).squeeze()
+    predictions = np.asarray(predictions).squeeze()
+
+    difference = labels - predictions
     return np.dot(difference.T, difference).squeeze() / float(len(labels))
 
 # KCV tools -------------------------------------------------------------------
@@ -474,7 +483,7 @@ def stratified_kfold_splits(labels, k, rseed=0):
 
 def _splits(indexes, k):
     r"""Splits the 'indexes' list in input in k disjoint chunks.
-    
+
     """
     return [(indexes[:start] + indexes[end:], indexes[start:end])
                 for start, end in _split_dimensions(len(indexes), k)]
@@ -482,7 +491,7 @@ def _splits(indexes, k):
 def _split_dimensions(num_items, num_splits):
     r"""Generator wich gives the pairs of indexes to split 'num_items' data
        in 'num_splits' chunks.
-    
+
     """
     start = 0
     remaining_items = float(num_items)

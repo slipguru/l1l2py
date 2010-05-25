@@ -70,12 +70,6 @@ Now we have to split data in training and testing set
 >>> print train_labels.shape, test_labels.shape
 (50,) (50,)
 
-TODO: delete this step updating functions!
-
->>> train_labels.shape = (50, 1)
->>> test_labels.shape = (50, 1)
-
-
 Setting parameters ranges
 -------------------------
 At this point we have to set right parameters values.

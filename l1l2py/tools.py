@@ -88,7 +88,7 @@ def geometric_range(min_value, max_value, number):
 
 # Normalization ---------------------------------------------------------------
 def center(matrix, optional_matrix=None, return_mean=False):
-    r"""Center columns of a matrix.
+    r"""Center columns of a matrix setting each column with zero mean.
 
     Returns the centered ``matrix`` given as input.
     Optionally centers an ``optional_matrix`` with respect to mean calculated
@@ -155,7 +155,8 @@ def center(matrix, optional_matrix=None, return_mean=False):
     return (matrix - mean, optional_matrix - mean, mean)
 
 def standardize(matrix, optional_matrix=None, return_factors=False):
-    r"""Standardize columns of a matrix.
+    r"""Standardize columns of a matrix setting each column with zero mean and
+    unitary standard deviation.
 
     Returns the standardized ``matrix`` given as input.
     Optionally standardizes an ``optional_matrix`` with respect to
@@ -238,13 +239,13 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 
 # Error functions -------------------------------------------------------------
 def classification_error(labels, predictions):
-    r"""Returns classification error.
+    r"""Returns the binary classification error.
 
     The classification error is based on the sign of the ``predictions`` values,
     with respect to the sign of the data ``labels``.
 
-    The function assumes that ``labels`` contain positive number for first
-    class and negative numbers for the second one.
+    The function assumes that ``labels`` contains positive values for one
+    class and negative values for the other one.
 
     .. warning::
 
@@ -281,11 +282,12 @@ def classification_error(labels, predictions):
     return len(*difference.nonzero()) / float(len(labels))
 
 def balanced_classification_error(labels, predictions, error_weights=None):
-    r"""Returns classification error balanced across the size of classes.
+    r"""Returns the binary classification error balanced
+    across the size of classes.
 
-    This function returns a biased classification error.
+    This function returns a balanced classification error.
     With the default value for ``error_weights``, the function
-    assign greater weight to the errors belonging to the smaller class.
+    assigns greater weight to the errors belonging to the smaller class.
 
     Parameters
     ----------
@@ -327,7 +329,7 @@ def balanced_classification_error(labels, predictions, error_weights=None):
 def regression_error(labels, predictions):
     r"""Returns regression error.
 
-    The regression error is the sum of the quadratic difference between the
+    The regression error is the sum of the quadratic differences between the
     ``labels`` values and the ``predictions`` values, over the number of
     samples.
 
@@ -345,7 +347,7 @@ def regression_error(labels, predictions):
 
     """
     difference = np.asarray(labels) - np.asarray(predictions)
-    return np.dot(difference.T, difference) / float(len(labels))
+    return np.dot(difference.T, difference).squeeze() / float(len(labels))
 
 # KCV tools -------------------------------------------------------------------
 def kfold_splits(labels, k, rseed=0):
@@ -373,7 +375,7 @@ def kfold_splits(labels, k, rseed=0):
     Raises
     ------
     ValueError
-        If ``k`` is lesser than 2 or greater than number of `labels`.
+        If ``k`` is less than 2 or greater than `N`.
 
     Examples
     --------
@@ -402,8 +404,8 @@ def stratified_kfold_splits(labels, k, rseed=0):
 
     This function is a variation of ``kfold_splits``, which
     returns stratified splits. The divisions are made by holding
-    the percentage of samples for each class, assuming that two-class problem
-    is given.
+    the percentage of samples for each class, assuming that the problem
+    is binary.
 
     Parameters
     ----------
@@ -425,7 +427,7 @@ def stratified_kfold_splits(labels, k, rseed=0):
     ValueError
         If `labels` contains more than two classes labels.
     ValueError
-        If ``k`` is lesser than 2 or greater than number of positive or negative
+        If ``k`` is less than 2 or greater than number of positive or negative
         samples in `labels`.
 
     Examples

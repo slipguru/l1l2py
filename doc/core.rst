@@ -54,6 +54,8 @@ This module also provide a wrapper function (:func:`model_selection`) that
 runs the two stages sequentially.
 
 
+.. _stage_i:
+
 Stage I: Minimal Model Selection
 ================================
 .. autofunction:: minimal_model

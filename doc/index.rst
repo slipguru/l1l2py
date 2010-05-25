@@ -12,15 +12,15 @@ L1L2Py Reference
 .. moduleauthor:: Annalisa Barla <annalisa.barla@disi.unige.it>
 
 **L1L2Py** is a Python package to perform feature selection by means
-of l1l2 regularization with double optimization following the procedure
-described in [DeMol09b]_.
+of :math:`\ell_1\ell_2` regularization with double optimization following
+the procedure described in [DeMol09b]_.
 
 L1L2Py makes use of `NumPy <http://numpy.scipy.org>`_ to provide fast
 N-dimensional array manipulation. It is licensed under
 `GNU GPL <http://www.gnu.org/licenses/gpl.html>`_.
 
-L1L2Py is based on the minimization of the (naive) l1l2 functional
-introduced in [Zou05]_ using the algorithm studied from the
+L1L2Py is based on the minimization of the (naive) :math:`\ell_1\ell_2`
+functional introduced in [Zou05]_ using the algorithm studied from the
 theoretical viewpoint in [DeMol09a]_.
 
 L1L2Py is the Python implementation of the one proposed and applied
@@ -36,11 +36,15 @@ The package is divided in three modules:
 .. toctree::
    :maxdepth: 2
 
+   tutorial.rst 
    core.rst
    algorithms.rst
    tools.rst
 
 :ref:`genindex`
+
+
+.. rubric:: References
 
 .. [Zou05]    H. Zou, T. Hastie,
               "Regularization and variable selection via the elastic net"

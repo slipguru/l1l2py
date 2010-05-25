@@ -11,10 +11,10 @@ Tools (:mod:`l1l2py.tools`)
    import numpy
 
 
-This module contains useful function to use in combination with the
-main function of the package.
+This module contains useful functions to be used in combination with the
+main functions of the package.
 
-The functions included in this module are divided in four group:
+The functions included in this module are divided in four groups:
 
 * :ref:`range_generators`
 * :ref:`data_normalizer`
@@ -104,7 +104,7 @@ The balanced classification error is calculated using this formula:
 
 where :math:`f(l_i, p_i)` is as defined above.
 
-With the default weigths the error function become:
+With the default weigths the error function becomes:
 
 .. math::
 

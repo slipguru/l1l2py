@@ -88,16 +88,16 @@ def model_selection(data, labels, test_data, test_labels,
     
     # KCV MINIMUM SELECTION
     err_ts = out['kcv_err_ts']
-    tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min()) 
+    tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min())
     tau_opt, lambda_opt = _minimum_selection(tau_opt_idxs, lambda_opt_idxs,
                                              sparse, regularized)
-    out['tau_opt'] = tau_opt
-    out['lambda_opt'] = lambda_opt
+    out['tau_opt'] = tau_range[tau_opt]
+    out['lambda_opt'] = lambda_range[lambda_opt]
 
     # STAGE II
     stage2_out = nested_models(data, labels,
                                test_data, test_labels,
-                               mu_range, tau_opt, lambda_opt,
+                               mu_range, out['tau_opt'], out['lambda_opt'],
                                error_function,
                                data_normalizer, labels_normalizer,
                                return_predictions)
@@ -150,11 +150,10 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     .. warning ::
 
-        On each cross validation split the number of non-empty model could be
-        different (on high value of ``tau``).
-
-        The function calculates the optimum value of ``tau`` for wich the model
-        is non-empty on every cross validation split.
+        On each cross validation split the number of valid solutions (not void)
+        could be different (on high values of ``tau``).
+        The function calculates the optimum value of ``tau`` for which the model
+        is not void on every cross validation split.
 
     Parameters
     ----------

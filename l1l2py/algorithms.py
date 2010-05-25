@@ -59,7 +59,7 @@ def l1_bound(data, labels):
 def ridge_regression(data, labels, mu=0.0):
     r"""Implementation of the Regularized Least Squares solver.
 
-    Solves the ridge regression problem with parameter ``mu`` on the
+    It solves the ridge regression problem with parameter ``mu`` on the
     `l2-norm`.
 
     Parameters
@@ -122,13 +122,20 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     The values in ``tau_range`` are used during the computation in reverse
     order, while the output path has the same ordering of the `tau` values.
+    
+    .. note ::
+        
+        For efficency purposes, if ``mu = 0.0`` and the number of non-zero
+        values is higher than `N` for a given value of tau (that means k has
+        reached the limit of allowed iterations), the following solutions (for
+        smaller values of ``tau``) are simply the least squares solutions.
 
     .. warning ::
 
-        The number of solutions can differ the lenght of ``tau_range``.
-        The functions returns only the solutions with at least one non-zero
+        The number of solutions can differ from ``len(tau_range)``.
+        The function returns only the solutions with at least one non-zero
         element.
-        For very high value of `tau` a solution could have all zero values.
+        For values higher than *tau_max* a solution could have all zero values.
 
     Parameters
     ----------
@@ -184,7 +191,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
-    Solves the `l1l2` regularization problem with parameter ``mu`` on the
+    It solves the `l1l2` regularization problem with parameter ``mu`` on the
     `l2-norm` and parameter ``tau`` on the `l1-norm`.
     
     Parameters
@@ -204,7 +211,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         Maximum number of iterations.
     tolerance : float, optional (default is `1e-6`)
         Convergence tolerance.
-    returns_iterations : bool, optional (default is `False`)
+    return_iterations : bool, optional (default is `False`)
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `10`.

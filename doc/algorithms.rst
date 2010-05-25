@@ -21,7 +21,7 @@ regression values :math:`\mathbf{Y} \in \mathbb{R}^n` or binary labels
 regression/classification error solving a Regularized Least Square (RLS)
 problem.
 
-In this module are implemented two main algorithms. The first one solves a
+In this module two main algorithms are implemented. The first one solves a
 classical RLS problem with a penalty on the :math:`\ell_2\text{-norm}`
 of the vector :math:`\boldsymbol{\beta}` (also called :func:`ridge_regression`)
 
@@ -36,8 +36,8 @@ of the vector :math:`\boldsymbol{\beta}` (also called :func:`ridge_regression`)
 
 with :math:`\mu > 0`.
 
-The second one minimize a functional with a linear combination of two penalties
-on the :math:`\ell_1\text{-norm}` and :math:`\ell_2\text{-norm}` fo the vector
+The second one minimizes a functional with a linear combination of two penalties
+on the :math:`\ell_1\text{-norm}` and :math:`\ell_2\text{-norm}` of the vector
 :math:`\boldsymbol{\beta}` (also called :func:`l1l2_regularization`)
     
 .. math::
@@ -55,12 +55,12 @@ with :math:`\mu > 0` and :math:`\tau > 0`.
 
 Implementation details
 ======================
-While :eq:`rls` has closed solution, for :eq:`l1l2` there are many different
-approachs. In this module we provide an Iterative Shrinkage-Thresholding
-Algorithm (ISTA) proposed in [DeMol09a]_.
+While :eq:`rls` has closed-form solution, for :eq:`l1l2` there are many
+different approaches. In this module we provide an Iterative
+Shrinkage-Thresholding Algorithm (ISTA) proposed in [DeMol09a]_.
 
-Starting from a zero vector, each step updates the value of
-:math:`\boldsymbol{\beta}` until convergence:
+Starting from a null vector :math:`\boldsymbol{\beta}`, each step updates
+the value of :math:`\boldsymbol{\beta}` until convergence:
 
 .. math::
     \boldsymbol{\beta}^{(k+1)} =
@@ -76,8 +76,8 @@ where, :math:`\mathbf{S}_{\gamma > 0}` is the soft-thresholding function
 .. math::
     \mathbf{S}_{\gamma}(x) = \text{sign}(x) \text{max}(0, | x | - \gamma/2)
 
-The constant :math:`\sigma` is a (theorically optimal) step size wich
-depends by the data:
+The constant :math:`\sigma` is a (theorically optimal) step size which
+depends on the data:
 
 .. math::
     \sigma = \frac{a + b}{2n} + \mu,
@@ -85,13 +85,13 @@ depends by the data:
 where :math:`a` and :math:`b` are the maximum and the minimum eigenvalues of
 the matrix :math:`\mathbf{X^T}\mathbf{X}`.
 
-The convergence is reached when for each :math:`j \in \{0,\dots,d\}`:
+The convergence is reached when for each :math:`j \in \{0,\dots,d-1\}`:
 
 .. math::
     | \beta_j^k - \beta_j^{k-1} | \leq | \beta_j^k | * (tol/k),
 
-where :math:`tol > 0` and until :math:`k` is under a fixed maximum number of
-iteration.
+where :math:`tol > 0` and before :math:`k` reaches a fixed maximum number of
+iterations.
 
 Regularization Algorithms
 =========================

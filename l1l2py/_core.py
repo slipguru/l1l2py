@@ -22,14 +22,14 @@ def model_selection(data, labels, test_data, test_labels,
 
     It executes two stages implemented in ``minimal_model`` and
     ``nested_models``, and returns their output wrapped in a dictionary.
-    
+
     Note that the error function calculated in the *Stage I* could have more
     than one minimum.
-    
+
     Default is to select, **in the set of (tau, lambda) pairs
     with minimum error**, the less sparse but more regularized
     solution (minimum value of ``tau`` and maximum value of ``lambda``).
-    
+
     It's possible to set the boolean parameters ``sparse`` and ``regularized``
     to change this behaviour.
 
@@ -38,7 +38,7 @@ def model_selection(data, labels, test_data, test_labels,
         See the functions documentation for details on each stage and the
         meaning of each parameter. In the following section **Parameters** are
         described only ``sparse`` and ``regularized`` parameters.
-        
+
     Parameters
     ----------
     sparse : bool, optional (default is `False`)
@@ -47,13 +47,13 @@ def model_selection(data, labels, test_data, test_labels,
     regularized : bool, optional (default is `True`)
         If `True` select one of the more regularized solution with minimum cross
         validation error after the STAGE I.
-        
+
     Returns
     -------
     out : dict
         Output dictionary. According with the parameter the dictionary has
         the following keys:
-        
+
         **kcv_err_ts** : (T, L) ndarray
             [STAGE I] Cross validation error on the training set.
         **kcv_err_tr** : (T, L) ndarray
@@ -85,7 +85,7 @@ def model_selection(data, labels, test_data, test_labels,
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer)
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
-    
+
     # KCV MINIMUM SELECTION
     err_ts = out['kcv_err_ts']
     tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min())
@@ -101,33 +101,33 @@ def model_selection(data, labels, test_data, test_labels,
                                error_function,
                                data_normalizer, labels_normalizer,
                                return_predictions)
-    
+
     keys = ['beta_list', 'selected_list', 'err_ts_list', 'err_tr_list']
     if return_predictions:
         keys.append('prediction_ts_list')
         keys.append('prediction_tr_list')
-    
+
     out.update(it.izip(keys, stage2_out))
-    
+
     return out
-    
+
 def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
     r"""Selection of the miminum error coordinates.
-    
+
     Given two ranges of minimum errors coordinates selects
     the right pair according to the two parameters sparse, regularized.
-    
+
     """
-    
+
     from collections import defaultdict
-    
+
     d = defaultdict(list)
     for t, l in it.izip(tau_idxs, lambda_idxs):
         d[t].append(l)
-    
+
     tau_idx = max(d.keys()) if sparse else min(d.keys())
     lam_idx = max(d[tau_idx]) if regularized else min(d[tau_idx])
-    
+
     return tau_idx, lam_idx
 
 def minimal_model(data, labels, mu, tau_range, lambda_range,
@@ -138,15 +138,15 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     Given a supervised training set (``data`` and ``labels``), for the fixed
     value of ``mu`` (should be minimum), finds the values in ``tau_range``
     and ``lambda_range`` with minimum performance error via cross validation
-    (see error functions in :mod:`l1l2py.tools`).
+    (see error functions in the ``l1l2py.tools`` module).
 
     Cross validation splits must be provided (``cv_splits``) as a list
     of pairs containing traning-set and validation-set indexes
-    (see cross validation tools in :mod:`l1l2py.tools`).
+    (see cross validation tools in the ``l1l2py.tools`` module).
 
     Data and labels will be normalized on each split using the function
     ``data_normalizer`` and ``labels_normalizer``.
-    (see data normalization functions in :mod:`l1l2py.tools`).
+    (see data normalization functions in the ``l1l2py.tools`` module).
 
     .. warning ::
 
@@ -183,10 +183,6 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         Matrix with cross validation error on the training set.
     err_tr : (T, L) ndarray
         Matrix with cross validation error on the training set.
-
-    See Also
-    --------
-    l1l2py.tools
 
     """
 
@@ -246,12 +242,12 @@ def nested_models(data, labels, test_data, test_labels,
     calculates one model for each incerasing value in ``mu_range``.
 
     Data and labels will be normalized using the function ``data_normalizer``
-    and ``labels_normalizer`` (see data normalization
-    functions in :mod:`l1l2py.tools`).
+    and ``labels_normalizer`` (see data normalization functions
+    in the ``l1l2py.tools`` module).
 
     The function returns test and training error using the
     ``error_function`` provided (see error functions
-    in :mod:`l1l2py.tools`).
+    in the ``l1l2py.tools`` module).
 
     Parameters
     ----------
@@ -292,10 +288,6 @@ def nested_models(data, labels, test_data, test_labels,
     prediction_tr_list : list of M (N, 1) ndarray
         Prediction vector calculated for each value in ``mu_range`` on the
         training set.
-        
-    See Also
-    --------
-    l1l2py.tools
 
     """
 
@@ -309,11 +301,11 @@ def nested_models(data, labels, test_data, test_labels,
     selected_list = list()
     err_ts_list = list()
     err_tr_list = list()
-    
+
     if return_predictions:
         prediction_ts_list = list()
         prediction_tr_list = list()
-    
+
     for mu in mu_range:
         beta = l1l2_regularization(data, labels, mu, tau)
         selected = (beta.flat != 0)
@@ -325,10 +317,10 @@ def nested_models(data, labels, test_data, test_labels,
 
         prediction_ts = np.dot(test_data[:, selected], beta)
         err_ts_list.append(error_function(test_labels, prediction_ts))
-        
+
         prediction_tr = np.dot(data[:, selected], beta)
         err_tr_list.append(error_function(labels, prediction_tr))
-        
+
         if return_predictions:
             prediction_ts_list.append(prediction_ts)
             prediction_tr_list.append(prediction_tr)

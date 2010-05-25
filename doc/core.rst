@@ -32,7 +32,7 @@ The optimal solution is found in two different stages:
   This stage aims at selecting the optimal pair of regularization parameters
   :math:`\tau_{opt}` and :math:`\lambda_{opt}` within a k-fold cross validation
   loop for a fixed and small value of the correlation parameter :math:`\mu`.
-       
+
   The function performs exactly the pesudocode described in
   [DeMol09b]_ (pag.7 - Stage I).
 
@@ -53,7 +53,6 @@ The optimal solution is found in two different stages:
 This module also provide a wrapper function (:func:`model_selection`) that
 runs the two stages sequentially.
 
-
 .. _stage_i:
 
 Stage I: Minimal Model Selection
@@ -67,6 +66,3 @@ Stage II: Nested lists generation
 Complete model selection
 ========================
 .. autofunction:: model_selection
-
-
-

@@ -55,9 +55,9 @@ def model_selection(data, labels, test_data, test_labels,
         the following keys:
 
         **kcv_err_ts** : (T, L) ndarray
-            [STAGE I] Cross validation error on the training set.
+            [STAGE I] Mean cross validation errors on the training set.
         **kcv_err_tr** : (T, L) ndarray
-            [STAGE I] Cross validation error on the training set.
+            [STAGE I] Mean cross validation errors on the training set.
         **tau_opt** : float
             Optimal value of tau selected in ``tau_range``.
         **lambda_opt** : float
@@ -163,9 +163,9 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         Labels vector.
     mu : float
         Minimum `l2` norm penalty (`l1l2` functional).
-    tau_range : array_like of floats
+    tau_range : array_like of `T` floats
         `l1` norm penalties (`l1l2` functional).
-    lambda_range : array_like of floats
+    lambda_range : array_like `L` of floats
         `l2` norm penalties (`RLS` functional).
     cv_splits : array_like of tuples
         Each tuple contains two lists with the training set and testing set
@@ -179,10 +179,12 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     Returns
     -------
-    err_ts : (T, L) ndarray
-        Matrix with cross validation error on the training set.
-    err_tr : (T, L) ndarray
-        Matrix with cross validation error on the training set.
+    err_ts : (< T, L) ndarray
+        Matrix with mean cross validation error on the training set.
+        The first dimension depends on the number of valid ``tau`` values.
+    err_tr : (< T, L) ndarray
+        Matrix with mean cross validation error on the training set.
+        The first dimension depends on the number of valid ``tau`` values.
 
     """
 

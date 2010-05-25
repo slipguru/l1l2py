@@ -1,8 +1,5 @@
 1. Funzione di errore (sign)
 2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
-3. Funzione Dataset correlato
-4. Tutorial
-8. In core indicare che si ritornano gli errori medi sugli split!
 9. use nonzero!
 10. TESTARE PARAMETRI INPUT SU TUTTE LE FUNZIONI (liste, array, dimensioni vuote)
-    Soprattuto per la Y!!   
+    Soprattuto per la Y!!

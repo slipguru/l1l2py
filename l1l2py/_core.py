@@ -289,6 +289,12 @@ def nested_models(data, labels, test_data, test_labels,
         Prediction vector calculated for each value in ``mu_range`` on the
         training set.
 
+    Raises
+    ------
+    ValueError
+        If the given value of ``tau`` produces a void solution with the
+        given data.
+
     """
 
     if not data_normalizer is None:
@@ -309,6 +315,10 @@ def nested_models(data, labels, test_data, test_labels,
     for mu in mu_range:
         beta = l1l2_regularization(data, labels, mu, tau)
         selected = (beta.flat != 0)
+
+        if not selected.any():
+            raise ValueError("the given value of 'tau' produces a void "
+                             "solution with the given data")
 
         beta = ridge_regression(data[:, selected], labels, lambda_)
 

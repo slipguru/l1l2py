@@ -19,24 +19,24 @@ class TestCore(object):
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
         assert_equals((30, 1), self.Y.shape)
-        
+
     def test_minimum_selection(self):
         from l1l2py._core import _minimum_selection
         range1 = (0, 0, 1, 1)
         range2 = (0, 1, 0, 1)
-        
+
         # default: NOT sparse and NOT regularized
         out = _minimum_selection(range1, range2)
         assert_equals((0, 0), out)
-        
+
         # sparse and NOT regularized
         out = _minimum_selection(range1, range2, sparse=True)
         assert_equals((1, 0), out)
-        
+
         # NOT sparse and regularized
         out = _minimum_selection(range1, range2, regularized=True)
         assert_equals((0, 1), out)
-        
+
         # sparse and regularized
         out = _minimum_selection(range1, range2, sparse=True, regularized=True)
         assert_equals((1, 1), out)
@@ -69,7 +69,7 @@ class TestCore(object):
         assert_equals(len(mu_range), len(out['selected_list']))
         assert_equals(len(mu_range), len(out['err_ts_list']))
         assert_equals(len(mu_range), len(out['err_tr_list']))
-        
+
         # Predictions
         out = model_selection(data, labels, test_data, test_labels,
                       mu_range, tau_range, lambda_range,
@@ -80,14 +80,14 @@ class TestCore(object):
                       labels_normalizer=tools.center,
                       return_predictions=True)
         assert_equals(10, len(out))
-        
+
         assert_equals(len(mu_range), len(out['prediction_ts_list']))
         assert_equals(len(mu_range), len(out['prediction_tr_list']))
-        
+
         for p in out['prediction_ts_list']:
             assert_equals(len(test_labels), len(p))
         for p in out['prediction_tr_list']:
-            assert_equals(len(labels), len(p))    
+            assert_equals(len(labels), len(p))
 
     def test_minimal_model(self):
         from l1l2py import tools
@@ -164,7 +164,7 @@ class TestCore(object):
             s = selected_list[i]
 
             assert_true(len(s_prev[s_prev]) <= len(s[s]))
-            
+
     def test_nested_models_predictions(self):
         from l1l2py import tools
         splits = tools.kfold_splits(self.Y, 2)
@@ -181,4 +181,18 @@ class TestCore(object):
                             labels_normalizer=tools.center,
                             return_predictions=True)
         assert_equals(6, len(out))
-        
+
+    def test_nested_model_void(self):
+        from l1l2py import tools
+        data, test_data = np.vsplit(self.X, 2)
+        labels, test_labels = np.vsplit(self.Y, 2)
+
+        tau_opt, lambda_opt = (50.0, 0.1)
+        mu_range = tools.linear_range(0.1, 1.0, 10)
+
+        assert_raises(ValueError, nested_models,
+                                  data, labels, test_data, test_labels,
+                                  mu_range, tau_opt, lambda_opt,
+                                  error_function=tools.regression_error,
+                                  data_normalizer=tools.standardize,
+                                  labels_normalizer=tools.center)

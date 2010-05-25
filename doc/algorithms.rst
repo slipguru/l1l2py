@@ -27,7 +27,7 @@ of the vector :math:`\boldsymbol{\beta}` (also called :func:`ridge_regression`)
 
 .. math::
     \boldsymbol{\beta^*} =
-        {\text{argmin}}_{\boldsymbol{\beta}}
+        \argmin_{\boldsymbol{\beta}}
             \Big\{
             \frac{1}{n} \| \mathbf{Y} - \mathbf{X}\boldsymbol{\beta} \|_2^2
             + \mu \|\boldsymbol{\beta}\|_2^2
@@ -39,14 +39,14 @@ with :math:`\mu > 0`.
 The second one minimizes a functional with a linear combination of two penalties
 on the :math:`\ell_1\text{-norm}` and :math:`\ell_2\text{-norm}` of the vector
 :math:`\boldsymbol{\beta}` (also called :func:`l1l2_regularization`)
-    
+
 .. math::
     \boldsymbol{\beta^*} =
-        {\text{argmin}}_{\boldsymbol{\beta}}
+        \argmin_{\boldsymbol{\beta}}
             \Big\{
             \frac{1}{n} \| \mathbf{Y} - \mathbf{X}\boldsymbol{\beta} \|_2^2
-            + \mu \|\boldsymbol{\beta}\|_2^2 
-            + \tau \|\boldsymbol{\beta}\|_1  
+            + \mu \|\boldsymbol{\beta}\|_2^2
+            + \tau \|\boldsymbol{\beta}\|_1
             \Big\},
     :label: l1l2
 
@@ -81,7 +81,7 @@ depends on the data:
 
 .. math::
     \sigma = \frac{a + b}{2n} + \mu,
-    
+
 where :math:`a` and :math:`b` are the maximum and the minimum eigenvalues of
 the matrix :math:`\mathbf{X^T}\mathbf{X}`.
 

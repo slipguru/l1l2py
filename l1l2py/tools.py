@@ -319,7 +319,8 @@ def balanced_classification_error(labels, predictions, error_weights=None):
     0.44444444444444442
     >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, -1])
     0.22222222222222224
-    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, -1], error_weights=[1, 1, 1])
+    >>> l1l2py.tools.balanced_classification_error(labels=[-1, 1, 1], predictions=[-1, 1, -1],
+    ...                                            error_weights=[1, 1, 1])
     0.33333333333333331
 
     """

@@ -54,7 +54,7 @@ def correlated_dataset(num_samples, num_variables, groups, weights,
     The regression values will be generated as
 
     .. math::
-        \mathbf{Y} = \mathbf{\tilde{X}} \cdot \boldsymbol{\tilde{\beta}} + \epsilon_y,
+        \mathbf{Y} = \mathbf{\tilde{X}}\boldsymbol{\tilde{\beta}} + \epsilon_y,
 
     where :math:`\boldsymbol{\tilde{\beta}}` is the ``weights`` parameter, a
     list of ``sum(groups)`` coefficients of the relevant variables,

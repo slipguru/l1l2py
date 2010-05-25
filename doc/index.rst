@@ -1,8 +1,8 @@
 .. _l1l2py:
 
-***********************
-L1L2Py Reference
-***********************
+********************
+L1L2Py Documentation
+********************
 
 :Release: |version|
 :Date: |today|
@@ -31,12 +31,10 @@ Starting from the minimal list, the second stage selects the family of
 (almost completely) nested lists of relevant variables for increasing values
 of linear correlation.
 
-The package is divided in three modules:
-
 .. toctree::
    :maxdepth: 2
 
-   tutorial.rst 
+   tutorial.rst
    core.rst
    algorithms.rst
    tools.rst

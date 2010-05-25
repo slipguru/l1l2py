@@ -84,7 +84,8 @@ using the function :func:`l1l2py.algorithms.l1_bound`.
 We can see that using this parameter to solve a *Lasso* optimization problem,
 we get a void solution.
 
->>> beta = l1l2py.algorithms.l1l2_regularization(train_data_centered, train_labels, 0.0, tau_max)
+>>> beta = l1l2py.algorithms.l1l2_regularization(train_data_centered,
+...                                              train_labels, 0.0, tau_max)
 >>> print np.allclose(np.zeros_like(beta), beta)
 True
 
@@ -95,8 +96,10 @@ of sparse solution
 
 >>> tau_max = tau_max - 1e-2
 >>> tau_min = tau_max * 1e-2
->>> beta_max = l1l2py.algorithms.l1l2_regularization(train_data_centered, train_labels, 0.0, tau_max)
->>> beta_min = l1l2py.algorithms.l1l2_regularization(train_data_centered, train_labels, 0.0, tau_min)
+>>> beta_max = l1l2py.algorithms.l1l2_regularization(train_data_centered,
+...                                                  train_labels, 0.0, tau_max)
+>>> beta_min = l1l2py.algorithms.l1l2_regularization(train_data_centered,
+...                                                  train_labels, 0.0, tau_min)
 >>> print len(beta_max.nonzero()[0]), len(beta_min.nonzero()[0])
 1 11
 

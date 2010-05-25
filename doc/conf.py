@@ -30,8 +30,8 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'matplotlib.sphinxext.only_directives',
               'matplotlib.sphinxext.plot_directive',
-              'numpydoc'
-	    ]
+              'numpydoc',
+	     ]
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -41,7 +41,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8'
+source_encoding = 'utf-8'
 
 # The master toctree document.
 master_doc = 'index'
@@ -120,12 +120,12 @@ html_theme_path = ['.']
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'slipGURUTheme/logo_html.png'
+html_logo = '_static/l1l2py_logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'slipGURUTheme/favicon.ico' 
+html_favicon = 'slipGURUTheme/static/favicon.ico'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -174,9 +174,8 @@ htmlhelp_basename = 'l1l2pydoc'
 pngmath_use_preview = True
 
 # Pngmath options
-#pngmath_dvipng_args = ['-gamma', '1.5', '-D', '110', '-bg', 'Transparent']
 pngmath_dvipng_args = ['-gamma 1.5', '-D 110', '-bg', 'Transparent']
-
+pngmath_latex_preamble = r"\newcommand{\argmin}{\operatornamewithlimits{argmin}}"
 
 # -- Options for LaTeX output --------------------------------------------------
 
@@ -195,7 +194,8 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'slipGURUTheme/logo_pdf.png'
+#latex_logo = 'slipGURUTheme/static/logo_pdf.png'
+latex_logo = '_static/l1l2py_logo_pdf.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -204,6 +204,7 @@ latex_logo = 'slipGURUTheme/logo_pdf.png'
 # Additional stuff for the LaTeX preamble.
 latex_preamble = r'''
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \DeclareUnicodeCharacter{00A0}{\nobreakspace}
 
 % In the parameters section, place a newline after the Parameters
@@ -222,6 +223,9 @@ latex_preamble = r'''
 % Fix footer/header
 \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\thechapter.\ #1}}{}}
 \renewcommand{\sectionmark}[1]{\markright{\MakeUppercase{\thesection.\ #1}}}
+
+% Argmin operator
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
 '''
 
 # Documents to append as an appendix to all manuals.
@@ -266,4 +270,3 @@ matplotlib.rcParams.update({
     'figure.subplot.wspace': 0.4,
     'text.usetex': False,
 })
-

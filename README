@@ -1,0 +1,30 @@
+L1L2Py (l1l2py) is a Python package to perform feature selection by means 
+of l1-l2 regularization with double optimization following the procedure 
+described in [DeMol09].
+
+l1l2py makes use of NumPy (http://numpy.scipy.org/) to provide fast 
+N-dimensional array manipulation.
+
+TODO:::::::::::::
+l1l2py is a project of the SlipGURU (http://slipguru.disi.unige.it/),
+TODO:::::::::::::
+
+l1l2py is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+
+[DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri, 
+          "A Regularized Method for Selecting Nested Group of Genes from 
+          Microarray Data" 
+          Journal of Computational Biology, vol. 16, pp. 677-690, 2009.

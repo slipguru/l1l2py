@@ -83,9 +83,9 @@ def ridge_regression(data, labels, mu=0.0):
     >>> Y = numpy.dot(X, beta)
     >>> l1l2py.algorithms.ridge_regression(X, Y, 1e3).T
     array([[  2.92871765e-05,   1.69054825e-04,   5.45274610e-05]])
-    >>> l1l2py.algorithms.ridge_regression(X, Y).T
-    array([[  1.00000000e-01,   1.00000000e-01,   1.59093116e-16]])
-
+    >>> beta_ls = l1l2py.algorithms.ridge_regression(X, Y).T
+    >>> numpy.allclose(beta, beta_ls.squeeze())
+    True
     """
     n, d = data.shape
 
@@ -222,8 +222,9 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     >>> Y = numpy.dot(X, beta)
     >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1).T
     array([[ 0.        ,  0.07715517,  0.        ]])
-    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0).T
-    array([[  1.00000000e-01,   1.00000000e-01,  -1.88737914e-15]])
+    >>> beta_ls = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0).T
+    >>> numpy.allclose(beta, beta_ls.squeeze())   
+    True
 
     """
     n = data.shape[0]

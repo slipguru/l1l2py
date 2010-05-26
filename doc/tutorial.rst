@@ -56,7 +56,7 @@ First, we have to import the needed packages
 >>> import numpy as np
 >>> import l1l2py
 
-and load the data from disk.
+and load the data from disk
 
 >>> X = np.loadtxt('tutorial/data.txt')
 >>> Y = np.loadtxt('tutorial/labels.txt')
@@ -141,14 +141,47 @@ the results (the complete execution of the function will take some minutes)
 ...                              data_normalizer=l1l2py.tools.center,
 ...                              labels_normalizer=None)
 
+Analyze the results
+-------------------
+.. currentmodule:: plot
+
 The optimal value of :math:`\tau` and :math:`\lambda` found in the
 :ref:`stage_i` are
 
 >>> print out['tau_opt'], out['lambda_opt']
 0.451073293459 0.000316227766017
 
-We can print the indexes of the (almost) nested list of relevant variables
-watching the ``selected_list`` entry of the resulting :class:`dict` object.
+Using the given module
+:download:`plot.py<tutorial/plot.py>`
+(in the directory :file:`{L1L2PY_SRCDIR}/doc/tutorial`), you can use
+a function (called :func:`kcv_errors`) to plot the mean cross validation
+error (remember that for some high value of :math:`\tau`, the solution
+could be void on some cross validation split, see :ref:`stage_i`)
+
+>>> from plot import kcv_errors
+>>> tau_max_idx = out['kcv_err_ts'].shape[0]
+>>> kcv_errors(out['kcv_err_ts'],
+...            np.log10(tau_range[:tau_max_idx]), np.log10(lambda_range),
+...            r'$log_{10}(\tau)$', r'$log_{10}(\lambda)$')
+>>> plt.show()
+
+.. image:: _static/tutorial_kcv_err.png
+
+Because the error increase rapidly with the highest value of :math:`\tau`,
+is useful to show the error surface removing the last row from the mean errors
+matrix
+
+>>> tau_max_idx -= 1
+>>> kcv_errors(out['kcv_err_ts'][:tau_max_idx,:],
+...            np.log10(tau_range[:tau_max_idx]), np.log10(lambda_range),
+...            r'$log_{10}(\tau)$', r'$log_{10}(\lambda)$')
+>>> plt.show()
+
+.. image:: _static/tutorial_kcv_err_zoom.png
+
+Than, we can also print the indexes of the (almost) nested list of relevant
+variables watching the ``selected_list`` entry of the resulting :class:`dict`
+object.
 
 >>> for mu, sel in zip(mu_range, out['selected_list']):
 ...     print "%.3f:" % mu, sel.nonzero()[0]
@@ -161,7 +194,7 @@ watching the ``selected_list`` entry of the resulting :class:`dict` object.
 Analyzing the result, we can see that the minimal list contains two variables
 belonging to the first group (indexes *3* and *4*), one variable belonging to the
 second group (index *5*) and three variables belonging to the
-third group (indexes *10, 11* and *12*), without any noisy variables!
+third group (indexes *10, 12* and *14*), without any noisy variables!
 Incrementing the correlation parameter we could include all the relevant
 variables obtaining model with (almost) constant prediction power.
 
@@ -177,8 +210,8 @@ result
 0.100: 2.224
 1.000: 2.227
 
-Appendix: dataset generation script
------------------------------------
+Appendix: functions used in this tutorial
+-----------------------------------------
 .. currentmodule:: dataset_generation
 
 .. testsetup:: *
@@ -186,3 +219,13 @@ Appendix: dataset generation script
    from dataset_generation import correlated_dataset
 
 .. autofunction:: correlated_dataset
+
+
+.. currentmodule:: plot
+
+.. testsetup:: *
+
+   import numpy
+   from matplotlib import pyplot as plt
+
+.. autofunction:: kcv_errors

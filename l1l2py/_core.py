@@ -18,40 +18,39 @@ def model_selection(data, labels, test_data, test_labels,
                     data_normalizer=None, labels_normalizer=None,
                     sparse=False, regularized=True,
                     return_predictions=False):
-    r"""Implements the complete model selection procedure.
+    r"""Complete model selection procedure.
 
-    It executes two stages implemented in ``minimal_model`` and
-    ``nested_models``, and returns their output wrapped in a dictionary.
+    It executes the two stages implemented in ``minimal_model`` and
+    ``nested_models`` and returns their output wrapped in a dictionary.
 
-    Note that the error function calculated in the *Stage I* could have more
+    Note that the error function calculated in the *Stage I* may have more
     than one minimum.
 
-    Default is to select, **in the set of (tau, lambda) pairs
-    with minimum error**, the less sparse but more regularized
-    solution (minimum value of ``tau`` and maximum value of ``lambda``).
+    By default the less sparse but more regularized
+    solution (minimum value of ``tau`` and maximum value of ``lambda``) is selected, 
+    **in the set of (tau, lambda) pairs with minimum error**, .
 
-    It's possible to set the boolean parameters ``sparse`` and ``regularized``
-    to change this behaviour.
+    The boolean parameters ``sparse`` and ``regularized`` allow to change this behaviour.
 
     .. note::
 
         See the functions documentation for details on each stage and the
-        meaning of each parameter. In the following section **Parameters** are
-        described only ``sparse`` and ``regularized`` parameters.
+        meaning of each parameter. The **Parameters** section 
+        describes only the ``sparse`` and ``regularized`` parameters.
 
     Parameters
     ----------
     sparse : bool, optional (default is `False`)
-        If `True` select one of the more sparse solution with minimum cross
-        validation error after the STAGE I.
+        If `True`, the function selects at STAGE I the sparsest solution with minimum cross
+        validation error.
     regularized : bool, optional (default is `True`)
-        If `True` select one of the more regularized solution with minimum cross
-        validation error after the STAGE I.
+        If `True`, the function selects at STAGE I the most regularized solution with minimum cross
+        validation error.
 
     Returns
     -------
     out : dict
-        Output dictionary. According with the parameter the dictionary has
+        Output dictionary. According with the parameters the dictionary has
         the following keys:
 
         **kcv_err_ts** : (T, L) ndarray
@@ -65,16 +64,16 @@ def model_selection(data, labels, test_data, test_labels,
         **beta_list** :  list of M (S,1) ndarray
             [STAGE II] Models calculated for each value in ``mu_range``.
         **selected_list** : list of M (D,) ndarray of boolean
-            [STAGE II] Selected variables for each models calculated.
+            [STAGE II] Selected variables for each model calculated.
         **err_ts_list** : list of M floats
-            [STAGE II] Testing error for the models calculated.
+            [STAGE II] List of Test errors evaluated for the all the models.
         **err_tr_list** : list of M floats
-            [STAGE II] Training error for the models calculated.
-        **prediction_ts_list** : list of M two dimensional ndarray, optional
-            [STAGE II] Prediction vectors for the models calculated on the test
+            [STAGE II] List of Training errors evaluated for the all the models.
+        **prediction_ts_list** : list of M two-dimensional ndarray, optional
+            [STAGE II] Prediction vectors for the models evaluated on the test
             set.
-        **prediction_tr_list** : list of M two dimensional ndarray, optional
-            [STAGE II] Prediction vectors for the models calculated on the
+        **prediction_tr_list** : list of M two-dimensional ndarray, optional
+            [STAGE II] Prediction vectors for the models evaluated on the
             training set.
 
     """
@@ -133,11 +132,11 @@ def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
 def minimal_model(data, labels, mu, tau_range, lambda_range,
                   cv_splits, error_function,
                   data_normalizer=None, labels_normalizer=None):
-    r"""Performs the minimal model selection.
+    r"""Minimal model selection.
 
-    Given a supervised training set (``data`` and ``labels``), for the fixed
-    value of ``mu`` (should be minimum), finds the values in ``tau_range``
-    and ``lambda_range`` with minimum performance error via cross validation
+    Given a supervised training set (``data`` and ``labels``), for a fixed
+    value of ``mu`` (should be minimum), it finds the values in ``tau_range``
+    and ``lambda_range`` minimizing the prediction error via cross validation
     (see error functions in the ``l1l2py.tools`` module).
 
     Cross validation splits must be provided (``cv_splits``) as a list
@@ -145,15 +144,15 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     (see cross validation tools in the ``l1l2py.tools`` module).
 
     Data and labels will be normalized on each split using the function
-    ``data_normalizer`` and ``labels_normalizer``.
+    ``data_normalizer`` and ``labels_normalizer``
     (see data normalization functions in the ``l1l2py.tools`` module).
 
     .. warning ::
 
         On each cross validation split the number of valid solutions (not void)
-        could be different (on high values of ``tau``).
+        may be different (on high values of ``tau``).
         The function calculates the optimum value of ``tau`` for which the model
-        is not void on every cross validation split.
+        is not void on all cross validation splits.
 
     Parameters
     ----------
@@ -180,10 +179,10 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
     Returns
     -------
     err_ts : (< T, L) ndarray
-        Matrix with mean cross validation error on the training set.
+        Matrix of average cross validation error on the training set.
         The first dimension depends on the number of valid ``tau`` values.
     err_tr : (< T, L) ndarray
-        Matrix with mean cross validation error on the training set.
+        Matrix of average cross validation error on the training set.
         The first dimension depends on the number of valid ``tau`` values.
 
     """
@@ -235,19 +234,19 @@ def nested_models(data, labels, test_data, test_labels,
                   mu_range, tau, lambda_, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   return_predictions=False):
-    r"""Generates the models with the (almost) nested lists of selected
+    r"""The function generates the models with the (almost) nested lists of selected
     variables.
 
-    Given a supervised training set (``data`` and ``labels``) and test set
-    (``test_data`` and ``test_labels``), for the fixed value of ``tau``
-    and ``lambda`` (should be the optimums calculated after the Stage I),
-    calculates one model for each incerasing value in ``mu_range``.
+    Given a training set (``data`` and ``labels``) and a test set
+    (``test_data`` and ``test_labels``), for fixed values of ``tau``
+    and ``lambda`` (should be the optimal values estimated at Stage I),
+    it calculates one model for each increasing value in ``mu_range``.
 
     Data and labels will be normalized using the function ``data_normalizer``
     and ``labels_normalizer`` (see data normalization functions
     in the ``l1l2py.tools`` module).
 
-    The function returns test and training error using the
+    The function returns test and training errors using the
     ``error_function`` provided (see error functions
     in the ``l1l2py.tools`` module).
 
@@ -281,7 +280,7 @@ def nested_models(data, labels, test_data, test_labels,
     selected_list : list of M (D,) ndarray of boolean
         Selected feature for each models calculated.
     err_ts_list : list of M floats
-        Testing error for the models calculated.
+        Test error for the models calculated.
     err_tr_list : list of M floats
         Training error for the models calculated.
     prediction_ts_list : list of M (T, 1) ndarray

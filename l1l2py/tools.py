@@ -365,7 +365,7 @@ def kfold_splits(labels, k, rseed=0):
 
     Given the list of labels, the function produces a list of ``k`` splits.
     Each split is a pair of tuples containing the indexes of the training set
-    and the indexes of the testing set.
+    and the indexes of the test set.
 
     Parameters
     ----------
@@ -379,7 +379,7 @@ def kfold_splits(labels, k, rseed=0):
     Returns
     -------
     splits : list of ``k`` tuples
-        Each tuple contains two lists with the training set and testing set
+        Each tuple contains two lists with the training set and test set
         indexes.
 
     Raises
@@ -429,7 +429,7 @@ def stratified_kfold_splits(labels, k, rseed=0):
     Returns
     -------
     splits : list of ``k`` tuples
-        Each tuple contains two lists with the training set and testing set
+        Each tuple contains two lists with the training set and test set
         indexes.
 
     Raises

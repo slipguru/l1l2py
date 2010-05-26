@@ -44,11 +44,11 @@ def correlated_dataset(num_samples, num_variables, groups, weights,
     with standard deviation equal to ``variables_stdev``.
 
     For each variable of the group associated with the :math:`\mathbf{x}`
-    vector, the function generates the its values as
+    vector, the function generates the  values as
 
     .. math:: \mathbf{x}^j = \mathbf{x} + \epsilon_x,
 
-    where :math:`\epsilon_x` is an error drawn from a zero-mean Gaussian
+    where :math:`\epsilon_x` is additive noise drawn from a zero-mean Gaussian
     distribution with standard deviation equal to ``correlations_stdev``.
 
     The regression values will be generated as
@@ -59,7 +59,7 @@ def correlated_dataset(num_samples, num_variables, groups, weights,
     where :math:`\boldsymbol{\tilde{\beta}}` is the ``weights`` parameter, a
     list of ``sum(groups)`` coefficients of the relevant variables,
     :math:`\mathbf{\tilde{X}}` is the submatrix containing only the column
-    related to the relevant variables and :math:`\epsilon_y` is an error drawn
+    related to the relevant variables and :math:`\epsilon_y` is additive noise drawn
     from a zero-mean Gaussian distribution with standard deviation equal to
     ``labels_stdev``.
 

@@ -4,3 +4,4 @@ syntax:glob
 *.pyc
 doc/_build/*
 doc/build/*
+.DS_Store

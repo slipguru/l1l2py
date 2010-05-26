@@ -10,18 +10,23 @@ Bla bla...
 
 Tutorial
 ========
+
+Here we need a couple of sentences to explain the **plan**, so that every following step described does make sense
+
+Synthetic Data Generation
+-------------------------
 .. currentmodule:: dataset_generation
 
-Using the given script
+Using the script
 :download:`dataset_generation.py<tutorial/dataset_generation.py>`
-(in the directory :file:`{L1L2PY_SRCDIR}/doc/tutorial`), you can generate
-synthetic data for a supervised regression problem.
+(:file:`{L1L2PY_SRCDIR}/doc/tutorial/dataset_generation.py`), 
+synthetic data can be generated for a supervised regression problem.
 The script contains a function (called :func:`correlated_dataset`) which
-can create a data matrix with some relevant and correlated variables.
+generates a data matrix with some relevant, correlated and noisy variables.
 
-Running the script with only two parameters (data matrix dimensions) you
-obtain (in the same directory where the script is placed) two text file
-called :file:`data.txt` and :file:`labels.txt`
+Running the script with only two parameters (i.e. the data matrix dimensions) 
+two text files, namely :file:`data.txt` and :file:`labels.txt` are generated 
+in the same directory containing the script file.
 
 .. code-block:: bash
 
@@ -32,36 +37,36 @@ called :file:`data.txt` and :file:`labels.txt`
     $ ls
     dataset_generation.py  data.txt  labels.txt
 
-The script creates a random dataset with **3 groups of 5 correlated variables**.
-At the end we have **15 relevant variables** and (as in the example above)
-*40 - 15* = **25 noisy variables**. The weight assigned to each relevant variable
-is 1.0.
+The script generates a random dataset with **3 groups of 5 correlated variables**.
+In total, there are **15 relevant variables** and, following the example above,
+*40 - 15* = **25 noisy variables**. 
+The weight assigned to each relevant variable is 1.0.
 
-You can find the
+The
 :download:`data matrix<tutorial/data.txt>` and the
 :download:`labels matrix<tutorial/labels.txt>` generated with the script
-and used in this tutorial in the the directory
-:file:`{L1L2PY_SRCDIR}/doc/tutorial`), where the script itself is placed.
+and used in this tutorial can be found in the the directory
+:file:`{L1L2PY_SRCDIR}/doc/tutorial`), where the script itself is located.
 
-You can copy the two file (or generate different data using the script or
-manually the function :func:`correlated_dataset`) and follow the instruction
-below.
+To familiarize with the l1l2py code, the two files can be copied where
+needed and used following the tutorial steps below (alternatively, different 
+datasets can be generated using either the script or the function :func:`correlated_dataset`).
 
 .. currentmodule:: l1l2py
 
-Preparing data
----------------
-First, we have to import the needed packages
+Preparing the data
+------------------
+First, import the needed packages:
 
 >>> import numpy as np
 >>> import l1l2py
 
-and load the data from disk
+and load the data from disk:
 
 >>> X = np.loadtxt('tutorial/data.txt')
 >>> Y = np.loadtxt('tutorial/labels.txt')
 
-Now we have to split data in training and testing set
+Then, split the data in training and test set:
 
 >>> train_data, test_data = np.vsplit(X, 2)
 >>> print train_data.shape, test_data.shape
@@ -72,27 +77,26 @@ Now we have to split data in training and testing set
 
 Setting parameters ranges
 -------------------------
-At this point we have to set right parameters values.
-We can start finding a good range for the sparsity parameter :math:`\tau`
-using the function :func:`l1l2py.algorithms.l1_bound`.
+At this point a correct range for the regularization parameters has to be chosen.
+The function :func:`l1l2py.algorithms.l1_bound` can be used to devise an optimal
+range for the sparsity parameter :math:`\tau`.
 
 >>> train_data_centered = l1l2py.tools.center(train_data)
 >>> tau_max = l1l2py.algorithms.l1_bound(train_data_centered, train_labels)
 >>> print tau_max
 10.5458157567
 
-We can see that using this parameter to solve a *Lasso* optimization problem,
-we get a void solution.
+Note that if using this parameter to solve a *Lasso* optimization problem,
+a void solution would be obtained.
 
 >>> beta = l1l2py.algorithms.l1l2_regularization(train_data_centered,
 ...                                              train_labels, 0.0, tau_max)
 >>> print np.allclose(np.zeros_like(beta), beta)
 True
 
-Note that we have centered the matrix because we want to use the same
-data normalization when we will run the model selection procedure.
-Than, we can set extreme values of :math:`\tau` in order to get different level
-of sparse solution
+Note that the matrix is centered. The same normalization will be used when 
+running the model selection procedure.
+A good choice for the extreme values for :math:`\tau` will be: 
 
 >>> tau_max = tau_max - 1e-2
 >>> tau_min = tau_max * 1e-2
@@ -107,30 +111,29 @@ The minimum value of :math:`\tau` should be set in order to get a solution with
 more non-zero variables than the number of *hypotetical* number of relevant
 groups of correlated variables (in the our case we know to have 3 groups).
 
-Than we can set the range of :math:`\tau` values as
+The range of :math:`\tau` values can therefore be set as:
 
 >>> tau_range = l1l2py.tools.geometric_range(tau_min, tau_max, 20)
 
-For the regularization parameter :math:`\lambda` we can use a wide range
-of values
+For the regularization parameter :math:`\lambda` a wide range
+of values is advisable:
 
 >>> lambda_range = l1l2py.tools.geometric_range(1e-6, 1e-3, 7)
 
-Instead for the correlation parameter :math:`\mu`, in this simple and
-small example we can use a minimum value equal to *0.0* and some different
-level of correlation
+As for the correlation parameter :math:`\mu`, 
+for this simple example some different
+levels of correlation are set, starting from 0.0
 
 >>> mu_range = [0.0, 0.001, 0.01, 0.1, 1.0]
 
 Run the model selection
 -----------------------
-Now we need only to generate (or to write manually) the cross validation splits
-to use in the :ref:`stage_i`,
+To correctly use the :ref:`stage_i`, cross validation splits must be generated:
 
 >>> cv_splits = l1l2py.tools.kfold_splits(train_labels, 5) #5-fold CV
 
-and call the our :func:`l1l2py.model_selection` function to get
-the results (the complete execution of the function will take some minutes)
+Now, call the :func:`l1l2py.model_selection` function to get
+the results of model selection (the complete execution of the function will take some minutes)
 
 >>> out = l1l2py.model_selection(train_data, train_labels,
 ...                              test_data, test_labels,
@@ -151,12 +154,12 @@ The optimal value of :math:`\tau` and :math:`\lambda` found in the
 >>> print out['tau_opt'], out['lambda_opt']
 0.451073293459 0.000316227766017
 
-Using the given module
-:download:`plot.py<tutorial/plot.py>`
-(in the directory :file:`{L1L2PY_SRCDIR}/doc/tutorial`), you can use
-a function (called :func:`kcv_errors`) to plot the mean cross validation
-error (remember that for some high value of :math:`\tau`, the solution
-could be void on some cross validation split, see :ref:`stage_i`)
+The module :download:`plot.py<tutorial/plot.py>`
+(:file:`{L1L2PY_SRCDIR}/doc/tutorial/plot.py`), provides 
+a function (called :func:`kcv_errors`) to plot the average cross validation
+error (remember that for some high values of :math:`\tau`, the solution
+could be void on some cross validation splits, see :ref:`stage_i`, so the average 
+could be evaluated on a different number of elements for each (:math:`\tau`, :math:`\lambda`) pair)
 
 >>> from plot import kcv_errors
 >>> tau_max_idx = out['kcv_err_ts'].shape[0]
@@ -167,9 +170,9 @@ could be void on some cross validation split, see :ref:`stage_i`)
 
 .. image:: _static/tutorial_kcv_err.png
 
-Because the error increase rapidly with the highest value of :math:`\tau`,
-is useful to show the error surface removing the last row from the mean errors
-matrix
+Since the error increases rapidly with the highest value of :math:`\tau`,
+is useful to show the error surface removing the (corresponding) last row 
+from the average errors matrix
 
 >>> tau_max_idx -= 1
 >>> kcv_errors(out['kcv_err_ts'][:tau_max_idx,:],
@@ -179,9 +182,9 @@ matrix
 
 .. image:: _static/tutorial_kcv_err_zoom.png
 
-Than, we can also print the indexes of the (almost) nested list of relevant
-variables watching the ``selected_list`` entry of the resulting :class:`dict`
-object.
+The (almost completely) nested list of relevant variables 
+is stored in the ``selected_list`` entry of the resulting :class:`dict`
+object:
 
 >>> for mu, sel in zip(mu_range, out['selected_list']):
 ...     print "%.3f:" % mu, sel.nonzero()[0]
@@ -191,16 +194,15 @@ object.
 0.100: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14]
 1.000: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 22 24 29 32 35 38 39]
 
-Analyzing the result, we can see that the minimal list contains two variables
+The results show that the minimal list contains two variables
 belonging to the first group (indexes *3* and *4*), one variable belonging to the
 second group (index *5*) and three variables belonging to the
 third group (indexes *10, 12* and *14*), without any noisy variables!
-Incrementing the correlation parameter we could include all the relevant
-variables obtaining model with (almost) constant prediction power.
+Incrementing the correlation parameter all the relevant
+variables can be included obtaining a model with (almost) constant prediction power.
 
-Indeed, watching the testing error of the *RLS* solution calculated with the
-selected variables (and the optimal :math:`\lambda`) we have the following
-result
+In fact, the test error evaluated by the *RLS* solution computed on the
+selected variables (with the optimal value of :math:`\lambda`) is:
 
 >>> for mu, err in zip(mu_range, out['err_ts_list']):
 ...     print "%.3f: %.3f" % (mu, err)

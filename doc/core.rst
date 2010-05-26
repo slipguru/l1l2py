@@ -11,11 +11,11 @@ Main functions (:class:`l1l2py`)
    import numpy
 
 
-In this module, the two main stages of the :math:`\ell_1\ell_2` with double
-optimization variable selection are implemented as in [DeMol09b]_.
+This module implements the two main stages of the :math:`\ell_1\ell_2` with double
+optimization variable selection, as in [DeMol09b]_.
 
-Assume we are given a supervised training set :math:`(\mathbf{X}, \mathbf{Y})`,
-we aim at selecting a linear model built on few relevant input variables with
+Given a supervised training set :math:`(\mathbf{X}, \mathbf{Y})`,
+the aim is to select a linear model built on few relevant input variables with
 good prediction ability.
 
 The linear model is :math:`\mathbf{X}\boldsymbol{\beta}`, where
@@ -33,7 +33,7 @@ The optimal solution is found in two different stages:
   :math:`\tau_{opt}` and :math:`\lambda_{opt}` within a k-fold cross validation
   loop for a fixed and small value of the correlation parameter :math:`\mu`.
 
-  The function performs exactly the pesudocode described in
+  The function follows exactly the pesudocode described in
   [DeMol09b]_ (pag.7 - Stage I).
 
 

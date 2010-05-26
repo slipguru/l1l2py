@@ -1,0 +1,23 @@
+{% extends "basic/layout.html" %}
+
+{% block sidebarsearch %}
+    {{ super() }}
+    <p class="logo">
+       <img class="logo" src="_static/logos.png" alt="Logos" usemap="#logosmap" />
+    </p>
+{% endblock %}
+
+{% block extrahead %}
+<map id="logosmap" name="logosmap">
+    <area shape="rect" alt="SlipGURU" title="SlipGURU" coords="0,0,89,112"
+          href="http://slipguru.disi.unige.it/" target="_blank" />
+    <area shape="rect" alt="Dipartimento di Informatica e Scienze dell'Informazione"
+          title="Dipartimento di Informatica e Scienze dell'Informazione"
+          coords="95,4,200,34" href="http://www.disi.unige.it/" target="_blank" />
+    <area shape="rect" alt="Università Degli Studi di Genova"
+          title="Università Degli Studi di Genova" coords="124,48,171,107"
+          href="http://www.unige.it/" target="_blank" />
+</map>
+{% endblock %}
+
+{% block sidebarrel %} {% endblock %}

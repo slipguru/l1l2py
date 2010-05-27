@@ -5,3 +5,7 @@ syntax:glob
 doc/_build/*
 doc/build/*
 .DS_Store
+dist
+build
+*.egg*
+MANIFEST

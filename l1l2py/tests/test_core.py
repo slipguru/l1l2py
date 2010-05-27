@@ -6,13 +6,16 @@ from nose.plugins.attrib import attr
 
 from l1l2py._core import *
 
+import os
+data_path = os.path.join(os.path.dirname(__file__), 'toy_dataA.mat')
+
 class TestCore(object):
     """
     Results generated with the original matlab code
     """
 
     def setup(self):
-        data = sio.loadmat('tests/toy_dataA.mat', struct_as_record=False)
+        data = sio.loadmat(data_path, struct_as_record=False)
         self.X = data['X']
         self.Y = data['Y']
 

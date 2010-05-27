@@ -1,0 +1,11 @@
+include INSTALL
+include README
+include LICENSE
+include MANIFEST
+
+recursive-include l1l2py/tests *.py *.mat
+
+include doc/*
+include doc/_static/*
+recursive-include doc/slipGURUTheme *
+recursive-include doc/tutorial *.txt *.py

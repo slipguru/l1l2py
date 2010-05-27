@@ -6,7 +6,7 @@ L1L2Py Documentation
 
 :Release: |version|
 :Date: |today|
-:Homepage: http://slipguru.disi.unige.it/homepage_code_url
+:Homepage: http://slipguru.disi.unige.it/l1l2py
 
 .. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@disi.unige.it>
 .. moduleauthor:: Annalisa Barla <annalisa.barla@disi.unige.it>

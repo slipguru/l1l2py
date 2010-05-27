@@ -29,12 +29,14 @@ setup(
     keywords='...',
     author='Salvatore Masecchia and Annalisa Barla',
     author_email='{salvatore.masecchia, annalisa.barla}@disi.unige.it',
-    license='GPL',
+    license='GNU GPL',
     platforms='...',
     url='http://slipguru.disi.unige.it/l1l2py',
     
-    packages=['l1l2py'],
-    requires=['numpy (>=1.3.0)'],
+    packages=['l1l2py', 'l1l2py.tests'],
+    package_data={'l1l2py.tests': ['*.mat']},
+
+    requires=['numpy (>=1.3.0)', 'nose', 'sphinx', 'numpydoc'],
     
 )
 

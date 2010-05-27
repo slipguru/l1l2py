@@ -3,7 +3,7 @@ include README
 include LICENSE
 include MANIFEST
 
-recursive-include l1l2py/tests *.py *.mat
+include l1l2py/tests/*.mat
 
 include doc/*
 include doc/_static/*

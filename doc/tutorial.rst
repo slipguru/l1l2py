@@ -214,15 +214,6 @@ selected variables (with the optimal value of :math:`\lambda`) is:
 
 Appendix: functions used in this tutorial
 -----------------------------------------
-.. currentmodule:: dataset_generation
-
-.. testsetup:: *
-
-   from dataset_generation import correlated_dataset
-
-.. autofunction:: correlated_dataset
-
-
 .. currentmodule:: plot
 
 .. testsetup:: *
@@ -231,3 +222,12 @@ Appendix: functions used in this tutorial
    from matplotlib import pyplot as plt
 
 .. autofunction:: kcv_errors
+
+
+.. currentmodule:: dataset_generation
+
+.. testsetup:: *
+
+   from dataset_generation import correlated_dataset
+
+.. autofunction:: correlated_dataset

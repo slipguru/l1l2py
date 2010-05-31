@@ -1,3 +1,6 @@
 1. Funzione di errore (sign)
 2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
 9. use nonzero!
+
+- Link in index e link codice in tutorial
+- 

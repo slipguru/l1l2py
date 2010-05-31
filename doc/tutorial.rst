@@ -6,12 +6,41 @@ Bla bla...
 
 Installation
 ============
-Bla bla...
+To install l1l2py from sources the following packages are required:
+* `NumPy <http://numpy.scipy.org>`_
+
+Optional
+
+* `Matplotlib <http://>`_
+* `Nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.3/>`_
+* `Sphinx <http://sphinx.pocoo.org/>`_
+
+
+.. code-block:: bash
+
+    $ tar -xvf l1l2py-0.1.0.tar.gz
+    $ cd l1l2py-0.1.0/
+    $ python setup.py install
+
+.. code-block:: bash
+
+    $ cd l1l2py-|version|/
+    $ nosetests
+    ..................................
+    ----------------------------------------------------------------------
+    Ran 34 tests in 12.088s
+
+    OK
+
+>>> import l1l2py.tests
+>>> l1l2py.tests.run()
+
 
 Tutorial
 ========
 
-Here we need a couple of sentences to explain the **plan**, so that every following step described does make sense
+Here we need a couple of sentences to explain the **plan**, so that every
+following step described does make sense
 
 Synthetic Data Generation
 -------------------------
@@ -19,13 +48,13 @@ Synthetic Data Generation
 
 Using the script
 :download:`dataset_generation.py<tutorial/dataset_generation.py>`
-(:file:`{L1L2PY_SRCDIR}/doc/tutorial/dataset_generation.py`), 
+(:file:`{L1L2PY_SRCDIR}/doc/tutorial/dataset_generation.py`),
 synthetic data can be generated for a supervised regression problem.
 The script contains a function (called :func:`correlated_dataset`) which
 generates a data matrix with some relevant, correlated and noisy variables.
 
-Running the script with only two parameters (i.e. the data matrix dimensions) 
-two text files, namely :file:`data.txt` and :file:`labels.txt` are generated 
+Running the script with only two parameters (i.e. the data matrix dimensions)
+two text files, namely :file:`data.txt` and :file:`labels.txt` are generated
 in the same directory containing the script file.
 
 .. code-block:: bash
@@ -39,7 +68,7 @@ in the same directory containing the script file.
 
 The script generates a random dataset with **3 groups of 5 correlated variables**.
 In total, there are **15 relevant variables** and, following the example above,
-*40 - 15* = **25 noisy variables**. 
+*40 - 15* = **25 noisy variables**.
 The weight assigned to each relevant variable is 1.0.
 
 The
@@ -49,7 +78,7 @@ and used in this tutorial can be found in the the directory
 :file:`{L1L2PY_SRCDIR}/doc/tutorial`), where the script itself is located.
 
 To familiarize with the l1l2py code, the two files can be copied where
-needed and used following the tutorial steps below (alternatively, different 
+needed and used following the tutorial steps below (alternatively, different
 datasets can be generated using either the script or the function :func:`correlated_dataset`).
 
 .. currentmodule:: l1l2py
@@ -94,9 +123,9 @@ a void solution would be obtained.
 >>> print np.allclose(np.zeros_like(beta), beta)
 True
 
-Note that the matrix is centered. The same normalization will be used when 
+Note that the matrix is centered. The same normalization will be used when
 running the model selection procedure.
-A good choice for the extreme values for :math:`\tau` will be: 
+A good choice for the extreme values for :math:`\tau` will be:
 
 >>> tau_max = tau_max - 1e-2
 >>> tau_min = tau_max * 1e-2
@@ -120,7 +149,7 @@ of values is advisable:
 
 >>> lambda_range = l1l2py.tools.geometric_range(1e-6, 1e-3, 7)
 
-As for the correlation parameter :math:`\mu`, 
+As for the correlation parameter :math:`\mu`,
 for this simple example some different
 levels of correlation are set, starting from 0.0
 
@@ -155,10 +184,10 @@ The optimal value of :math:`\tau` and :math:`\lambda` found in the
 0.451073293459 0.000316227766017
 
 The module :download:`plot.py<tutorial/plot.py>`
-(:file:`{L1L2PY_SRCDIR}/doc/tutorial/plot.py`), provides 
+(:file:`{L1L2PY_SRCDIR}/doc/tutorial/plot.py`), provides
 a function (called :func:`kcv_errors`) to plot the average cross validation
 error (remember that for some high values of :math:`\tau`, the solution
-could be void on some cross validation splits, see :ref:`stage_i`, so the average 
+could be void on some cross validation splits, see :ref:`stage_i`, so the average
 could be evaluated on a different number of elements for each (:math:`\tau`, :math:`\lambda`) pair)
 
 >>> from plot import kcv_errors
@@ -171,7 +200,7 @@ could be evaluated on a different number of elements for each (:math:`\tau`, :ma
 .. image:: _static/tutorial_kcv_err.png
 
 Since the error increases rapidly with the highest value of :math:`\tau`,
-is useful to show the error surface removing the (corresponding) last row 
+is useful to show the error surface removing the (corresponding) last row
 from the average errors matrix
 
 >>> tau_max_idx -= 1
@@ -182,7 +211,7 @@ from the average errors matrix
 
 .. image:: _static/tutorial_kcv_err_zoom.png
 
-The (almost completely) nested list of relevant variables 
+The (almost completely) nested list of relevant variables
 is stored in the ``selected_list`` entry of the resulting :class:`dict`
 object:
 

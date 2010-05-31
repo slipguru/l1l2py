@@ -9,3 +9,5 @@ include doc/*
 include doc/_static/*
 recursive-include doc/slipGURUTheme *
 recursive-include doc/tutorial *.txt *.py
+
+exclude doc/slipGURUTheme/logos_src/*

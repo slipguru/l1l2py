@@ -73,7 +73,7 @@ release = '0.1.0'
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_trees = ['build', 'slipGURUTheme', 'l1l2py_logo', 'tutorial']
+exclude_trees = ['_build', 'slipGURUTheme', 'l1l2py_logo', 'tutorial']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -156,7 +156,7 @@ html_use_modindex = False
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the

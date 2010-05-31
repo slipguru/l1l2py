@@ -21,3 +21,13 @@
 {% endblock %}
 
 {% block sidebarrel %} {% endblock %}
+
+{% block sidebartoc %}
+   {% if prev %}
+      {{ super() }}
+   {% else %}
+      <h3>{{ _('Table Of Contents') }}</h3>
+      {{ toctree(collapse=True) }}
+   {% endif %}
+{% endblock %}
+

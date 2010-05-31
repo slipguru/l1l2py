@@ -43,8 +43,8 @@ or loading the ``l1l2py.tests.run`` function
 If all it's ok, the package is installed and fully working.
 
 Moreover, in order to generate the plot showed in the following
-tutorial is required the `Matplotlib <http://matplotlib.sourceforge.net/>`_
-package.
+tutorial the `Matplotlib <http://matplotlib.sourceforge.net/>`_ package
+is required.
 
 Tutorial
 ========

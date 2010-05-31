@@ -3,4 +3,3 @@
 9. use nonzero!
 
 - Link in index e link codice in tutorial
-- Rimuovere source from doc

@@ -4,7 +4,7 @@
 L1L2Py Documentation
 ********************
 
-:Release: |version|
+:Release: |release|
 :Date: |today|
 :Homepage: http://slipguru.disi.unige.it/l1l2py
 

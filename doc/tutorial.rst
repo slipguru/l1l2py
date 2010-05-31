@@ -6,25 +6,28 @@ Bla bla...
 
 Installation
 ============
-To install l1l2py from sources the following packages are required:
-* `NumPy <http://numpy.scipy.org>`_
+L1L2Py is available open-source under the
+`GNU GPL <http://www.gnu.org/licenses/gpl.html>`_ license.
+It requires `Python <http://www.python.org>`_ version 2.5 or higher and the
+`NumPy <http://numpy.scipy.org>`_ package.
 
-Optional
-
-* `Matplotlib <http://>`_
-* `Nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.3/>`_
-* `Sphinx <http://sphinx.pocoo.org/>`_
-
+First, download the latest official version
+`l1l2py-x.y.z.tar.gz <http://slipguru.disi.unige.it/l1l2py>`_, then:
 
 .. code-block:: bash
 
-    $ tar -xvf l1l2py-0.1.0.tar.gz
-    $ cd l1l2py-0.1.0/
+    $ tar xzvf l1l2py-x.y.z.tar.gz
+    $ cd l1l2py-x.y.z
     $ python setup.py install
 
+Now, the ``l1l2py`` package is ready to use. If the testing framework
+`Nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.3>`_ is installed,
+is possible to run the given
+`Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
+``nosetests`` script,
+
 .. code-block:: bash
 
-    $ cd l1l2py-|version|/
     $ nosetests
     ..................................
     ----------------------------------------------------------------------
@@ -32,9 +35,16 @@ Optional
 
     OK
 
+or loading the ``l1l2py.tests.run`` function
+
 >>> import l1l2py.tests
 >>> l1l2py.tests.run()
 
+If all it's ok, the package is installed and fully working.
+
+Moreover, in order to generate the plot showed in the following
+tutorial is required the `Matplotlib <http://matplotlib.sourceforge.net/>`_
+package.
 
 Tutorial
 ========
@@ -79,7 +89,8 @@ and used in this tutorial can be found in the the directory
 
 To familiarize with the l1l2py code, the two files can be copied where
 needed and used following the tutorial steps below (alternatively, different
-datasets can be generated using either the script or the function :func:`correlated_dataset`).
+datasets can be generated using either the script or the function
+:func:`correlated_dataset`).
 
 .. currentmodule:: l1l2py
 

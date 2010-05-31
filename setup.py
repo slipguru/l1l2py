@@ -34,7 +34,7 @@ setup(
     url='http://slipguru.disi.unige.it/l1l2py',
     
     packages=['l1l2py', 'l1l2py.tests'],
-    package_data={'l1l2py.tests': ['*.mat']},
+    package_data={'l1l2py.tests': ['data.txt']},
 
     requires=['numpy (>=1.3.0)', 'nose', 'sphinx', 'numpydoc'],
     

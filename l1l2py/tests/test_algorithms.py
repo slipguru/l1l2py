@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io as sio
 
 from nose.tools import *
 from nose.plugins.attrib import attr
@@ -8,7 +7,7 @@ from l1l2py.algorithms import *
 from l1l2py.algorithms import _soft_thresholding
 
 import os
-data_path = os.path.join(os.path.dirname(__file__), 'toy_dataA.mat')
+data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
 
 class TestAlgorithms(object):
     """
@@ -16,13 +15,13 @@ class TestAlgorithms(object):
     """
 
     def setup(self):
-        data = sio.loadmat(data_path, struct_as_record=False)
-        self.X = data['X']
-        self.Y = data['Y']
+        data = np.loadtxt(data_path)
+        self.X = data[:,:-1]
+        self.Y = data[:,-1]
 
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
-        assert_equals((30, 1), self.Y.shape)
+        assert_equals((30, ), self.Y.shape)
 
     def test_rls(self):
         # case n >= d

@@ -1,12 +1,11 @@
 import numpy as np
-import scipy.io as sio
 
 from nose.tools import *
 
 from l1l2py.tools import *
 
 import os
-data_path = os.path.join(os.path.dirname(__file__), 'toy_dataA.mat')
+data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
 
 class TestDataTools(object):
     """
@@ -14,13 +13,13 @@ class TestDataTools(object):
     """
 
     def setup(self):
-        data = sio.loadmat(data_path, struct_as_record=False)
-        self.X = data['X']
-        self.Y = data['Y']
+        data = np.loadtxt(data_path)
+        self.X = data[:,:-1]
+        self.Y = data[:,-1]
 
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
-        assert_equals((30, 1), self.Y.shape)
+        assert_equals((30, ), self.Y.shape)
 
     def test_geometric_ranges(self):
         exp_geom = [1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2, 1e3]

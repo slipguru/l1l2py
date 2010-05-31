@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io as sio
 
 from nose.tools import *
 
@@ -7,7 +6,7 @@ from l1l2py.tools import *
 import l1l2py.algorithms as alg
 
 import os
-data_path = os.path.join(os.path.dirname(__file__), 'toy_dataA.mat')
+data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
 
 class TestErrorFunctions(object):
     """
@@ -15,13 +14,13 @@ class TestErrorFunctions(object):
     """
 
     def setup(self):
-        data = sio.loadmat(data_path, struct_as_record=False)
-        self.X = data['X']
-        self.Y = data['Y']
+        data = np.loadtxt(data_path)
+        self.X = data[:,:-1]
+        self.Y = data[:,-1]
 
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
-        assert_equals((30, 1), self.Y.shape)
+        assert_equals((30, ), self.Y.shape)
 
     def test_classification_error(self):
         labels = np.ones(100)

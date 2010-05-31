@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.io as sio
 
 from nose.tools import *
 from nose.plugins.attrib import attr
@@ -7,7 +6,7 @@ from nose.plugins.attrib import attr
 from l1l2py._core import *
 
 import os
-data_path = os.path.join(os.path.dirname(__file__), 'toy_dataA.mat')
+data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
 
 class TestCore(object):
     """
@@ -15,13 +14,13 @@ class TestCore(object):
     """
 
     def setup(self):
-        data = sio.loadmat(data_path, struct_as_record=False)
-        self.X = data['X']
-        self.Y = data['Y']
+        data = np.loadtxt(data_path)
+        self.X = data[:,:-1]
+        self.Y = data[:,-1]
 
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
-        assert_equals((30, 1), self.Y.shape)
+        assert_equals((30, ), self.Y.shape)
 
     def test_minimum_selection(self):
         from l1l2py._core import _minimum_selection
@@ -188,7 +187,7 @@ class TestCore(object):
     def test_nested_model_void(self):
         from l1l2py import tools
         data, test_data = np.vsplit(self.X, 2)
-        labels, test_labels = np.vsplit(self.Y, 2)
+        labels, test_labels = np.hsplit(self.Y, 2)
 
         tau_opt, lambda_opt = (50.0, 0.1)
         mu_range = tools.linear_range(0.1, 1.0, 10)

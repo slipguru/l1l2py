@@ -1,9 +1,29 @@
-r"""Miscellaneous useful tools.
+"""Miscellaneous useful tools.
 
 In this module are implemented some common function to use in combination
 with the rest of the package.
 
 """
+## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+## and Annalisa Barla <annalisa.barla@unige.it>
+## Copyright (C) 2010 SlipGURU -
+## Statistical Learning and Image Processing Genoa University Research Group
+## Via Dodecaneso, 35 - 16146 Genova, ITALY.
+##
+## This file is part of L1L2Py.
+##
+## L1L2Py is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## L1L2Py is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',

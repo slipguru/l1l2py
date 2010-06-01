@@ -1,9 +1,29 @@
-r"""Internal algorithms implementations.
+"""Internal algorithms implementations.
 
 This module contains the functions strictly related with the statistical
 elaboration of the data.
 
 """
+## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+## and Annalisa Barla <annalisa.barla@unige.it>
+## Copyright (C) 2010 SlipGURU -
+## Statistical Learning and Image Processing Genoa University Research Group
+## Via Dodecaneso, 35 - 16146 Genova, ITALY.
+##
+## This file is part of L1L2Py.
+##
+## L1L2Py is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## L1L2Py is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
@@ -223,7 +243,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1).T
     array([[ 0.        ,  0.07715517,  0.        ]])
     >>> beta_ls = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, 0.0).T
-    >>> numpy.allclose(beta, beta_ls.squeeze())   
+    >>> numpy.allclose(beta, beta_ls.squeeze())
     True
 
     """

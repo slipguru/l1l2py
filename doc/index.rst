@@ -8,15 +8,15 @@ L1L2Py Documentation
 :Date: |today|
 :Homepage: http://slipguru.disi.unige.it/l1l2py
 
-.. moduleauthor:: Salvatore Masecchia <salvatore.masecchia@unige.it>
-.. moduleauthor:: Annalisa Barla <annalisa.barla@unige.it>
+.. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@unige.it>
+.. sectionauthor:: Annalisa Barla <annalisa.barla@unige.it>
 
 **L1L2Py** is a Python package to perform feature selection by means
 of :math:`\ell_1\ell_2` regularization with double optimization.
 
 L1L2Py makes use of `NumPy <http://numpy.scipy.org>`_ to provide fast
 N-dimensional array manipulation. It is licensed under
-`GNU GPL <http://www.gnu.org/licenses/gpl.html>`_.
+`GNU General Public License (GPL) version 3 <http://www.gnu.org/licenses/gpl.html>`_.
 
 L1L2Py is based on the minimization of the (naive) :math:`\ell_1\ell_2`
 functional introduced in [Zou05]_ using the algorithm studied from the

@@ -1,9 +1,29 @@
-r"""l1l2py main functions.
+"""l1l2py main functions.
 
 In this module are implemented the two main stages of the l1l2 with
 double optimization variable selection.
 
 """
+## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+## and Annalisa Barla <annalisa.barla@unige.it>
+## Copyright (C) 2010 SlipGURU -
+## Statistical Learning and Image Processing Genoa University Research Group
+## Via Dodecaneso, 35 - 16146 Genova, ITALY.
+##
+## This file is part of L1L2Py.
+##
+## L1L2Py is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## L1L2Py is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 __all__ = ['model_selection', 'minimal_model', 'nested_models']
 
@@ -27,7 +47,7 @@ def model_selection(data, labels, test_data, test_labels,
     than one minimum.
 
     By default the less sparse but more regularized
-    solution (minimum value of ``tau`` and maximum value of ``lambda``) is selected, 
+    solution (minimum value of ``tau`` and maximum value of ``lambda``) is selected,
     **in the set of (tau, lambda) pairs with minimum error**, .
 
     The boolean parameters ``sparse`` and ``regularized`` allow to change this behaviour.
@@ -35,7 +55,7 @@ def model_selection(data, labels, test_data, test_labels,
     .. note::
 
         See the functions documentation for details on each stage and the
-        meaning of each parameter. The **Parameters** section 
+        meaning of each parameter. The **Parameters** section
         describes only the ``sparse`` and ``regularized`` parameters.
 
     Parameters

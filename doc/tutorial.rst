@@ -21,7 +21,7 @@ First, download the latest official version
     $ python setup.py install
 
 Now, the ``l1l2py`` package is ready to use. If the testing framework
-`Nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.3>`_ is installed,
+`Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,
 is possible to run the given
 `Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
 ``nosetests`` script,
@@ -31,18 +31,20 @@ is possible to run the given
     $ nosetests
     ..................................
     ----------------------------------------------------------------------
-    Ran 34 tests in 12.088s
+    Ran 34 tests in 5.339s
 
     OK
 
-or loading the ``l1l2py.tests.run`` function
+or running the ``l1l2py.tests.run`` function
 
->>> import l1l2py.tests
->>> l1l2py.tests.run()
+.. code-block:: python
+
+    >>> import l1l2py.tests
+    >>> l1l2py.tests.run()
 
 If all it's ok, the package is installed and fully working.
 
-Moreover, in order to generate the plot showed in the following
+Moreover, in order to generate the plots showed in the following
 tutorial the `Matplotlib <http://matplotlib.sourceforge.net/>`_ package
 is required.
 
@@ -126,17 +128,18 @@ range for the sparsity parameter :math:`\tau`.
 >>> print tau_max
 10.5458157567
 
-Note that if using this parameter to solve a *Lasso* optimization problem,
-a void solution would be obtained.
+Note that the matrix is centered, because the same normalization will be used
+when running the model selection procedure.
+
+Using this parameter to solve a *Lasso* optimization problem, a void solution
+would be obtained:
 
 >>> beta = l1l2py.algorithms.l1l2_regularization(train_data_centered,
 ...                                              train_labels, 0.0, tau_max)
 >>> print np.allclose(np.zeros_like(beta), beta)
 True
 
-Note that the matrix is centered. The same normalization will be used when
-running the model selection procedure.
-A good choice for the extreme values for :math:`\tau` will be:
+A good choice for the extreme values for :math:`\tau` could be:
 
 >>> tau_max = tau_max - 1e-2
 >>> tau_min = tau_max * 1e-2
@@ -156,13 +159,12 @@ The range of :math:`\tau` values can therefore be set as:
 >>> tau_range = l1l2py.tools.geometric_range(tau_min, tau_max, 20)
 
 For the regularization parameter :math:`\lambda` a wide range
-of values is advisable:
+of values is advisable
 
 >>> lambda_range = l1l2py.tools.geometric_range(1e-6, 1e-3, 7)
 
-As for the correlation parameter :math:`\mu`,
-for this simple example some different
-levels of correlation are set, starting from 0.0
+as for the correlation parameter :math:`\mu`. For this simple example some
+different levels of correlation are set, starting from `0.0`
 
 >>> mu_range = [0.0, 0.001, 0.01, 0.1, 1.0]
 
@@ -170,10 +172,11 @@ Run the model selection
 -----------------------
 To correctly use the :ref:`stage_i`, cross validation splits must be generated:
 
->>> cv_splits = l1l2py.tools.kfold_splits(train_labels, 5) #5-fold CV
+>>> cv_splits = l1l2py.tools.kfold_splits(train_labels, k=5) #5-fold CV
 
 Now, call the :func:`l1l2py.model_selection` function to get
-the results of model selection (the complete execution of the function will take some minutes)
+the results of model selection (the complete execution of the function
+will take some minutes)
 
 >>> out = l1l2py.model_selection(train_data, train_labels,
 ...                              test_data, test_labels,
@@ -189,18 +192,19 @@ Analyze the results
 .. currentmodule:: plot
 
 The optimal value of :math:`\tau` and :math:`\lambda` found in the
-:ref:`stage_i` are
+:ref:`stage_i` are:
 
 >>> print out['tau_opt'], out['lambda_opt']
 0.451073293459 0.000316227766017
 
 The module :download:`plot.py<tutorial/plot.py>`
 (:file:`{L1L2PY_SRCDIR}/doc/tutorial/plot.py`), provides
-a function (called :func:`kcv_errors`) to plot the average cross validation
+a function (called :func:`kcv_errors`) to plot the mean cross validation
 error (remember that for some high values of :math:`\tau`, the solution
-could be void on some cross validation splits, see :ref:`stage_i`, so the average
-could be evaluated on a different number of elements for each (:math:`\tau`, :math:`\lambda`) pair)
+could be void on some cross validation splits, see :ref:`stage_i`, so the
+mean could be evaluated on a subset of (:math:`\tau`, :math:`\lambda`) pairs)
 
+>>> from matplotlib import pyplot as plt
 >>> from plot import kcv_errors
 >>> tau_max_idx = out['kcv_err_ts'].shape[0]
 >>> kcv_errors(out['kcv_err_ts'],
@@ -212,7 +216,7 @@ could be evaluated on a different number of elements for each (:math:`\tau`, :ma
 
 Since the error increases rapidly with the highest value of :math:`\tau`,
 is useful to show the error surface removing the (corresponding) last row
-from the average errors matrix
+from the mean errors matrix
 
 >>> tau_max_idx -= 1
 >>> kcv_errors(out['kcv_err_ts'][:tau_max_idx,:],
@@ -235,11 +239,12 @@ object:
 1.000: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 22 24 29 32 35 38 39]
 
 The results show that the minimal list contains two variables
-belonging to the first group (indexes *3* and *4*), one variable belonging to the
-second group (index *5*) and three variables belonging to the
+belonging to the first group (indexes *3* and *4*), one variable belonging to
+the second group (index *5*) and three variables belonging to the
 third group (indexes *10, 12* and *14*), without any noisy variables!
 Incrementing the correlation parameter all the relevant
-variables can be included obtaining a model with (almost) constant prediction power.
+variables can be included obtaining a model with (almost) constant prediction
+power.
 
 In fact, the test error evaluated by the *RLS* solution computed on the
 selected variables (with the optimal value of :math:`\lambda`) is:

@@ -89,7 +89,7 @@ The
 and used in this tutorial can be found in the the directory
 :file:`{L1L2PY_SRCDIR}/doc/tutorial`), where the script itself is located.
 
-To familiarize with the l1l2py code, the two files can be copied where
+To familiarize with the ``l1l2py`` code, the two files can be copied where
 needed and used following the tutorial steps below (alternatively, different
 datasets can be generated using either the script or the function
 :func:`correlated_dataset`).

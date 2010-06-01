@@ -1,6 +1,7 @@
 include INSTALL
 include README
 include LICENSE
+include CHANGELOG
 
 include l1l2py/tests/data.txt
 
@@ -10,3 +11,4 @@ recursive-include doc/slipGURUTheme *
 recursive-include doc/tutorial *.txt *.py
 
 exclude doc/slipGURUTheme/logos_src/*
+

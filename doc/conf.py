@@ -189,12 +189,11 @@ latex_paper_size = 'a4'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'l1l2py.tex', u'L1L2Py Documentation',
-   u'SlipGURU', 'manual'),
+   u'SlipGURU', u'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = 'slipGURUTheme/static/logo_pdf.png'
 latex_logo = '_static/l1l2py_logo_pdf.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,

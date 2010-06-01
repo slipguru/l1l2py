@@ -22,17 +22,12 @@
 import numpy as np
 from nose.tools import *
 from l1l2py.tools import *
-
-import os
-data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
+from l1l2py.tests import _TEST_DATA_PATH
 
 class TestKCVTools(object):
-    """
-    Results generated with the original matlab code
-    """
 
     def setup(self):
-        data = np.loadtxt(data_path)
+        data = np.loadtxt(_TEST_DATA_PATH)
         self.X = data[:,:-1]
         self.Y = data[:,-1]
 

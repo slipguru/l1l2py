@@ -29,7 +29,6 @@ __all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits']
 
-import math
 import random
 import numpy as np
 

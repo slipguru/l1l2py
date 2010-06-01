@@ -22,3 +22,6 @@
 def run():
     import nose
     nose.run()
+
+import os
+_TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data.txt')

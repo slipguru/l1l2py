@@ -28,7 +28,6 @@ elaboration of the data.
 __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 import numpy as np
-import math
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.

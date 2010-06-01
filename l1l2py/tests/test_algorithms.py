@@ -24,17 +24,12 @@ from nose.tools import *
 from nose.plugins.attrib import attr
 from l1l2py.algorithms import *
 from l1l2py.algorithms import _soft_thresholding
-
-import os
-data_path = os.path.join(os.path.dirname(__file__), 'data.txt')
+from l1l2py.tests import _TEST_DATA_PATH
 
 class TestAlgorithms(object):
-    """
-    Results generated with the original matlab code
-    """
 
     def setup(self):
-        data = np.loadtxt(data_path)
+        data = np.loadtxt(_TEST_DATA_PATH)
         self.X = data[:,:-1]
         self.Y = data[:,-1]
 
@@ -65,7 +60,6 @@ class TestAlgorithms(object):
 
     def test_l1l2_regularization(self):
         from itertools import product
-        n, m = self.X.shape
 
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):

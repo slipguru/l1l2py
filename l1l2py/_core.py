@@ -30,7 +30,7 @@ __all__ = ['model_selection', 'minimal_model', 'nested_models']
 import numpy as np
 import itertools as it
 
-from algorithms import ridge_regression, l1l2_regularization, l1l2_path
+from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
@@ -254,8 +254,8 @@ def nested_models(data, labels, test_data, test_labels,
                   mu_range, tau, lambda_, error_function,
                   data_normalizer=None, labels_normalizer=None,
                   return_predictions=False):
-    r"""The function generates the models with the (almost) nested lists of selected
-    variables.
+    r"""The function generates the models with the (almost) nested lists of
+    selected variables.
 
     Given a training set (``data`` and ``labels``) and a test set
     (``test_data`` and ``test_labels``), for fixed values of ``tau``

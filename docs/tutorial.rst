@@ -1,8 +1,12 @@
 ****************
 Getting started
 ****************
-Bla bla...
+L1L2Py is a simple and lightweight python package to perform variable selection.
+The algoritms proposed and implemented are been well studied in different
+experimental settings.
 
+The package is self contained and gives all the needed tools to generate
+sparse solution for a given classification or regression problem.
 
 Installation
 ============

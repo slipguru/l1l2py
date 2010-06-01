@@ -1,3 +1,4 @@
+include MANIFEST.in
 include INSTALL
 include README
 include LICENSE
@@ -5,10 +6,9 @@ include CHANGELOG
 
 include l1l2py/tests/data.txt
 
-include doc/*
-include doc/_static/*
-recursive-include doc/slipGURUTheme *
-recursive-include doc/tutorial *.txt *.py
+include docs/*
+include docs/_static/*
+recursive-include docs/slipGURUTheme *
+recursive-include docs/tutorial *.txt *.py
 
-exclude doc/slipGURUTheme/logos_src/*
-
+exclude docs/slipGURUTheme/logos_src/*

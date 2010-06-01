@@ -4,7 +4,7 @@ rm MANIFEST
 rm -rf dist
 rm -rf build
 
-cd doc
+cd docs
 make clean
 cd ..
 

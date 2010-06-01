@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-cd doc
+cd docs
 make html
 make latex
 cd _build/latex
@@ -10,5 +10,5 @@ cd ..
 
 python setup.py sdist
 
-cp -R doc/_build/html dist/l1l2py_html
-cp doc/_build/latex/l1l2py.pdf dist/
+cp -R docs/_build/html dist/l1l2py_html
+cp docs/_build/latex/l1l2py.pdf dist/

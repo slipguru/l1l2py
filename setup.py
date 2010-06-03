@@ -6,7 +6,7 @@ README = os.path.join(os.path.dirname(__file__), 'README')
 long_description = '\n' + open(README).read()
 
 setup(
-    name='L1L2Py',
+    name='l1l2py',
     version=version,
     url='http://slipguru.disi.unige.it/l1l2py',
     description='l1l2py is a Python package to perform feature selection '
@@ -15,6 +15,7 @@ setup(
     keywords='feature selection, regularization, regression, classification,'
              'l1, l2',
     author='SlipGURU',
+    author_email='salvatore.masecchia@unige.it',
     maintainer='Salvatore Masecchia',
     maintainer_email='salvatore.masecchia@unige.it',
     license='GNU GPL version 3',

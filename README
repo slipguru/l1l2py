@@ -1,12 +1,12 @@
 L1L2Py (l1l2py) is a Python package to perform feature selection by means
 of l1l2 regularization with double optimization.
 
-l1l2py makes use of NumPy <http://numpy.scipy.org> to provide fast
+L1L2Py makes use of NumPy <http://numpy.scipy.org> to provide fast
 N-dimensional array manipulation.
 
-l1l2py is a project of the SlipGURU - Statistical Learning and Image Processing
+L1L2Py is a project of the SlipGURU - Statistical Learning and Image Processing
 Genoa University Research Group - Via Dodecaneso, 35 - 16146 Genova, ITALY
 <http://slipguru.disi.unige.it>.
 
-l1l2py is free software. It is licensed under the GNU General Public
+L1L2Py is free software. It is licensed under the GNU General Public
 License (GPL) version 3 <http://www.gnu.org/licenses/gpl.html>.

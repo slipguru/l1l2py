@@ -19,9 +19,5 @@
 ## You should have received a copy of the GNU General Public License
 ## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
-def run():
-    import nose
-    nose.run()
-
 import os
 _TEST_DATA_PATH = os.path.join(os.path.dirname(__file__), 'data.txt')

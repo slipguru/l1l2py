@@ -6,7 +6,7 @@ The algoritms proposed and implemented are been well studied in different
 experimental settings.
 
 The package is self contained and gives all the needed tools to generate
-sparse solution for a given classification or regression problem.
+sparse solution for a given linear classification or regression problem.
 
 Installation
 ============
@@ -22,13 +22,12 @@ First, download the latest official version
 
     $ tar xzvf l1l2py-x.y.z.tar.gz
     $ cd l1l2py-x.y.z
-    $ python setup.py install
 
-Now, the ``l1l2py`` package is ready to use. If the testing framework
+If the testing framework
 `Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,
 is possible to run the given
 `Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
-``nosetests`` script,
+``nosetests`` script
 
 .. code-block:: bash
 
@@ -39,24 +38,26 @@ is possible to run the given
 
     OK
 
-or running the ``l1l2py.tests.run`` function
+Finally, executing the following command is possible to install the
+``l1l2py`` package
 
-.. code-block:: python
+.. code-block:: bash
 
-    >>> import l1l2py.tests
-    >>> l1l2py.tests.run()
-
-If all it's ok, the package is installed and fully working.
+    $ python setup.py install
 
 Moreover, in order to generate the plots showed in the following
 tutorial the `Matplotlib <http://matplotlib.sourceforge.net/>`_ package
-is required.
+(with the `mplot3d toolkit <http://matplotlib.sourceforge.net/mpl_toolkits/mplot3d>`_
+enabled) is required.
 
 Tutorial
 ========
 
-Here we need a couple of sentences to explain the **plan**, so that every
-following step described does make sense
+This tutorial aims to show how the :math:`\ell_1\ell_2` regularization with
+double optimization is able to perform variable selection. Moreover, the
+tutorial shows how to use L1L2Py on a synthetic dataset generated with a given
+function which simulates a linear regression problem with a subset of relevant
+and linearly correlated variables.
 
 Synthetic Data Generation
 -------------------------
@@ -64,7 +65,7 @@ Synthetic Data Generation
 
 Using the script
 :download:`dataset_generation.py<tutorial/dataset_generation.py>`
-(:file:`{L1L2PY_SRCDIR}/doc/tutorial/dataset_generation.py`),
+(:file:`l1l2py-1.0.0/docs/tutorial/dataset_generation.py`),
 synthetic data can be generated for a supervised regression problem.
 The script contains a function (called :func:`correlated_dataset`) which
 generates a data matrix with some relevant, correlated and noisy variables.
@@ -75,8 +76,6 @@ in the same directory containing the script file.
 
 .. code-block:: bash
 
-    $ pwd
-    {L1L2PY_SRCDIR}/doc/tutorial
     $ python dataset_generation.py 100 40
     Generation of 100 samples with 40 variables... done
     $ ls
@@ -91,7 +90,7 @@ The
 :download:`data matrix<tutorial/data.txt>` and the
 :download:`labels matrix<tutorial/labels.txt>` generated with the script
 and used in this tutorial can be found in the the directory
-:file:`{L1L2PY_SRCDIR}/doc/tutorial`), where the script itself is located.
+:file:`l1l2py-1.0.0/docs/tutorial`), where the script itself is located.
 
 To familiarize with the ``l1l2py`` code, the two files can be copied where
 needed and used following the tutorial steps below (alternatively, different
@@ -202,7 +201,7 @@ The optimal value of :math:`\tau` and :math:`\lambda` found in the
 0.451073293459 0.000316227766017
 
 The module :download:`plot.py<tutorial/plot.py>`
-(:file:`{L1L2PY_SRCDIR}/doc/tutorial/plot.py`), provides
+(:file:`l1l2py-1.0.0/docs/tutorial/plot.py`), provides
 a function (called :func:`kcv_errors`) to plot the mean cross validation
 error (remember that for some high values of :math:`\tau`, the solution
 could be void on some cross validation splits, see :ref:`stage_i`, so the

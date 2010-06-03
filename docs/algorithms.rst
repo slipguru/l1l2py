@@ -102,3 +102,16 @@ Utility Functions
 =================
 .. autofunction:: l1_bound
 .. autofunction:: l1l2_path
+
+.. rubric:: Note
+
+The acceleration method based on *warm starts*, implemented in this function,
+is been theoretically proved in [Hale08]_.
+
+.. [Hale08] E. T. Hale, W. Yin, Y. Zhang
+            "Fixed-point continuation for :math:`\ell_1`-minimization:
+            Methodology and convergence"
+            SIAM J. Optim. Volume 19, Issue 3, pp. 1107-1130, 2008
+
+
+

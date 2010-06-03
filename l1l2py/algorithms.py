@@ -137,16 +137,16 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     .. note ::
 
         For efficency purposes, if ``mu = 0.0`` and the number of non-zero
-        values is higher than `N` for a given value of tau (that means k has
-        reached the limit of allowed iterations), the following solutions (for
-        smaller values of ``tau``) are simply the least squares solutions.
+        values is higher than `N` for a given value of tau (that means algorithm
+        has reached the limit of allowed iterations), the following solutions
+        (for smaller values of ``tau``) are simply the least squares solutions.
 
     .. warning ::
 
         The number of solutions can differ from ``len(tau_range)``.
         The function returns only the solutions with at least one non-zero
         element.
-        For values higher than *tau_max* a solution could have all zero values.
+        For values higher than *tau_max* a solution have all zero values.
 
     Parameters
     ----------
@@ -163,7 +163,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is `1e5`)
         Maximum number of iterations.
-    tolerance : float, optional (default is `1e-6`)
+    tolerance : float, optional (default is `1e-5`)
         Convergence tolerance.
 
     Returns
@@ -220,7 +220,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is `1e5`)
         Maximum number of iterations.
-    tolerance : float, optional (default is `1e-6`)
+    tolerance : float, optional (default is `1e-5`)
         Convergence tolerance.
     return_iterations : bool, optional (default is `False`)
         If `True`, returns the number of iterations performed.

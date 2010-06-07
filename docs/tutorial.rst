@@ -16,12 +16,13 @@ It requires `Python <http://www.python.org>`_ version 2.5 or higher and the
 `NumPy <http://numpy.scipy.org>`_ package.
 
 First, download the latest official version
-`L1L2Py-x.y.z.tar.gz <http://slipguru.disi.unige.it/l1l2py>`_, then:
+`L1L2Py-1.0.0.tar.gz <http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.0.tar.gz>`_,
+then:
 
 .. code-block:: bash
 
-    $ tar xzvf L1L2Py-x.y.z.tar.gz
-    $ cd L1L2Py-x.y.z
+    $ tar xzvf L1L2Py-1.0.0.tar.gz
+    $ cd L1L2Py-1.0.0
 
 If the testing framework
 `Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,

@@ -16,12 +16,12 @@ It requires `Python <http://www.python.org>`_ version 2.5 or higher and the
 `NumPy <http://numpy.scipy.org>`_ package.
 
 First, download the latest official version
-`l1l2py-x.y.z.tar.gz <http://slipguru.disi.unige.it/l1l2py>`_, then:
+`L1L2Py-x.y.z.tar.gz <http://slipguru.disi.unige.it/l1l2py>`_, then:
 
 .. code-block:: bash
 
-    $ tar xzvf l1l2py-x.y.z.tar.gz
-    $ cd l1l2py-x.y.z
+    $ tar xzvf L1L2Py-x.y.z.tar.gz
+    $ cd L1L2Py-x.y.z
 
 If the testing framework
 `Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,
@@ -65,7 +65,7 @@ Synthetic Data Generation
 
 Using the script
 :download:`dataset_generation.py<tutorial/dataset_generation.py>`
-(:file:`l1l2py-1.0.0/docs/tutorial/dataset_generation.py`),
+(:file:`L1L2Py-1.0.0/docs/tutorial/dataset_generation.py`),
 synthetic data can be generated for a supervised regression problem.
 The script contains a function (called :func:`correlated_dataset`) which
 generates a data matrix with some relevant, correlated and noisy variables.
@@ -90,7 +90,7 @@ The
 :download:`data matrix<tutorial/data.txt>` and the
 :download:`labels matrix<tutorial/labels.txt>` generated with the script
 and used in this tutorial can be found in the the directory
-:file:`l1l2py-1.0.0/docs/tutorial`), where the script itself is located.
+:file:`L1L2py-1.0.0/docs/tutorial`), where the script itself is located.
 
 To familiarize with the ``l1l2py`` code, the two files can be copied where
 needed and used following the tutorial steps below (alternatively, different
@@ -201,7 +201,7 @@ The optimal value of :math:`\tau` and :math:`\lambda` found in the
 0.451073293459 0.000316227766017
 
 The module :download:`plot.py<tutorial/plot.py>`
-(:file:`l1l2py-1.0.0/docs/tutorial/plot.py`), provides
+(:file:`L1L2py-1.0.0/docs/tutorial/plot.py`), provides
 a function (called :func:`kcv_errors`) to plot the mean cross validation
 error (remember that for some high values of :math:`\tau`, the solution
 could be void on some cross validation splits, see :ref:`stage_i`, so the

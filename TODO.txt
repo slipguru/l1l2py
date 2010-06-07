@@ -6,3 +6,4 @@
     - setup.py
     - index.rst
     - tutorial.rst
+- Pubblicazione su PyPI

@@ -22,10 +22,22 @@ The linear model is :math:`\mathbf{X}\boldsymbol{\beta}`, where
 :math:`\boldsymbol{\beta}` is found as the minimizer of the (naive) elastic-net
 functional combined with a regularized least squares functional.
 
-Hence :math:`\boldsymbol{\beta}` depends on two regularization parameters,
-:math:`\tau` and :math:`\lambda` and one correlation parameter :math:`\mu`.
+.. math::
+    \frac{1}{n} \| \mathbf{Y} - \mathbf{X}\boldsymbol{\beta} \|_2^2
+    + \mu \|\boldsymbol{\beta}\|_2^2
+    + \tau \|\boldsymbol{\beta}\|_1
 
-The optimal solution is found in two different stages:
+.. math::
+    \frac{1}{n} \| \mathbf{Y} - \mathbf{\tilde{X}}\boldsymbol{\tilde{\beta}} \|_2^2
+    + \lambda \|\boldsymbol{\tilde{\beta}}\|_2^2
+
+in which :math:`\boldsymbol{\tilde{\beta}}` and :math:`\mathbf{\tilde{X}}`
+represent, respectively, the weights vector and the input matrix restricted to
+the genes selected by the :math:`\ell_1\ell_2` selection.
+
+The optimal solution depends on two regularization parameters, :math:`\tau` and
+:math:`\lambda` and one correlation parameter :math:`\mu` and is found in
+two different stages:
 
 * **Stage I** (:func:`minimal_model`)
 

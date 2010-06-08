@@ -60,6 +60,10 @@ tutorial shows how to use L1L2Py on a synthetic dataset generated with a given
 function which simulates a linear regression problem with a subset of relevant
 and linearly correlated variables.
 
+Even if it's not mandatory, in order to better understand this tutorial the
+reader should read the method described in [DeMol09b]_, or at least
+the introduction of :ref:`core`.
+
 Synthetic Data Generation
 -------------------------
 .. currentmodule:: dataset_generation
@@ -85,7 +89,7 @@ in the same directory containing the script file.
 The script generates a random dataset with **3 groups of 5 correlated variables**.
 In total, there are **15 relevant variables** and, following the example above,
 *40 - 15* = **25 noisy variables**.
-The weight assigned to each relevant variable is 1.0.
+The weight assigned to each relevant variable is `1.0`.
 
 The
 :download:`data matrix<tutorial/data.txt>` and the
@@ -102,17 +106,18 @@ datasets can be generated using either the script or the function
 
 Preparing the data
 ------------------
-First, import the needed packages:
+First, starting a new python terminal, import the needed packages:
 
 >>> import numpy as np
 >>> import l1l2py
 
-and load the data from disk:
+and load the data from disk (change file paths as needed):
 
 >>> X = np.loadtxt('tutorial/data.txt')
 >>> Y = np.loadtxt('tutorial/labels.txt')
 
-Then, split the data in training and test set:
+Then, split the data in two blocks, training-set and test-set using the standard
+NumPy functions :func:`numpy.vsplit` and :func:`numpy.hsplit`
 
 >>> train_data, test_data = np.vsplit(X, 2)
 >>> print train_data.shape, test_data.shape
@@ -120,6 +125,8 @@ Then, split the data in training and test set:
 >>> train_labels, test_labels = np.hsplit(Y, 2)
 >>> print train_labels.shape, test_labels.shape
 (50,) (50,)
+
+as shown, each set contains `50` samples.
 
 Setting parameters ranges
 -------------------------
@@ -133,7 +140,7 @@ range for the sparsity parameter :math:`\tau`.
 10.5458157567
 
 Note that the matrix is centered, because the same normalization will be used
-when running the model selection procedure.
+when running the model selection procedure (see later).
 
 Using this parameter to solve a *Lasso* optimization problem, a void solution
 would be obtained:
@@ -143,7 +150,7 @@ would be obtained:
 >>> print np.allclose(np.zeros_like(beta), beta)
 True
 
-A good choice for the extreme values for :math:`\tau` could be:
+A good choice for the extreme values for :math:`\tau` could be
 
 >>> tau_max = tau_max - 1e-2
 >>> tau_min = tau_max * 1e-2
@@ -156,7 +163,7 @@ A good choice for the extreme values for :math:`\tau` could be:
 
 The minimum value of :math:`\tau` should be set in order to get a solution with
 more non-zero variables than the number of *hypotetical* number of relevant
-groups of correlated variables (in the our case we know to have 3 groups).
+groups of correlated variables (in the our case we know to have `3` groups).
 
 The range of :math:`\tau` values can therefore be set as:
 
@@ -242,10 +249,12 @@ object:
 0.100: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14]
 1.000: [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 22 24 29 32 35 38 39]
 
-The results show that the minimal list contains two variables
-belonging to the first group (indexes *3* and *4*), one variable belonging to
-the second group (index *5*) and three variables belonging to the
-third group (indexes *10, 12* and *14*), without any noisy variables!
+Remembering that in the used dataset we have `3` groups of `5` relevant
+variables, with indexes from `0` to `14`, the result shows that the minimal
+list contains two variables belonging to the first group (indexes `3` and `4`),
+one variable belonging to the second group (index `5`) and three variables
+belonging to the third group (indexes `10, 12` and `14`), without any noisy
+variables!
 Incrementing the correlation parameter all the relevant
 variables can be included obtaining a model with (almost) constant prediction
 power.

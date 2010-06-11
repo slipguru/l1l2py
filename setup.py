@@ -13,7 +13,7 @@ setup(
                 'by means of l1l2 regularization with double optimization',
     long_description=long_description,
     keywords='feature selection, regularization, regression, classification,'
-             'l1, l2',
+             'l1-norm, l2-norm',
     author='L1L2Py developers - SlipGURU',
     author_email='salvatore.masecchia@unige.it',
     license='GNU GPL version 3',

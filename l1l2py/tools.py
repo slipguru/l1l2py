@@ -29,7 +29,6 @@ __all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits']
 
-import random
 import numpy as np
 
 # Ranges functions ------------------------------------------------------------
@@ -421,9 +420,11 @@ def kfold_splits(labels, k, rseed=0):
         raise ValueError("'k' must be greater than one and smaller or equal "
                          "than the number of samples")
 
+    import random
     random.seed(rseed)
     indexes = range(len(labels))
     random.shuffle(indexes)
+    random.seed() #restores random generation from a random seed
 
     return _splits(indexes, k)
 
@@ -478,7 +479,6 @@ def stratified_kfold_splits(labels, k, rseed=0):
     if classes.size != 2:
         raise ValueError("'labels' must contains only two class labels")
 
-    random.seed(rseed)
     n_indexes = (np.where(labels == classes[0])[0]).tolist()
     p_indexes = (np.where(labels == classes[1])[0]).tolist()
 
@@ -486,11 +486,14 @@ def stratified_kfold_splits(labels, k, rseed=0):
         raise ValueError("'k' must be greater than oen and smaller or equal "
                          "than number of positive and negative samples")
 
+    import random
+    random.seed(rseed)
     random.shuffle(n_indexes)
     n_splits = _splits(n_indexes, k)
-
+    
     random.shuffle(p_indexes)
     p_splits = _splits(p_indexes, k)
+    random.seed() #restores random generation from a random seed
 
     splits = list()
     for ns, ps in zip(n_splits, p_splits):

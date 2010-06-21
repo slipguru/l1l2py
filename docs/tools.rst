@@ -127,3 +127,11 @@ Cross Validation utilities
 ==========================
 .. autofunction:: kfold_splits
 .. autofunction:: stratified_kfold_splits
+
+.. rubric:: Note
+
+Running this functions more times with the same value of the parameter ``rseed``
+gives **always** the same result, in order to allow repeatable experiments.
+Note, moreover, that each of this functions sets the random seed equal
+to ``None``, to restore a random seed for the following use of the
+:mod:`random` module (see :func:`random.seed`).

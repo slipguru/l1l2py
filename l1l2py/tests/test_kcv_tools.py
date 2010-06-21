@@ -103,6 +103,27 @@ class TestKCVTools(object):
         assert_equal(splits1, splits2)
         assert_not_equal(splits1, splits3)
         assert_not_equal(splits2, splits3)
+        
+    def test_rseed_client_code(self):
+        import random
+        
+        labels = np.ones(10)
+        labels[0:5] = -1
+        
+        for split_func in (kfold_splits, stratified_kfold_splits):
+            random.seed(1)
+            indexes_1 = [random.random() for i in range(10)]
+            split_func(labels, 2)
+            indexes_2 = [random.random() for i in range(10)]
+            
+            assert_not_equal(indexes_1, indexes_2)        
+            
+            split_func(labels, 2)
+            indexes_3 = [random.random() for i in range(10)]
+            
+            assert_not_equal(indexes_1, indexes_2)
+            assert_not_equal(indexes_1, indexes_3)
+            assert_not_equal(indexes_2, indexes_3)        
 
     @staticmethod
     def _test_splits(labels_size, splits):

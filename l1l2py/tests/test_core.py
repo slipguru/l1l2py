@@ -105,35 +105,12 @@ class TestCore(object):
         for p in out['prediction_tr_list']:
             assert_equals(len(labels), len(p))
             
-    def test_void_stage_i(self):
-        from l1l2py import tools
-        splits = tools.kfold_splits(self.Y, 2)
-        tr_idx, ts_idx = splits[0]
-        data, test_data = self.X[tr_idx, :], self.X[ts_idx, :]
-        labels, test_labels = self.Y[tr_idx, :], self.Y[ts_idx, :]
-
-        from l1l2py.algorithms import l1_bound
-        splits = tools.kfold_splits(self.Y, 2)       
-        tau_max = l1_bound(tools.center(self.X), self.Y)
-        tau_range = tools.linear_range(tau_max, tau_max*10, 5)
-
-        lambda_range = tools.linear_range(0.1, 1.0, 6)
-        mu_range = tools.linear_range(0.1, 1.0, 10)
-        int_splits = tools.kfold_splits(labels, 3)
-
-        assert_raises(ValueError, model_selection,
-                      data, labels, test_data, test_labels,
-                      mu_range, tau_range, lambda_range,
-                      int_splits, tools.regression_error,
-                      tools.regression_error, data_normalizer=tools.center,
-                      labels_normalizer=None)
-
     def test_minimal_model(self):
         from l1l2py import tools
         splits = tools.kfold_splits(self.Y, 2)
 
         tau_range = tools.linear_range(0.1, 1.0, 5)
-        lambda_range = tools.linear_range(0.1, 1.0, 5)
+        lambda_range = tools.linear_range(0.1, 1.0, 5)       
 
         for mu in tools.linear_range(0.1, 1.0, 10):
             out = minimal_model(self.X, self.Y, mu, tau_range, lambda_range,
@@ -170,6 +147,19 @@ class TestCore(object):
 
             assert_equals((1, len(lambda_range)), kcv_err_ts.shape)
             assert_equals(kcv_err_tr.shape, kcv_err_ts.shape)
+            
+    def test_void_minimal_model(self):
+        from l1l2py import tools
+        from l1l2py.algorithms import l1_bound
+        splits = tools.kfold_splits(self.Y, 2)       
+        tau_max = l1_bound(tools.center(self.X), self.Y)
+        tau_range = tools.linear_range(tau_max, tau_max*10, 5)
+        lambda_range = tools.linear_range(0.1, 1.0, 6)
+
+        assert_raises(ValueError, minimal_model,
+                      self.X, self.Y, 0.0, tau_range, lambda_range,
+                      splits, tools.regression_error,
+                      data_normalizer=tools.center, labels_normalizer=None)
             
     def test_nested_models(self):
         from l1l2py import tools

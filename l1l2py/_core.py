@@ -84,7 +84,7 @@ def model_selection(data, labels, test_data, test_labels,
             Optimal value of lambda selected in ``lambda_range``.
         **beta_list** :  list of M (S,1) ndarray
             [STAGE II] Models calculated for each value in ``mu_range``.
-        **selected_list** : list of M (D,) ndarray of boolean
+        **selected_list** : list of M (P,) ndarray of boolean
             [STAGE II] Selected variables for each model calculated.
         **err_ts_list** : list of M floats
             [STAGE II] List of Test errors evaluated for the all the models.
@@ -179,7 +179,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
@@ -287,11 +287,11 @@ def nested_models(data, labels, test_data, test_labels,
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
-    test_data : (T, D) ndarray
+    test_data : (T, P) ndarray
         Test set matrix.
     test_labels : (T,)  or (T, 1) ndarray
         Test set labels vector.
@@ -312,7 +312,7 @@ def nested_models(data, labels, test_data, test_labels,
     -------
     beta_list : list of M (S,1) ndarray
         Models calculated for each value in ``mu_range``.
-    selected_list : list of M (D,) ndarray of boolean
+    selected_list : list of M (P,) ndarray of boolean
         Selected feature for each models calculated.
     err_ts_list : list of M floats
         Test error for the models calculated.

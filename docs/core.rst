@@ -71,6 +71,8 @@ Stage I: Minimal Model Selection
 ================================
 .. autofunction:: minimal_model
 
+.. _stage_ii:
+
 Stage II: Nested lists generation
 =================================
 .. autofunction:: nested_models

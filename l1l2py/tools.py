@@ -118,9 +118,9 @@ def center(matrix, optional_matrix=None, return_mean=False):
 
     Parameters
     ----------
-    matrix : (N,) or (N, D) ndarray
+    matrix : (N,) or (N, P) ndarray
         Input matrix whose columns are to be centered.
-    optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
+    optional_matrix : (N,) or (N, P) ndarray, optional (default is `None`)
         Optional matrix whose columns are to be centered
         using mean of ``matrix``.
         It must have the same number of columns as ``matrix``.
@@ -129,11 +129,11 @@ def center(matrix, optional_matrix=None, return_mean=False):
 
     Returns
     -------
-    matrix_centered : (N,) or (N, D) ndarray
+    matrix_centered : (N,) or (N, P) ndarray
         Centered ``matrix``.
-    optional_matrix_centered : (N,) or (N, D) ndarray, optional
+    optional_matrix_centered : (N,) or (N, P) ndarray, optional
         Centered ``optional_matrix`` with respect to ``matrix``
-    mean : float or (D,) ndarray, optional
+    mean : float or (P,) ndarray, optional
         Mean of ``matrix`` columns.
 
     Examples
@@ -166,7 +166,7 @@ def center(matrix, optional_matrix=None, return_mean=False):
     if optional_matrix is None: # than return_mean is True
         return (matrix - mean, mean)
 
-    if return_mean is False: # ...with p not None
+    if return_mean is False: # otherwise
         return (matrix - mean, optional_matrix - mean)
 
     # Full case
@@ -186,10 +186,10 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 
     Parameters
     ----------
-    matrix : (N,) or (N, D) ndarray
+    matrix : (N,) or (N, P) ndarray
         Input matrix whose columns are to be standardized
         to mean `0` and standard deviation `1`.
-    optional_matrix : (N,) or (N, D) ndarray, optional (default is `None`)
+    optional_matrix : (N,) or (N, P) ndarray, optional (default is `None`)
         Optional matrix whose columns are to be standardized
         using mean and standard deviation of ``matrix``.
         It must have same number of columns as ``matrix``.
@@ -198,13 +198,13 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 
     Returns
     -------
-    matrix_standardized : (N,) or (N, D) ndarray
+    matrix_standardized : (N,) or (N, P) ndarray
         Standardized ``matrix``.
-    optional_matrix_standardized : (N,) or (N, D) ndarray, optional
+    optional_matrix_standardized : (N,) or (N, P) ndarray, optional
         Standardized ``optional_matrix`` with respect to ``matrix``
-    mean : float or (D,) ndarray, optional
+    mean : float or (P,) ndarray, optional
         Mean of ``matrix`` columns.
-    std : float or (D,) ndarray, optional
+    std : float or (P,) ndarray, optional
         Standard deviation of ``matrix`` columns.
 
     Raises
@@ -249,7 +249,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     if optional_matrix is None: # than return_factors is True
         return (matrix - mean)/std, mean, std
 
-    if return_factors is False: # ... with p not None
+    if return_factors is False: # otherwise
         return (matrix - mean)/std, (optional_matrix - mean)/std
 
     # Full case

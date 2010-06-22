@@ -46,7 +46,7 @@ def l1_bound(data, labels):
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
@@ -83,7 +83,7 @@ def ridge_regression(data, labels, mu=0.0):
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,)  or (N, 1) ndarray
         Labels vector.
@@ -92,7 +92,7 @@ def ridge_regression(data, labels, mu=0.0):
 
     Returns
     --------
-    beta : (D, 1) ndarray
+    beta : (P, 1) ndarray
         Ridge regression solution.
 
     Examples
@@ -106,9 +106,9 @@ def ridge_regression(data, labels, mu=0.0):
     >>> numpy.allclose(beta, beta_ls.squeeze())
     True
     """
-    n, d = data.shape
+    n, p = data.shape
 
-    if n < d:
+    if n < p:
         tmp = np.dot(data, data.T)
         if mu:
             tmp += mu*n*np.eye(n)
@@ -118,7 +118,7 @@ def ridge_regression(data, labels, mu=0.0):
     else:
         tmp = np.dot(data.T, data)
         if mu:
-            tmp += mu*n*np.eye(d)
+            tmp += mu*n*np.eye(p)
         tmp = np.linalg.pinv(tmp)
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
@@ -150,7 +150,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,) or (N, 1) ndarray
         Labels vector.
@@ -158,7 +158,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         `l2-norm` penalty.
     tau_range : array_like of float
         `l1-norm` penalties in increasing order.
-    beta : (D,) or (D, 1) ndarray, optional (default is `None`)
+    beta : (P,) or (P, 1) ndarray, optional (default is `None`)
         Starting value of the iterations.
         If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is `1e5`)
@@ -168,17 +168,17 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     Returns
     -------
-    beta_path : list of (D,) or (D, 1) ndarrays
+    beta_path : list of (P,) or (P, 1) ndarrays
         `l1l2` solutions with at least one non-zero element.
 
     """
     from collections import deque
-    n, d = data.shape
+    n, p = data.shape
 
     if mu == 0.0:
         beta_ls = ridge_regression(data, labels)
     if beta is None:
-        beta = np.zeros((d, 1))
+        beta = np.zeros((p, 1))
 
     out = deque()
     nonzero = 0
@@ -207,7 +207,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     Parameters
     ----------
-    data : (N, D) ndarray
+    data : (N, P) ndarray
         Data matrix.
     labels : (N,) or (N, 1) ndarray
         Labels vector.
@@ -215,7 +215,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         `l2-norm` penalty.
     tau : float
         `l1-norm` penalty.
-    beta : (D,) or (D, 1) ndarray, optional (default is `None`)
+    beta : (P,) or (P, 1) ndarray, optional (default is `None`)
         Starting value for the iterations.
         If `None`, then iterations starts from the empty model.
     kmax : int, optional (default is `1e5`)
@@ -229,7 +229,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     Returns
     -------
-    beta : (D, 1) ndarray
+    beta : (P, 1) ndarray
         `l1l2` solution.
     k : int, optional
         Number of iterations performed.
@@ -280,9 +280,9 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         return beta
 
 def _sigma(matrix, mu):
-    n, d = matrix.shape
+    n, p = matrix.shape
 
-    if d > n:
+    if p > n:
         tmp = np.dot(matrix, matrix.T)
         num = np.linalg.eigvalsh(tmp).max()
     else:

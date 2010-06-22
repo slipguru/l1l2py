@@ -15,7 +15,7 @@ In order to describe the function implemented in this module, we have to assume
 some notation.
 
 Assuming to have a centered data matrix
-:math:`\mathbf{X} \in \mathbb{R}^{n \times d}` and a column vector of
+:math:`\mathbf{X} \in \mathbb{R}^{n \times p}` and a column vector of
 regression values :math:`\mathbf{Y} \in \mathbb{R}^n` or binary labels
 :math:`\mathbf{Y} \in \{-1, 1\}^n`, we want to minimize the
 regression/classification error solving a Regularized Least Square (RLS)

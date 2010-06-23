@@ -2,9 +2,6 @@ TODO
 ----
 
 * 1.0.1
-    - Check windows installation
-    - HTML direct download
-    - l1l2py extensive help string
     - Fix use of 'sign' in classification
    
 Misc

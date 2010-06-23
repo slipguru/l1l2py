@@ -1,9 +1,16 @@
-1. Funzione di errore (sign)
-2. Tornare errori kcv interni completi, in modo da poter plottare un error bar!
-9. use nonzero!
+TODO
+----
 
-- Link al sito in:
-    - setup.py
-    - index.rst
-    - tutorial.rst
-- Pubblicazione su PyPI
+* 1.0.1
+    - Check windows installation
+    - HTML direct download
+    - l1l2py extensive help string
+    - Fix use of 'sign' in classification
+   
+Misc
+----
+* Return complete kcv error (no mean) in order to allow errorbar plotting
+* PyPI release (easy_install-able) - needed setuptools??
+* Runnable tests without nose
+
+

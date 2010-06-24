@@ -8,16 +8,16 @@ long_description = '\n' + open(README).read()
 setup(
     name='L1L2Py',
     version=version,
-    url='http://slipguru.disi.unige.it/l1l2py',
+    url='http://slipguru.disi.unige.it/Research/L1L2Py',
     description='l1l2py is a Python package to perform feature selection '
                 'by means of l1l2 regularization with double optimization',
     long_description=long_description,
     keywords='feature selection, regularization, regression, classification,'
              'l1-norm, l2-norm',
     author='L1L2Py developers - SlipGURU',
-    author_email='salvatore.masecchia@unige.it',
+    author_email='salvatore.masecchia@disi.unige.it',
     license='GNU GPL version 3',
-    download_url = 'http://slipguru.disi.unige.it/L1L2Py.tar.gz',
+    download_url = 'http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.0.tar.gz',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',

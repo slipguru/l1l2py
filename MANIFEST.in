@@ -11,4 +11,3 @@ include docs/_static/*
 recursive-include docs/slipGURUTheme *
 recursive-include docs/tutorial *.txt *.py
 
-exclude docs/slipGURUTheme/logos_src/*

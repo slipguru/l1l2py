@@ -14,7 +14,7 @@
    height="1052.3622047"
    id="svg2"
    version="1.1"
-   inkscape:version="0.47pre4 r22446"
+   inkscape:version="0.47 r22583"
    sodipodi:docname="logos.svg"
    inkscape:export-filename="/home/sabba/Code/Workspace/L1L2Py/doc/slipGURUTheme/logo_src/logos.png"
    inkscape:export-xdpi="200"
@@ -68,12 +68,12 @@
      inkscape:cx="402.39732"
      inkscape:cy="525.94765"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g2872"
      showgrid="false"
      inkscape:window-width="1280"
-     inkscape:window-height="950"
+     inkscape:window-height="725"
      inkscape:window-x="0"
-     inkscape:window-y="25"
+     inkscape:window-y="24"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
@@ -83,7 +83,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -92,29 +92,32 @@
      inkscape:groupmode="layer"
      id="layer1">
     <image
-       y="57.147892"
-       x="69.357147"
-       id="image2840"
-       height="339"
+       sodipodi:absref="/home/sabba/Phd/L1L2Py/docs/slipGURUTheme/logos_src/slipguru.png"
+       xlink:href="slipguru.png"
        width="275"
-       xlink:href="file:///home/sabba/Code/Workspace/L1L2Py/doc/slipGURUTheme/logo_src/slipguru.png" />
+       height="339"
+       id="image2840"
+       x="69.357147"
+       y="57.147892" />
     <g
        id="g2872"
        transform="translate(0,-22.927586)">
       <image
-         xlink:href="file:///home/sabba/Code/Workspace/L1L2Py/doc/slipGURUTheme/logo_src/disi.png"
-         width="313.71429"
-         height="84.787643"
-         id="image2854"
+         sodipodi:absref="/home/sabba/Phd/L1L2Py/docs/slipGURUTheme/logos_src/disi.png"
+         xlink:href="disi.png"
+         y="99.003067"
          x="363.14285"
-         y="99.003067" />
+         id="image2854"
+         height="84.787643"
+         width="313.71429" />
       <image
-         xlink:href="file:///home/sabba/Code/Workspace/L1L2Py/doc/slipGURUTheme/logo_src/unige.png"
-         width="130.64804"
-         height="172.71428"
-         id="image2868"
+         sodipodi:absref="/home/sabba/Phd/L1L2Py/docs/slipGURUTheme/logos_src/unige.png"
+         xlink:href="unige.png"
+         y="227.43361"
          x="454.67596"
-         y="227.43361" />
+         id="image2868"
+         height="172.71428"
+         width="130.64804" />
     </g>
   </g>
 </svg>

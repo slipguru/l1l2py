@@ -1,5 +1,7 @@
 #!/bin/bash -x
 
+./clean_wc.sh
+
 cd docs
 make html
 make latex

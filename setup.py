@@ -3,14 +3,15 @@ from distutils.core import setup
 
 from l1l2py import __version__ as version
 README = os.path.join(os.path.dirname(__file__), 'README')
-long_description = '\n' + open(README).read()
+lines = open(README).readlines()
+description = ''.join(lines[:2])
+long_description = ''.join(lines[2:])
 
 setup(
     name='L1L2Py',
     version=version,
     url='http://slipguru.disi.unige.it/Research/L1L2Py',
-    description='l1l2py is a Python package to perform feature selection '
-                'by means of l1l2 regularization with double optimization',
+    description=description,
     long_description=long_description,
     keywords='feature selection, regularization, regression, classification,'
              'l1-norm, l2-norm',

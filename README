@@ -1,4 +1,4 @@
-L1L2Py (l1l2py) is a Python package to perform feature selection by means
+L1L2Py is a Python package to perform feature selection by means
 of l1l2 regularization with double optimization.
 
 L1L2Py makes use of NumPy <http://numpy.scipy.org> to provide fast

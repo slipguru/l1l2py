@@ -1,5 +1,17 @@
 CHANGELOG
 
+1.0.1
+-----
+New Features:
+    * Function minimal_model now raise a ValueError if the given range of tau
+      values produces all void solutions
+    * Updated installation instructions
+    * Documentation improved
+    
+Bug fixes:
+    * Fixed kfold_splits functions (random seed)
+
 1.0.0
+-----
 First public release
 

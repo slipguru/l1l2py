@@ -90,6 +90,10 @@ where
           0 & \quad \text{otherwise}\\
         \end{array}
     \right.
+    
+.. warning::
+    The classification error is calculated using the :func:`numpy.sign` function.
+    Keep in mind that the ``sign(x)`` returns ``0 if x==0``.
 
 
 .. autofunction:: balanced_classification_error

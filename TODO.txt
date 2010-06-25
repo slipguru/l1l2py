@@ -2,8 +2,7 @@ TODO
 ----
 
 * 1.0.1
-    - Fix use of 'sign' in classification
-    - Add ref in REAMDE
+    Done
    
 Misc
 ----

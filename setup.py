@@ -18,7 +18,7 @@ setup(
     author='L1L2Py developers - SlipGURU',
     author_email='salvatore.masecchia@disi.unige.it',
     license='GNU GPL version 3',
-    download_url = 'http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.0.tar.gz',
+    download_url = 'http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-%s.tar.gz' % version,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',

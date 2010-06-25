@@ -189,7 +189,7 @@ latex_paper_size = 'a4'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'l1l2py.tex', u'L1L2Py Documentation',
-   u'SlipGURU', u'manual'),
+   u'Salvatore Masecchia', u'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

@@ -3,11 +3,11 @@ TODO
 
 * 1.0.1
     - Fix use of 'sign' in classification
+    - Add ref in REAMDE
    
 Misc
 ----
 * Return complete kcv error (no mean) in order to allow errorbar plotting
-* PyPI release (easy_install-able) - needed setuptools??
 * Runnable tests without nose
 * See suggestions in http://diveintopython3.org/packaging.html
 

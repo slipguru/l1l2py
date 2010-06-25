@@ -15,36 +15,45 @@ L1L2Py is available open-source under the
 It requires `Python <http://www.python.org>`_ version 2.5 or higher and the
 `NumPy <http://numpy.scipy.org>`_ package.
 
-First, download the latest official version
-`L1L2Py-1.0.1.tar.gz <http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.1.tar.gz>`_,
-then:
+There are two ways you can get it:
 
-.. code-block:: bash
+* **Automatic Installation (recomended)**
 
-    $ tar xzvf L1L2Py-1.0.1.tar.gz
-    $ cd L1L2Py-1.0.1
+  L1L2Py is available on the
+  `Python Package Index <http://pypi.python.org/pypi/L1L2Py>`_ and can be
+  installed via 
+  `easy-install <http://peak.telecommunity.com/DevCenter/EasyInstall>`_
 
-If the testing framework
-`Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,
-is possible to run the given
-`Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
-``nosetests`` script
+  .. code-block:: bash
+  
+      $ easy_install -U L1L2Py
+      
+* **Manual Installation**
 
-.. code-block:: bash
+  Download the latest official version
+  `L1L2Py-1.0.1.tar.gz <http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.1.tar.gz>`_,
+  then:
 
-    $ nosetests
-    ..................................
-    ----------------------------------------------------------------------
-    Ran 36 tests in 5.239s
+  .. code-block:: bash
 
-    OK
+      $ tar xzvf L1L2Py-1.0.1.tar.gz
+      $ cd L1L2Py-1.0.1
+      $ python setup.py install
 
-Finally, executing the following command is possible to install the
-``l1l2py`` package
+  Using this manual installation, if the testing framework
+  `Nose <http://somethingaboutorange.com/mrl/projects/nose>`_ is installed,
+  is possible to run the given
+  `Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
+  ``nosetests`` script
 
-.. code-block:: bash
+  .. code-block:: bash
 
-    $ python setup.py install
+      $ nosetests
+      ..................................
+      ----------------------------------------------------------------------
+      Ran 36 tests in 5.239s
+
+      OK
 
 Moreover, in order to generate the plots showed in the following
 tutorial the `Matplotlib <http://matplotlib.sourceforge.net/>`_ package

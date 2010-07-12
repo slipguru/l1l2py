@@ -15,7 +15,7 @@ from l1l2py import __version__ as version
 from mercurial import ui, hg
 repo = hg.repository(ui.ui(), pkg_path)
 rev = repo['tip'].rev()
-if repo[str(rev-1)].tags != version and repo['tip'].tags != version:
+if not version in repo[str(rev-1)].tags() and not version in repo['tip'].tags():
     import datetime
     today = datetime.date.today()
     version += '-%s-%s%s%s' % (repo['tip'].hex()[:12],

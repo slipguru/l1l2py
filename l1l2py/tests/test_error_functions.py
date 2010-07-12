@@ -44,6 +44,19 @@ class TestErrorFunctions(object):
             predictions[0:index] = -1
             error = classification_error(labels, predictions)
             assert_almost_equals(exp_error, error)
+            
+    def test_loo_error(self):
+        labels = np.ones(1)
+
+        for predictions, exp_error in (([0], 1.0), ([1], 0.0)):
+            error = classification_error(labels, predictions)
+            assert_almost_equals(exp_error, error)
+            
+            error = balanced_classification_error(labels, predictions)
+            assert_almost_equals(0.0, error) # Always zero in LOO!
+            
+            error = regression_error(labels, predictions)
+            assert_almost_equals(exp_error, error)
 
     def test_regression_error(self):
         beta = alg.ridge_regression(self.X, self.Y)

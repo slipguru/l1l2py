@@ -295,10 +295,10 @@ def classification_error(labels, predictions):
     0.66666666666666663
 
     """
-    labels = np.asarray(labels).squeeze()
-    predictions = np.asarray(predictions).squeeze()
-
-    difference = (np.sign(labels) != np.sign(predictions))
+    labels = np.asarray(labels).ravel()
+    predictions = np.asarray(predictions).ravel()
+    
+    difference = (np.sign(labels) != np.sign(predictions))  
     return len(*difference.nonzero()) / float(len(labels))
 
 def balanced_classification_error(labels, predictions, error_weights=None):
@@ -341,8 +341,8 @@ def balanced_classification_error(labels, predictions, error_weights=None):
     0.33333333333333331
 
     """
-    labels = np.asarray(labels).squeeze()
-    predictions = np.asarray(predictions).squeeze()
+    labels = np.asarray(labels).ravel()
+    predictions = np.asarray(predictions).ravel()
 
     if error_weights is None:
         error_weights = np.abs(center(labels))
@@ -370,8 +370,8 @@ def regression_error(labels, predictions):
         Regression error calculated.
 
     """
-    labels = np.asarray(labels).squeeze()
-    predictions = np.asarray(predictions).squeeze()
+    labels = np.asarray(labels).ravel()
+    predictions = np.asarray(predictions).ravel()
 
     difference = labels - predictions
     return np.dot(difference.T, difference).squeeze() / float(len(labels))

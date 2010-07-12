@@ -8,6 +8,7 @@ experimental settings.
 The package is self contained and gives all the needed tools to generate
 sparse solution for a given linear classification or regression problem.
 
+
 Installation
 ============
 L1L2Py is available open-source under the
@@ -46,14 +47,8 @@ There are two ways you can get it:
   `Unit Test <http://en.wikipedia.org/wiki/Unit_testing>`_ running the
   ``nosetests`` script
 
-  .. code-block:: bash
-
-      $ nosetests
-      ..................................
-      ----------------------------------------------------------------------
-      Ran 36 tests in 5.239s
-
-      OK
+  .. literalinclude:: tests.txt
+     :language: bash
 
 Moreover, in order to generate the plots showed in the following
 tutorial the `Matplotlib <http://matplotlib.sourceforge.net/>`_ package

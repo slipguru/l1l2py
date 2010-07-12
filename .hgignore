@@ -3,6 +3,7 @@ syntax:glob
 *.swp
 *.pyc
 docs/_build/*
+docs/tests.txt
 .DS_Store
 dist
 build

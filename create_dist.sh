@@ -2,6 +2,10 @@
 
 ./clean_wc.sh
 
+# Preparing nosetest output
+echo '$ nosetests' > docs/tests.txt
+nosetests &>> docs/tests.txt
+
 cd docs
 make html
 make latex

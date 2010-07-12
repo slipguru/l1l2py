@@ -1,12 +1,26 @@
 import os
 from distutils.core import setup
 
-from l1l2py import __version__ as version
-README = os.path.join(os.path.dirname(__file__), 'README')
+# Package path
+pkg_path = os.path.dirname(__file__)
+
+# Package description
+README = os.path.join(pkg_path, 'README')
 lines = open(README).readlines()
 description = ''.join(lines[:2])
 long_description = ''.join(lines[2:])
 
+# Package Version
+from l1l2py import __version__ as version
+from mercurial import ui, hg
+repo = hg.repository(ui.ui(), pkg_path)
+rev = repo['tip'].rev()
+if repo[str(rev-1)].tags != version and repo['tip'].tags != version:
+    import datetime
+    today = datetime.date.today()
+    version += '-%s-%s%s%s' % (repo['tip'].hex()[:12],
+                               today.year, today.month, today.day)
+    
 setup(
     name='L1L2Py',
     version=version,

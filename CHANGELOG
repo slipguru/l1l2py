@@ -1,5 +1,10 @@
 CHANGELOG
 
+1.0.2
+-----
+Bug fixes:
+    * Fixed classification error functions (exception using loo splits) 
+
 1.0.1
 -----
 New Features:

@@ -246,6 +246,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     True
 
     """
+    import math
     n = data.shape[0]
 
     # Useful quantities
@@ -255,42 +256,53 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels.reshape(-1, 1))
 
+    # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         beta = np.zeros_like(XTY)
     else:
         beta = beta.reshape(-1, 1)
+    beta_prev = beta
 
-    k, kmin = 0, 100
+    # Auxiliary beta (FISTA implementation), starts from 0
+    aux_beta = beta
+    t, t_next = 1., None     # t values initializations
+
+    k, kmin = 0, 10
     th, difference = -np.inf, np.inf
     while k < kmin or ((difference > th).any() and k < kmax):
         k += 1
 
-        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
-        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
+        # New solution
+        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
+        beta = _soft_thresholding(value, tau_s)
+
+        # New auxiliary beta (FISTA)
+        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        difference = (beta - beta_prev)
+        aux_beta = beta + ((t - 1.0)/t_next)*difference
 
         # Convergence values
-        difference = np.abs(beta_next - beta)
-        th = np.abs(beta) * (tolerance / k)
-
-        beta = beta_next
+        difference = np.abs(difference)
+        th = np.abs(beta) * (tolerance / math.sqrt(k))
+        
+        # Values update
+        beta_prev, t = beta, t_next
 
     if return_iterations:
         return beta, k
     else:
         return beta
-
+   
 def _sigma(matrix, mu):
     n, p = matrix.shape
 
     if p > n:
         tmp = np.dot(matrix, matrix.T)
-        num = np.linalg.eigvalsh(tmp).max()
     else:
         tmp = np.dot(matrix.T, matrix)
-        evals = np.linalg.eigvalsh(tmp)
-        num = evals.max() + evals.min()
 
-    return (num/(2.*n)) + mu
+    return (np.linalg.eigvalsh(tmp).max()/n) + mu
+    
 
 def _soft_thresholding(x, th):
     return np.sign(x) * np.maximum(0, np.abs(x) - th/2.0)

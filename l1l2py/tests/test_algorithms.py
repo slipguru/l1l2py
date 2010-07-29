@@ -73,10 +73,10 @@ class TestAlgorithms(object):
             assert_true(k2 <= k1)
 
             beta, k3 = l1l2_regularization(self.X, self.Y, mu, tau,
-                                           tolerance=1e-3, kmax=100,
+                                           tolerance=1e-3, kmax=10,
                                            return_iterations=True)
             assert_true(k3 <= k2)
-            assert_true(k3 == 100)
+            assert_true(k3 == 10)
 
             beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
                                             return_iterations=True)

@@ -60,21 +60,71 @@ def l1_bounds(data, labels, eps=1e-5):
     
     return tau_min, tau_max
 
-    
-def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
-                              tolerance=1e-5, returns_iterations=False):
-    n, d = data.shape
+
+def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
+                        tolerance=1e-5, return_iterations=False):
+    n = data.shape[0]
 
     # Useful quantities
     sigma = _sigma(data, mu)
     mu_s = mu / sigma
     tau_s = tau / sigma
     XT = data.T / (n * sigma)
-    XTY = np.dot(XT, labels)
+    XTY = np.dot(XT, labels.reshape(-1, 1))
+
+    if beta is None:
+        beta = np.zeros_like(XTY)
+    else:
+        beta = beta.reshape(-1, 1)
+
+    k, kmin = 0, 100
+    th, difference = -np.inf, np.inf
+    while k < kmin or ((difference > th).any() and k < kmax):
+        k += 1
+
+        value = beta +  XTY - np.dot(XT, np.dot(data, beta))
+        beta_next = _soft_thresholding(value, tau_s) / (1.0 + mu_s)
+
+        # Convergence values
+        difference = np.abs(beta_next - beta)
+        th = np.abs(beta) * (tolerance / k)
+
+        beta = beta_next
+
+    if return_iterations:
+        return beta, k
+    else:
+        return beta
+
+def _sigma(matrix, mu):
+    n, p = matrix.shape
+
+    if p > n:
+        tmp = np.dot(matrix, matrix.T)
+        num = np.linalg.eigvalsh(tmp).max()
+    else:
+        tmp = np.dot(matrix.T, matrix)
+        evals = np.linalg.eigvalsh(tmp)
+        num = evals.max() + evals.min()
+
+    return (num/(2.*n)) + mu
+    
+def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
+                              tolerance=1e-5, returns_iterations=False):
+    n, d = data.shape
+
+    # Useful quantities
+    sigma = _sigma_F(data, mu)
+    mu_s = mu / sigma
+    tau_s = tau / sigma
+    XT = data.T / (n * sigma)
+    XTY = np.dot(XT, labels.reshape(-1, 1))
 
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         beta = np.zeros_like(XTY)
+    else:
+        beta = beta.reshape(-1, 1)
     beta_prev = beta
 
     # Auxiliary beta (FISTA implementation), starts from 0
@@ -103,7 +153,7 @@ def l1l2_regularization_FISTA(data, labels, mu, tau, beta=None, kmax=1e5,
         beta_prev, t = beta, t_next
 
     if returns_iterations:
-        return beta, k, values
+        return beta, k
     else:
         return beta
     
@@ -113,7 +163,7 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
     n = data.shape[0]
 
     # Useful quantities
-    sigma = _sigma(data, mu)
+    sigma = _sigma_F(data, mu)
     mu_s = mu / sigma
     tau_s = tau / sigma
     XT = data.T / (n * sigma)
@@ -168,3 +218,14 @@ def l1l2_regularization_MFISTA(data, labels, mu, tau, beta=None, kmax=1e5,
         return beta, k, values
     else:
         return beta
+
+
+def _sigma_F(matrix, mu):
+    n, d = matrix.shape
+
+    if d > n:
+        tmp = np.dot(matrix, matrix.T)
+    else:
+        tmp = np.dot(matrix.T, matrix)
+
+    return (np.linalg.eigvalsh(tmp).max()/n) + mu

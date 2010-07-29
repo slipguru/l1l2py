@@ -7,7 +7,7 @@ L1L2Py Documentation
 :Release: |release|
 :Date: |today|
 :Homepage: http://slipguru.disi.unige.it/Research/L1L2Py
-:Download: http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.1.tar.gz
+:Download: http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.2.tar.gz
 
 .. sectionauthor:: Salvatore Masecchia <salvatore.masecchia@unige.it>
 .. sectionauthor:: Annalisa Barla <annalisa.barla@unige.it>

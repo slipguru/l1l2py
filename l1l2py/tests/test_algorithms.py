@@ -124,7 +124,7 @@ class TestAlgorithms(object):
         beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max)
         assert_equals(0, len(beta.nonzero()[0]))
 
-        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-5)
+        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-3)
         assert_equals(1, len(beta.nonzero()[0]))
 
     def test_soft_thresholding(self):

@@ -96,7 +96,7 @@ def model_selection(data, labels, test_data, test_labels,
         **prediction_tr_list** : list of M two-dimensional ndarray, optional
             [STAGE II] Prediction vectors for the models evaluated on the
             training set.
-            
+
     """
 
     # STAGE I
@@ -107,7 +107,7 @@ def model_selection(data, labels, test_data, test_labels,
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
 
     # KCV MINIMUM SELECTION
-    err_ts = out['kcv_err_ts']     
+    err_ts = out['kcv_err_ts']
     tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min())
     tau_opt, lambda_opt = _minimum_selection(tau_opt_idxs, lambda_opt_idxs,
                                              sparse, regularized)
@@ -174,7 +174,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         may be different (on high values of ``tau``).
         The function calculates the optimum value of ``tau`` for which the model
         is not void on all cross validation splits.
-        
+
         **This means than in extreme cases the output could be void.**
 
     Parameters
@@ -209,7 +209,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         Matrix of average cross validation error on the training set.
         The first dimension depends on the number of valid ``tau`` values,
         **even zero**.
-        
+
     Raises
     ------
     ValueError
@@ -234,7 +234,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
         # Builds a classifier for each value of tau
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
-        
+
         if len(beta_casc) == 0:
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")

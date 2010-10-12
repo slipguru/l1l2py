@@ -22,13 +22,13 @@ There are two ways you can get it:
 
   L1L2Py is available on the
   `Python Package Index <http://pypi.python.org/pypi/L1L2Py>`_ and can be
-  installed via 
+  installed via
   `easy-install <http://peak.telecommunity.com/DevCenter/EasyInstall>`_
 
   .. code-block:: bash
-  
+
       $ easy_install -U L1L2Py
-      
+
 * **Manual Installation**
 
   Download the latest official version
@@ -163,7 +163,7 @@ A good choice for the extreme values for :math:`\tau` could be
 >>> beta_min = l1l2py.algorithms.l1l2_regularization(train_data_centered,
 ...                                                  train_labels, 0.0, tau_min)
 >>> print len(beta_max.nonzero()[0]), len(beta_min.nonzero()[0])
-1 11
+1 10
 
 The minimum value of :math:`\tau` should be set in order to get a solution with
 more non-zero variables than the number of *hypotetical* number of relevant

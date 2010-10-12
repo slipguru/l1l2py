@@ -18,6 +18,7 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.path.pardir))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'tutorial'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 

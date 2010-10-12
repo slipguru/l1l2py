@@ -28,6 +28,10 @@ elaboration of the data.
 __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 import numpy as np
+try:
+    from scipy import linalg as la
+except ImportError:
+    from numpy import linalg as la
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.
@@ -112,14 +116,14 @@ def ridge_regression(data, labels, mu=0.0):
         tmp = np.dot(data, data.T)
         if mu:
             tmp += mu*n*np.eye(n)
-        tmp = np.linalg.pinv(tmp)
+        tmp = la.pinv(tmp)
 
         return np.dot(np.dot(data.T, tmp), labels.reshape(-1, 1))
     else:
         tmp = np.dot(data.T, data)
         if mu:
             tmp += mu*n*np.eye(p)
-        tmp = np.linalg.pinv(tmp)
+        tmp = la.pinv(tmp)
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
@@ -299,7 +303,7 @@ def _sigma(matrix, mu):
     else:
         tmp = np.dot(matrix.T, matrix)
 
-    return (np.linalg.eigvalsh(tmp).max()/n) + mu
+    return (la.eigvalsh(tmp).max()/n) + mu
 
 
 def _soft_thresholding(x, th):

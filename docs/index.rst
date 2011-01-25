@@ -58,5 +58,5 @@ of linear correlation.
               Journal of Computational Biology, vol. 16, pp. 677-690, 2009.
 .. [Beck09]   A. Beck, M. Teboulle,
               "A fast iterative shrinkage-thresholding algorithm for linear
-               inverse problems"
-               SIAM Journal on Imaging Sciences, 2(1):183–202, Mar 2009.
+              inverse problems"
+              SIAM Journal on Imaging Sciences, 2(1):183–202, Mar 2009.

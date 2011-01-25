@@ -22,6 +22,8 @@ N-dimensional array manipulation. It is licensed under
 L1L2Py is based on the minimization of the (naive) :math:`\ell_1\ell_2`
 functional introduced in [Zou05]_ using the algorithm studied from the
 theoretical viewpoint in [DeMol09a]_.
+The current implementation exploits the minimization algorithm proposed in
+[Beck09]_.
 
 L1L2Py is the Python implementation of the one proposed and applied
 in [DeMol09b]_.
@@ -54,3 +56,7 @@ of linear correlation.
               "A Regularized Method for Selecting Nested Group of Genes from
               Microarray Data"
               Journal of Computational Biology, vol. 16, pp. 677-690, 2009.
+.. [Beck09]   A. Beck, M. Teboulle,
+              "A fast iterative shrinkage-thresholding algorithm for linear
+               inverse problems"
+               SIAM Journal on Imaging Sciences, 2(1):183–202, Mar 2009.

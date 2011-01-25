@@ -203,7 +203,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                         tolerance=1e-5, return_iterations=False):
-    r"""Implementation of the Iterative Shrinkage-Thresholding Algorithm
+    r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
     It solves the `l1l2` regularization problem with parameter ``mu`` on the

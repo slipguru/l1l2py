@@ -57,7 +57,8 @@ Implementation details
 ======================
 While :eq:`rls` has closed-form solution, for :eq:`l1l2` there are many
 different approaches. In this module we provide an Iterative
-Shrinkage-Thresholding Algorithm (ISTA) proposed in [DeMol09a]_.
+Shrinkage-Thresholding Algorithm (ISTA) proposed in [DeMol09a]_ exploiting
+a faster variation (called FISTA) proposed in [Beck09]_.
 
 Starting from a null vector :math:`\boldsymbol{\beta}`, each step updates
 the value of :math:`\boldsymbol{\beta}` until convergence:
@@ -80,10 +81,10 @@ The constant :math:`\sigma` is a (theorically optimal) step size which
 depends on the data:
 
 .. math::
-    \sigma = \frac{a + b}{2n} + \mu,
+    \sigma = \frac{e}{n} + \mu,
 
-where :math:`a` and :math:`b` are the maximum and the minimum eigenvalues of
-the matrix :math:`\mathbf{X^T}\mathbf{X}`.
+where :math:`e` is the maximum eigenvalue of the matrix
+:math:`\mathbf{X^T}\mathbf{X}`.
 
 The convergence is reached when for each :math:`j \in \{0,\dots,d-1\}`:
 
@@ -112,6 +113,3 @@ is been theoretically proved in [Hale08]_.
             "Fixed-point continuation for :math:`\ell_1`-minimization:
             Methodology and convergence"
             SIAM J. Optim. Volume 19, Issue 3, pp. 1107-1130, 2008
-
-
-

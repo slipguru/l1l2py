@@ -95,6 +95,13 @@ def test_enet_toy():
     X = np.array([[-1.], [0.], [1.]])
     Y = [-1, 0, 1]       # just a straight line
     T = [[2.], [3.], [4.]]  # test sample
+    
+    n = X.shape[0]
+       
+    #tau = alpha*rho; mu = 0.5*alpha*(1-rho)
+    # 1/n instead of 1/2 -> coeff_test = 0.5*coeff;
+    def par_conv(alpha, rho, n):
+        return alpha*rho*n, 0.5*alpha*(1-rho)*n #tau, mu
 
     # this should be the same as lasso... no OLS
     #clf = ElasticNet(alpha=0, rho=1.0)
@@ -106,9 +113,11 @@ def test_enet_toy():
     #assert_almost_equal(clf.dual_gap_, 0)
 
     #clf = ElasticNet(alpha=0.5, rho=0.3)
-    #clf.fit(X, Y, max_iter=1000, precompute=False)
-    #pred = clf.predict(T)
-    #assert_array_almost_equal(clf.coef_, [0.50819], decimal=3)
+    tau, mu = par_conv(alpha=0.5, rho=0.3, n=n)
+    clf = ElasticNetLocal(tau=tau, mu=mu)
+    clf.fit(X, Y, max_iter=1000, precompute=False)
+    pred = clf.predict(T)
+    assert_array_almost_equal(clf.coef_*(n/2.), [0.50819], decimal=3)
     #assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
     #assert_almost_equal(clf.dual_gap_, 0)
     #

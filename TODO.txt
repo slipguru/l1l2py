@@ -27,6 +27,8 @@ Phases
 2. Removing duplicates/useless classes (for comparision with scikits)
 3. Implementing external_dep classes to test the library without
    scikits.learn installed
+   
+See: http://scikit-learn.sourceforge.net/ml-benchmarks/
 
 
 OO (scikits.learn restyling)

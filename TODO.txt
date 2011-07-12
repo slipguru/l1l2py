@@ -1,13 +1,127 @@
 TODO
 ----
 
+Giustification
+===============
+We want a double-face library which ca be used alone (only with numpy)
+or as a companion for scikits.learn.
+To do this we have to replicate something (we have to cut and paste
+the base classes??), but we can mantain the same
+structure eg:
+
+l1l2py
+    cross_val.py (our implementation of the iterators)
+    metrics.py
+    external_dep.py (scikits cut and paste... mumble mumble)
+    utils.py (center and standardize as Transformers)
+    proximal.py (eventually "pyx")
+    _core.py (contains L1L2Fw and DoubleOptimizer)
+
+To Remove:
+    - linear_range, geometric_range (numpy functions)
+
+Phases
+======
+1. Replication of all the function to the new style, using scikits when
+   possible
+2. Removing duplicates/useless classes (for comparision with scikits)
+3. Implementing external_dep classes to test the library without
+   scikits.learn installed
+
+
+OO (scikits.learn restyling)
+============================
+
+1. Core classes
+---------------
+    - Lasso
+    - Ridge
+    - ENet
+    - TwoStepPredictor (DoublePredictor)
+        __init__(fs: FeatureSelector, fp: FinalPredictor)
+
+        eg.
+        lasso = Lasso(...)
+        ridge = Ridge(...)
+        dp = DoublePredictor(fs=lasso, fp=ridge)
+        dp.fit(X, y)
+        dp.predict(X2)
+
+        where:
+            dp.fit(X, y):
+                selected = fs.fit(X, y)
+                coeff_ = fs.fit(X[selected], y)
+        How to manage the reduced number of features ->
+            * len(coeff) = len(selected)
+            * len(coeff) = len(selected[nonzero(selected)])
+
+        The DoublePredicter has to be implemented as a standard
+        scikits.learn Predictor where the list of parameters is the union of the
+        two internal predictor's parameters.
+
+2. Cross Validation
+-------------------
+- GridSearchCV is a generic class accepting a generic predictor
+- There are also a list of CustomCV classes (for the generalized linear model),
+  using the warm start trick (eg. LassoCV, EnetCV, which are "predictors").
+- Alternaitives:
+    (A) GridSearchCV(DoublePredictor, ...) work but may be slow
+    (B) DoublePredictorCV(fsCV, fpCV) accept two CV-like predictors
+        eg. DoublePredictor(LassoCV(...), GridSearchCV(SVM(...), ...), ...)
+        (probably it can also accept a CVpredictor and a standard predictor,
+        we have to underline that it is not equal to search on fs and then
+        search on fp with the best parameter of the firts, but that it is
+        a global-common search of the combined two step predictor, but the
+        functionality permits to optimize the search using optimized cv
+        routines).
+
+    Differences (assuming n + m parameters):
+        (A) search on the grid of the hyperparameter calling a "fit" on the
+        double predictor on each tuple of combined parameter (n*m fit calls)
+        (B) search on the same grid but calling one fit for fsCV getting
+        the list of n "models". Than for each models calls the fit on fp
+        starting another search on the remaining m parameters (1+m fit calls)
+
+        models = fscv.fit(X, y).models
+        for m in models:
+            fp.fit(X[m], y)
+
+3. L1L2Fw
+----------
+We can think the all framework as an application of two step (stage 1 and 2),
+can we generalize it using the core classes implemented?
+The framework as a step of feature selection based on a double optimization,
+but one might use a simple selector (?), then the obtained list
+is enriched by correlation of the variables...
+the our step 2 depends on the step 1 because it need the two parameters
+tau* and lambda*.... how can we connect from outside (and in a general way)
+the two steps... is it useful??
+
+We can also implement the internal framework in a scikits.learn style and
+offer the out l1l2fw as a solution for a particular problem which uses
+a step of minimal model selection ad the calculation nested (correleted)
+lists o variable which is based on an instantiation of DoublePredictor
+(which has ENet has fs) and the nested lists are calculated using a theorical
+feature of the funcional. Moreover L1L2FW offer the possibility to change
+the "improving model" predictor which is used in the DoublePredictor
+and in the final validation... (probably also the nested list generation,
+can be though as a DoublePredictor instantiation... DoublePredictorCV with
+EnetCV on mu and a FinalPredictor chosen by the user, instead the first step
+is a DoublePredictorCV with LassoCV and a FinalPredictorCV... wow)
+
+
+
+
+
+
+
+
+
 * 1.0.1
     Done
-   
+
 Misc
 ----
 * Return complete kcv error (no mean) in order to allow errorbar plotting
 * Runnable tests without nose
 * See suggestions in http://diveintopython3.org/packaging.html
-
-

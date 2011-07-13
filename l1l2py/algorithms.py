@@ -254,7 +254,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     # Useful quantities
     sigma = _sigma(data, mu)
     mu_s = mu / sigma
-    tau_s = tau / sigma
+    tau_s = tau / (2.0*sigma)
     XT = data.T / (n * sigma)
     XTY = np.dot(XT, labels.reshape(-1, 1))
 
@@ -307,4 +307,4 @@ def _sigma(matrix, mu):
 
 
 def _soft_thresholding(x, th):
-    return np.sign(x) * np.maximum(0, np.abs(x) - th/2.0)
+    return np.sign(x) * np.maximum(0, np.abs(x) - th)#/2.0)

@@ -133,7 +133,8 @@ class TestAlgorithms(object):
             out = _soft_thresholding(beta, th)
 
             # Verbose and slow version
-            out_exp = beta - (np.sign(beta) * th/2.0)
-            out_exp[np.abs(beta) <= th/2.0] = 0.0
+            out_exp = beta - (np.sign(beta) * th)#/2.0)
+            #out_exp[np.abs(beta) <= th/2.0] = 0.0
+            out_exp[np.abs(beta) <= th] = 0.0
 
             assert_true(np.allclose(out, out_exp))

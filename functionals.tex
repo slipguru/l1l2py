@@ -1,0 +1,96 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsbsy, amsmath}
+
+\newcommand{\bbeta}{\boldsymbol{\beta}}
+\newcommand{\X}{\mathbf{X}}
+\newcommand{\y}{\mathbf{y}}
+
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Scikits.learn (glmnet) and L1L2Py parameters connections}
+Scikits.learn minimize the following functional:
+\begin{equation} \label{eq:glmnet}
+  \frac{1}{2n} \| \y - \X \bbeta \|_2^2 
+      + \alpha( \rho \| \bbeta \|_1 + \frac{1}{2}(1 - \rho) \| \bbeta \|_2^2
+\end{equation}
+
+\noindent
+The internal (fast) coordinate descent algorithm solves the following
+\begin{equation}
+  \frac{1}{2} \| \y - \X \bbeta \|_2^2 
+      + \lambda_1 \| \bbeta \|_1 + \frac{1}{2}\lambda_2 \| \bbeta \|_2^2
+\end{equation}
+where $\lambda_1 = n\alpha\rho$ and $\lambda_2 = n\alpha(1 - \rho)$.
+
+\noindent
+Our proximal algorithms solve a similar functional:
+\begin{equation} \label{eq:prox}
+  \frac{1}{n} \| \y - \X \bbeta \|_2^2 
+      + \tau \| \bbeta \|_1 + \mu \| \bbeta \|_2^2
+\end{equation}
+
+\noindent
+Transforming the functional in \eqref{eq:glmnet} in a form-like
+\eqref{eq:prox} we get
+\begin{equation}
+  \frac{1}{n} \| \y - \X \bbeta \|_2^2 
+      + 2\alpha\rho \| \bbeta \|_1 + \alpha(1 - \rho) \| \bbeta \|_2^2
+\end{equation}
+
+\noindent
+So, if we use $\alpha$, $\rho$ with scikits.learn and $\tau = 2\alpha\rho$,
+$\mu = \alpha(1 - \rho)$ in l1l2py we solve the same problem.
+
+
+\section{l1l2py vs paspal}
+
+Assuming
+\begin{equation}
+  \mathbf{S}_{\lambda}(x) = \text{sign}(x) \cdot (|x| - \lambda)_{+}
+\end{equation}
+
+\subsection{L1L2Py}
+\begin{equation}
+  \frac{1}{n} \| \y - \X \bbeta \|_2^2 
+      + \tau \| \bbeta \|_1 + \mu \| \bbeta \|_2^2
+\end{equation}
+
+\noindent
+Iteration step
+\begin{equation}
+    \bbeta^{p+1} = \mathbf{S}_{\frac{\tau}{2\sigma}}\{ 
+                          (1 - \frac{\mu}{\sigma})\bbeta^p + 
+                          \frac{1}{n\sigma}\X^T(\y - \X\bbeta^p)
+                    \}
+\end{equation}
+with $\sigma = \frac{\|\X^T\X\|_2}{n} + \mu$.
+
+\subsection{Paspal}
+\begin{equation}
+  \frac{1}{n} \| \y - \X \bbeta \|_2^2 
+      + 2\tau \| \bbeta \|_1 + k\alpha \| \bbeta \|_2^2
+\end{equation}
+where $k = \frac{\|\X^T\X\|_2}{n}$ and $0 < \alpha \leq 1$
+
+\noindent
+Iteration step
+\begin{equation}
+    \bbeta^{p+1} = \mathbf{S}_{\frac{\tau}{\sigma}}\{ 
+                          (1 - \frac{\mu}{\sigma})\bbeta^p + 
+                          \frac{1}{n\sigma}\X^T(\y - \X\bbeta^p)
+                    \}
+\end{equation}
+with $\sigma = \frac{\|\X^T\X\|_2}{n}(1 + \alpha)$.
+
+\end{document}

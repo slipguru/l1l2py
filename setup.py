@@ -12,7 +12,7 @@ long_description = ''.join(lines[2:])
 
 # Package Version
 from l1l2py import __version__ as version
-    
+
 setup(
     name='L1L2Py',
     version=version,

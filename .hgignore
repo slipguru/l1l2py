@@ -1,5 +1,10 @@
 syntax:glob
 
+*~
+*aux
+*log
+*pdf
+*backup
 *.swp
 *.pyc
 docs/_build/*

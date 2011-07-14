@@ -72,17 +72,32 @@ class ElasticNet(LinearModel):
                           ' to increase the number of iterations')
         
         return self
-        
+
+class Lasso(ElasticNet):    
+    def __init__(self, alpha=1.0, fit_intercept=True, #### HACK
+                 precompute='auto', max_iter=100000, tol=1e-5):
+        tau = 2.*alpha ### HACK (rho=1.0)
+        super(Lasso, self).__init__(tau=tau, mu=0.0,
+                            fit_intercept=fit_intercept,
+                            precompute=precompute, max_iter=max_iter,
+                            tol=tol)
 
 ###############################################################################
 # Elastic net tests from scikits.learn internals
 ##############################################################################
 
-ElasticNetLocal = ElasticNet
-from scikits.learn.linear_model.coordinate_descent import ElasticNet
+from scikits.learn.linear_model.coordinate_descent import ElasticNet as ElasticNetSK
 from numpy.testing.utils import assert_array_almost_equal, assert_almost_equal
 
-def test_enet_toy():
+def conv_(alpha, rho):
+    tau, mu = 2.*alpha*rho, alpha*(1-rho)
+    return {'tau': tau, 'mu': mu}
+
+def test_enet_toy_both():
+    for en in ElasticNetSK, ElasticNet:
+        yield _test_enet_toy, en
+
+def _test_enet_toy(ElasticNet):
     """
     Test ElasticNet for various parameters of alpha and rho.
 
@@ -97,24 +112,22 @@ def test_enet_toy():
     T = [[2.], [3.], [4.]]  # test sample
     
     n = X.shape[0]
-       
-    #tau = alpha*rho; mu = 0.5*alpha*(1-rho)
-    # 1/n instead of 1/2 -> coeff_test = 0.5*coeff;
-    def par_conv(alpha, rho, n):
-        return 2.*alpha*rho, alpha*(1-rho) #tau, mu
 
     # this should be the same as lasso... no OLS
-    #clf = ElasticNet(alpha=0, rho=1.0)
-    clf = ElasticNetLocal(tau=0, mu=0.0)
+    try:
+        clf = ElasticNet(alpha=0, rho=1.0)    
+    except:
+        clf = ElasticNet(**conv_(alpha=0, rho=1.0))
     clf.fit(X, Y)
     pred = clf.predict(T)
     assert_array_almost_equal(clf.coef_, [1])
     assert_array_almost_equal(pred, [2, 3, 4])
     #assert_almost_equal(clf.dual_gap_, 0)
 
-    #clf = ElasticNet(alpha=0.5, rho=0.3)
-    tau, mu = par_conv(alpha=0.5, rho=0.3, n=n)
-    clf = ElasticNetLocal(tau=tau, mu=mu)
+    try:
+        clf = ElasticNet(alpha=0.5, rho=0.3)
+    except:
+        clf = ElasticNet(**conv_(alpha=0.5, rho=0.3))
     clf.fit(X, Y, max_iter=1000, precompute=False)
     pred = clf.predict(T)
     assert_array_almost_equal(clf.coef_, [0.50819], decimal=3)
@@ -133,9 +146,13 @@ def test_enet_toy():
     #assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
     #assert_almost_equal(clf.dual_gap_, 0)
     #
-    #clf = ElasticNet(alpha=0.5, rho=0.5)
-    #clf.fit(X, Y)
-    #pred = clf.predict(T)
-    #assert_array_almost_equal(clf.coef_, [0.45454], 3)
-    #assert_array_almost_equal(pred, [0.9090, 1.3636, 1.8181], 3)
+    
+    try:
+        clf = ElasticNet(alpha=0.5, rho=0.5)
+    except:
+        clf = ElasticNet(**conv_(alpha=0.5, rho=0.5))
+    clf.fit(X, Y)
+    pred = clf.predict(T)
+    assert_array_almost_equal(clf.coef_, [0.45454], 3)
+    assert_array_almost_equal(pred, [0.9090, 1.3636, 1.8181], 3)
     #assert_almost_equal(clf.dual_gap_, 0)

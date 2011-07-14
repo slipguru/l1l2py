@@ -6,14 +6,14 @@ from scikits.learn.linear_model.base import LinearModel
 class ElasticNet(LinearModel):
     """
     scikits.learn model is:
-        0.5*||y - X*b||^2 + alpha*rho*||b||_1 + 0.5*alpha*(1-rho)||b||^2
-    
+        (1/2n)*||y - X*b||^2 + alpha*rho*||b||_1 + 0.5*alpha*(1-rho)||b||^2
+
     l1l2py model is:
         (1/n)*||y - X*b||^2 + tau*||b||_1 + mu*||b||^2
-        
+
     Now, we keep our definition... we have to think if a different one
     is better or not.
-    
+
     Notes:
         - with alpha and rho the default parameters (1.0 and 0.5)
           have a meaning: equal balance between l1 and l2 penalties.
@@ -26,10 +26,10 @@ class ElasticNet(LinearModel):
         - In l1l2py we have max_iter equal 100.000 instead of 1.000 and
           tol equal to 1e-5 instead of 1e-4... are them differences
           between cd and prox???
-    
+
     """
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-5):
+                 precompute='auto', max_iter=100000, tol=1e-4):
         self.tau = tau
         self.mu = mu
         self.coef_ = None
@@ -37,46 +37,47 @@ class ElasticNet(LinearModel):
         self.precompute = precompute
         self.max_iter = max_iter
         self.tol = tol
-        
+
     def fit(self, X, y, Xy=None, coef_init=None, **params):
         """
         Notes: Xy is related to Gram and precompute parameter
-        
+
         params may be each "init" parameter that the user want to
         override in the specific fit
         """
         from .algorithms import l1l2_regularization
-        
+
         self._set_params(**params)
         X = np.asanyarray(X, dtype=np.float64)
         y = np.asanyarray(y, dtype=np.float64)
 
         X, y, Xmean, ymean = LinearModel._center_data(X, y, self.fit_intercept)
-        
+
         if coef_init is None:
             self.coef_ = np.zeros(X.shape[1], dtype=np.float64)
         else:
             self.coef_ = coef_init
-        
-        self.coef_, self.iter_ = l1l2_regularization(X, y, self.mu, self.tau,
+
+        self.coef_, self.niter_, self.coeffs_ = l1l2_regularization(X, y, self.mu, self.tau,
                                                      beta=self.coef_,
                                                      kmax=self.max_iter,
                                                      tolerance=self.tol,
                                                      return_iterations=True)
         self.coef_ = self.coef_.ravel()
-        
+
         self._set_intercept(Xmean, ymean)
-        
-        if self.iter_ == self.max_iter:
+
+        if self.niter_ == self.max_iter:
             warnings.warn('Objective did not converge, you might want'
                           ' to increase the number of iterations')
-        
+
         return self
 
-class Lasso(ElasticNet):    
+class Lasso(ElasticNet):
     def __init__(self, alpha=1.0, fit_intercept=True, #### HACK
-                 precompute='auto', max_iter=100000, tol=1e-5):
+                 precompute='auto', max_iter=100000, tol=1e-4):
         tau = 2.*alpha ### HACK (rho=1.0)
+        self.alpha = alpha
         super(Lasso, self).__init__(tau=tau, mu=0.0,
                             fit_intercept=fit_intercept,
                             precompute=precompute, max_iter=max_iter,
@@ -110,12 +111,12 @@ def _test_enet_toy(ElasticNet):
     X = np.array([[-1.], [0.], [1.]])
     Y = [-1, 0, 1]       # just a straight line
     T = [[2.], [3.], [4.]]  # test sample
-    
+
     n = X.shape[0]
 
     # this should be the same as lasso... no OLS
     try:
-        clf = ElasticNet(alpha=0, rho=1.0)    
+        clf = ElasticNet(alpha=0, rho=1.0)
     except:
         clf = ElasticNet(**conv_(alpha=0, rho=1.0))
     clf.fit(X, Y)
@@ -146,7 +147,7 @@ def _test_enet_toy(ElasticNet):
     #assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
     #assert_almost_equal(clf.dual_gap_, 0)
     #
-    
+
     try:
         clf = ElasticNet(alpha=0.5, rho=0.5)
     except:

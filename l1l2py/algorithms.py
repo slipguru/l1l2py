@@ -256,7 +256,9 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     mu_s = mu / sigma
     tau_s = tau / (2.0*sigma)
     XT = data.T / (n * sigma)
+    Y = labels.reshape(-1, 1)
     XTY = np.dot(XT, labels.reshape(-1, 1))
+    #XTX = np.dot(XT, data)
 
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
@@ -264,6 +266,9 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     else:
         beta = beta.reshape(-1, 1)
     beta_prev = beta
+
+    coeffs = list()
+    coeffs.append(beta.copy())
 
     # Auxiliary beta (FISTA implementation), starts from 0
     aux_beta = beta
@@ -275,8 +280,12 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         k += 1
 
         # New solution
-        value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
+        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
+        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XTX, aux_beta)
+        value = (1.0 - mu_s)*aux_beta + np.dot(XT, Y - np.dot(data, aux_beta))
         beta = _soft_thresholding(value, tau_s)
+
+        coeffs.append(beta.copy())
 
         # New auxiliary beta (FISTA)
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
@@ -291,9 +300,22 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         beta_prev, t = beta, t_next
 
     if return_iterations:
-        return beta, k
+        return beta, k, coeffs
     else:
         return beta
+
+
+def _functional(X, Y, beta, tau, mu):
+    n = X.shape[0]
+
+    loss = Y - np.dot(X, beta)
+    loss_quadratic_norm = np.linalg.norm(loss) ** 2
+    beta_quadratic_norm = np.linalg.norm(beta) ** 2
+    beta_l1_norm = np.abs(beta).sum()
+
+    return (((1./n) * loss_quadratic_norm)
+             + mu * beta_quadratic_norm
+             + tau * beta_l1_norm)
 
 def _sigma(matrix, mu):
     n, p = matrix.shape

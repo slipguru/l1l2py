@@ -1,9 +1,4 @@
 """
-To run this, you'll need to have installed.
-
-  * glmnet-python
-  * scikit-learn (of course)
-
 Does two benchmarks
 
 First, we fix a training set and increase the number of
@@ -17,7 +12,6 @@ the number of dimensions.
 In both cases, only 10% of the features are informative.
 """
 import sys
-sys.path.append('../scikit-learn')
 
 import numpy as np
 import gc
@@ -46,16 +40,18 @@ def bench(factory, X, Y, X_test, Y_test, ref_coef):
     print "mean coef abs diff: %f" % abs(ref_coef - clf.coef_.ravel()).mean()
     return delta
 
-
-if __name__ == '__main__':
-    from glmnet.elastic_net import Lasso as GlmnetLasso
-    from l1l2py.proximal import Lasso as ScikitLasso ######## HACK
-    #from scikits.learn.linear_model import Lasso as ScikitLasso
+def main():
+    from l1l2py.proximal import Lasso as ProximalLasso
+    from scikits.learn.linear_model import Lasso as ScikitLasso
     # Delayed import of pylab
     import pylab as pl
 
+
+    # the number of variable is fixed
+    # and the number of point increases
+
     scikit_results = []
-    glmnet_results = []
+    proximal_results = []
     n = 20
     step = 500
     n_features = 1000
@@ -69,16 +65,16 @@ if __name__ == '__main__':
             n_train_samples=(i * step), n_test_samples=n_test_samples,
             n_features=n_features, noise=0.1, n_informative=n_informative)
 
-        print "benching scikit: "
+        print "benching proximal: "
+        proximal_results.append(bench(ProximalLasso, X, Y, X_test, Y_test, coef))
+        print "benching scikits: "
         scikit_results.append(bench(ScikitLasso, X, Y, X_test, Y_test, coef))
-        print "benching glmnet: "
-        glmnet_results.append(bench(GlmnetLasso, X, Y, X_test, Y_test, coef))
 
     pl.clf()
     xx = range(0, n*step, step)
     pl.title('Lasso regression on sample dataset (%d features)' % n_features)
     pl.plot(xx, scikit_results, 'b-', label='scikit-learn')
-    pl.plot(xx, glmnet_results,'r-', label='glmnet')
+    pl.plot(xx, proximal_results,'r-', label='proximal')
     pl.legend()
     pl.xlabel('number of samples to classify')
     pl.ylabel('time (in seconds)')
@@ -103,18 +99,71 @@ if __name__ == '__main__':
             n_train_samples=n_samples, n_test_samples=n_test_samples,
             n_features=n_features, noise=0.1, n_informative=n_informative)
 
-        print "benching scikit: "
+        print "benching proximal: "
+        proximal_results.append(bench(ProximalLasso, X, Y, X_test, Y_test, coef_))
+        print "benching scikits: "
         scikit_results.append(bench(ScikitLasso, X, Y, X_test, Y_test, coef_))
-        print "benching glmnet: "
-        glmnet_results.append(bench(GlmnetLasso, X, Y, X_test, Y_test, coef_))
 
     xx = np.arange(100, 100 + n * step, step)
     pl.figure()
     pl.title('Regression in high dimensional spaces (%d samples)' % n_samples)
     pl.plot(xx, scikit_results, 'b-', label='scikit-learn')
-    pl.plot(xx, glmnet_results,'r-', label='glmnet')
+    pl.plot(xx, proximal_results,'r-', label='proximal')
     pl.legend()
     pl.xlabel('number of features')
     pl.ylabel('time (in seconds)')
     pl.axis('tight')
+    pl.show()
+
+
+if __name__ == '__main__':
+    import pylab as pl
+    import l1l2py.algorithms
+    from l1l2py.algorithms import l1l2_regularization
+    from l1l2py.proximal import Lasso
+
+    from scikits.learn.linear_model.cd_fast import enet_coordinate_descent
+    from scikits.learn.linear_model import Lasso as LassoSKL
+
+    X, Y, X_test, Y_test, coef = make_regression_dataset(
+            n_train_samples=100, n_test_samples=50,
+            n_features=10000, noise=0.1, n_informative=100)
+
+    alpha = 3.
+    tau = 2.*alpha
+    mu = 0.0
+
+    def _functional(beta):
+        n = X.shape[0]
+
+        Xc, Yc, Xmean, Ymean = Lasso._center_data(X, Y, True)
+
+        loss = Yc.ravel() - np.dot(Xc, beta.ravel())
+        loss_quadratic_norm = np.linalg.norm(loss) ** 2
+        beta_quadratic_norm = np.linalg.norm(beta) ** 2
+        beta_l1_norm = np.abs(beta).sum()
+
+        return (((1./n) * loss_quadratic_norm)
+                 + mu * beta_quadratic_norm
+                 + tau * beta_l1_norm)
+
+    clfprox = Lasso(alpha=alpha).fit(X, Y)
+    clfcd = LassoSKL(alpha=alpha).fit(X, Y)
+
+    print clfprox.coef_[clfprox.coef_.nonzero()]
+    print clfcd.coef_[clfcd.coef_.nonzero()]
+
+    print clfprox.niter_
+    print clfcd.niter_
+
+    valuesprox = [_functional(x) for x in clfprox.coeffs_]
+    pl.plot(valuesprox, 'r', label='prox')
+    pl.axhline(min(valuesprox), c='r', ls='--')
+
+    valuescd = [_functional(x) for x in clfcd.coeffs_]
+    pl.plot(valuescd, 'b', label='cd')
+    pl.axhline(min(valuescd), c='b', ls='--')
+
+    pl.legend()
+    pl.title('func vs iter')
     pl.show()

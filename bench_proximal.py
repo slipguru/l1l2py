@@ -147,23 +147,46 @@ if __name__ == '__main__':
                  + mu * beta_quadratic_norm
                  + tau * beta_l1_norm)
 
+    import time
+
+    st = time.time()
     clfprox = Lasso(alpha=alpha).fit(X, Y)
+    proxt = time.time() - st
+    
+    st = time.time()
     clfcd = LassoSKL(alpha=alpha).fit(X, Y)
-
-    print clfprox.coef_[clfprox.coef_.nonzero()]
-    print clfcd.coef_[clfcd.coef_.nonzero()]
-
-    print clfprox.niter_
-    print clfcd.niter_
-
-    valuesprox = [_functional(x) for x in clfprox.coeffs_]
-    pl.plot(valuesprox, 'r', label='prox')
-    pl.axhline(min(valuesprox), c='r', ls='--')
-
-    valuescd = [_functional(x) for x in clfcd.coeffs_]
-    pl.plot(valuescd, 'b', label='cd')
-    pl.axhline(min(valuescd), c='b', ls='--')
-
-    pl.legend()
-    pl.title('func vs iter')
-    pl.show()
+    cdt = time.time() - st
+    
+    print
+    print 'Calculated Coefficients'
+    #realcoef = coef[coef.nonzero()]
+    proxcoef = clfprox.coef_[clfprox.coef_.nonzero()]
+    cdcoef = clfcd.coef_[clfcd.coef_.nonzero()]
+    #print 'Real:', realcoef
+    print 'Prox:', proxcoef
+    print 'Cd:  ', cdcoef
+    print 'Max Diff:', np.abs(proxcoef - cdcoef).max()
+    
+    #print 'Max Differences'
+    #print 'Prox:', np.abs(proxcoef - realcoef).max()
+    #print 'Cd:  ', np.abs(proxcoef - realcoef).max()
+    
+    print
+    print 'Prox: %d iter in %.3f sec' % (clfprox.niter_, proxt)
+    print 'Cd: convergence in %.3f sec' % cdt
+    
+    print
+    valueprox = _functional(clfprox.coef_)
+    valuecd = _functional(clfcd.coef_)
+    print 'Minimum reached by prox:', valueprox
+    print 'Minimum reached by cd:', valuecd
+    print 'Diff:', np.abs(valueprox - valuecd)
+    
+    # Proximal perfomances
+    #valuesprox = [_functional(x) for x in clfprox.coeffs_]
+    #pl.plot(valuesprox, 'r', label='prox')
+    #pl.axhline(min(valuesprox), c='r', ls='--')
+    #
+    #pl.legend()
+    #pl.title('func vs iter')
+    #pl.show()

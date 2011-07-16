@@ -249,58 +249,118 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
 
     """
     import math
-    n = data.shape[0]
+    n, d = data.shape
 
     # Useful quantities
-    sigma = _sigma(data, mu)
-    mu_s = mu / sigma
-    tau_s = tau / (2.0*sigma)
-    XT = data.T / (n * sigma)
+    XTn = data.T / n # * sigma)
     Y = labels.reshape(-1, 1)
-    XTY = np.dot(XT, labels.reshape(-1, 1))
+    #XTY = np.dot(XT, labels.reshape(-1, 1))
     #XTX = np.dot(XT, data)
 
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
-        beta = np.zeros_like(XTY)
+        beta_prev = np.zeros((d, 1))
     else:
-        beta = beta.reshape(-1, 1)
-    beta_prev = beta
+        beta_prev = beta.reshape(-1, 1)
+    #beta_prev = beta
+    
+    # First iteration with standard sigma
+    sigma = _sigma(data, mu)
+    mu_s = mu / sigma
+    tau_s = tau / (2.0*sigma)
+    der_prev = np.dot(XTn, Y - np.dot(data, beta_prev))
+    value = der_prev / sigma
+    beta = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+    #der = np.dot(XTn, Y)
 
-    coeffs = list()
-    coeffs.append(beta.copy())
+    #coeffs = list()
+    #coeffs.append(beta.copy())
 
     # Auxiliary beta (FISTA implementation), starts from 0
-    aux_beta = beta
+    aux_beta = beta#_prev
     t, t_next = 1., None     # t values initializations
+    difference = (beta - beta_prev)
 
     k, kmin = 0, 10
-    th, difference = -np.inf, np.inf
-    while k < kmin or ((difference > th).any() and k < kmax):
-        k += 1
+    #th, difference = -np.inf, np.inf
+       
+    for k in xrange(kmax):
+        
+        beta_prev = aux_beta
+        
+        ######## Adaptive step size
+        nonzero = np.flatnonzero(beta_prev)#.nonzero()[0]
+        datanz = data[:,nonzero]
+        betanz = beta_prev[nonzero]
+        der = np.dot(XTn, Y - np.dot(datanz, betanz))
+        
+        sp = difference.ravel()
+        rp = (der - der_prev).ravel()
+        #print sp.max(), sp.min()
+        #tmp =
+        num = np.abs(np.dot(sp, rp))
+        den = np.linalg.norm(sp)
+        #num = np.linalg.norm(rp)
+        #den = np.dot(sp, rp)
+        if num != 0.0 and den != 0.0:
+            sigma = num / (den**2)
+            #sigma = (num**2) / den
+            #print sigma
+            mu_s = mu/sigma
+            tau_s = tau / (2.0*sigma)
+            #XT = data.T / (n * sigma)
+        ######## Adaptive step size
+
+        # Improvement.......
+        #print beta[beta.nonzero()[0]].shape # TODO: plottare dimensione beta
+        #nonzero = aux_beta.nonzero()[0]
+        #datanz = data[:,nonzero]
+        #aux_betanz = aux_beta[nonzero]
 
         # New solution
         #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
-        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XTX, aux_beta)
-        value = (1.0 - mu_s)*aux_beta + np.dot(XT, Y - np.dot(data, aux_beta))
-        beta = _soft_thresholding(value, tau_s)
-
-        coeffs.append(beta.copy())
-
+        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XTX, aux_beta) # d^3
+        #value = (1.0 - mu_s)*aux_beta + np.dot(XT, Y - np.dot(data, aux_beta))
+        value = der / sigma
+        value[nonzero] += ((1.0 - mu_s)*betanz)
+        
+        #print len(aux_betanz), len(value.nonzero()[0])
+        
+        # Essendo ora value non sparso... devo passarlo tutto
+        #beta = _soft_thresholding(value, tau_s)        
+        beta = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+        
+        #coeffs.append(beta.copy())
+       
         # New auxiliary beta (FISTA)
-        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
         difference = (beta - beta_prev)
+        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
         aux_beta = beta + ((t - 1.0)/t_next)*difference
 
         # Convergence values
-        difference = np.abs(difference)
-        th = np.abs(beta) * (tolerance / math.sqrt(k))
+        #th = np.abs(beta) * (tolerance / math.sqrt(k+1))
+        
+        max_diff = np.abs(difference).max()
+        max_coef = np.abs(beta).max()
+        tol = (tolerance / math.sqrt(k+1))
+        
+        # Stopping rule
+        #print tolerance / math.sqrt(k+1)
+        #if (k >= kmin-1) and ((difference <= th).all() or (k >= kmax -1)):
+        #if (k > kmin-1) and max_coef != 0.0 and max_diff / max_coef <= tol:
+        if (k > kmin-1) and max_diff / max_coef <= tol:
+            break
 
         # Values update
-        beta_prev, t = beta, t_next
+        #beta_prev, t, der_prev = beta, t_next, der
+        t = t_next
+        der_prev = der
+        
+        #beta_prev, t = beta, t_next
 
     if return_iterations:
-        return beta, k, coeffs
+        return beta, k, None#, coeffs
+        #return beta, k, coeffs
     else:
         return beta
 
@@ -330,3 +390,4 @@ def _sigma(matrix, mu):
 
 def _soft_thresholding(x, th):
     return np.sign(x) * np.maximum(0, np.abs(x) - th)#/2.0)
+    #return np.sign(x) * np.clip(np.abs(x) - th, 0, np.inf)

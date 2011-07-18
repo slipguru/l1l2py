@@ -48,9 +48,9 @@ def bench(factory, X, Y, X_test, Y_test, ref_coef):
 
 
 if __name__ == '__main__':
-    from glmnet.elastic_net import Lasso as GlmnetLasso
-    from l1l2py.proximal import Lasso as ScikitLasso ######## HACK
-    #from scikits.learn.linear_model import Lasso as ScikitLasso
+    #from glmnet.elastic_net import Lasso as GlmnetLasso
+    from l1l2py.proximal import Lasso as GlmnetLasso ######## HACK
+    from scikits.learn.linear_model import Lasso as ScikitLasso
     # Delayed import of pylab
     import pylab as pl
 

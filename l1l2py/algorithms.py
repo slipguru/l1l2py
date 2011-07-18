@@ -250,116 +250,94 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     """
     import math
     n, d = data.shape
-
-    # Useful quantities
-    XTn = data.T / n # * sigma)
-    Y = labels.reshape(-1, 1)
-    #XTY = np.dot(XT, labels.reshape(-1, 1))
-    #XTX = np.dot(XT, data)
-
+    
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
-        beta_prev = np.zeros((d, 1))
+        beta = np.zeros((d, 1))
     else:
-        beta_prev = beta.reshape(-1, 1)
-    #beta_prev = beta
+        beta.shape = (-1, 1)
+    aux_beta = beta
+
+    # Useful quantities
+    X = data
+    XTn = data.T / n # * sigma) - np.ascontiguousarray
+    Y = labels.reshape(-1, 1)
     
     # First iteration with standard sigma
     sigma = _sigma(data, mu)
     mu_s = mu / sigma
     tau_s = tau / (2.0*sigma)
-    der_prev = np.dot(XTn, Y - np.dot(data, beta_prev))
-    value = der_prev / sigma
-    beta = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
-    #der = np.dot(XTn, Y)
+    t = 1.
+    kmin = 10
 
-    #coeffs = list()
-    #coeffs.append(beta.copy())
-
-    # Auxiliary beta (FISTA implementation), starts from 0
-    aux_beta = beta#_prev
-    t, t_next = 1., None     # t values initializations
-    difference = (beta - beta_prev)
-
-    k, kmin = 0, 10
-    #th, difference = -np.inf, np.inf
+    # Preallocations??
+    #coeffs = [beta.copy()]
+    invariant = np.empty_like(beta)
        
-    for k in xrange(kmax):
-        
-        beta_prev = aux_beta
-        
-        ######## Adaptive step size
-        nonzero = np.flatnonzero(beta_prev)#.nonzero()[0]
-        datanz = data[:,nonzero]
-        betanz = beta_prev[nonzero]
-        der = np.dot(XTn, Y - np.dot(datanz, betanz))
-        
-        sp = difference.ravel()
-        rp = (der - der_prev).ravel()
-        #print sp.max(), sp.min()
-        #tmp =
-        num = np.abs(np.dot(sp, rp))
-        den = np.linalg.norm(sp)
-        #num = np.linalg.norm(rp)
-        #den = np.dot(sp, rp)
-        if num != 0.0 and den != 0.0:
-            sigma = num / (den**2)
-            #sigma = (num**2) / den
-            #print sigma
-            mu_s = mu/sigma
-            tau_s = tau / (2.0*sigma)
-            #XT = data.T / (n * sigma)
-        ######## Adaptive step size
-
-        # Improvement.......
-        #print beta[beta.nonzero()[0]].shape # TODO: plottare dimensione beta
-        #nonzero = aux_beta.nonzero()[0]
-        #datanz = data[:,nonzero]
-        #aux_betanz = aux_beta[nonzero]
+    for k in xrange(kmax):        
+        # Matrix multiplication only on the nonzero dimensions
+        # When this overhead is useless??
+        nonzero = np.flatnonzero(aux_beta)
+        datanz = X[:,nonzero] # this is a BIG copy!
+        aux_betanz = aux_beta[nonzero]
 
         # New solution
-        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XT, np.dot(data, aux_beta))
-        #value = (1.0 - mu_s)*aux_beta + XTY - np.dot(XTX, aux_beta) # d^3
-        #value = (1.0 - mu_s)*aux_beta + np.dot(XT, Y - np.dot(data, aux_beta))
-        value = der / sigma
-        value[nonzero] += ((1.0 - mu_s)*betanz)
+        np.dot(XTn, Y - np.dot(datanz, aux_betanz), out=invariant)
+        value = invariant / sigma
+        value[nonzero] += ((1.0 - mu_s) * aux_betanz)
+               
+        # Soft-Thresholding
+        beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
         
-        #print len(aux_betanz), len(value.nonzero()[0])
+        #coeffs.append(beta_next.copy())
+       
+        ######## Adaptive step size ###########################################
+        if True:
+            beta_diff2 = (aux_beta - beta_next)
+            nonzero2 = np.flatnonzero(beta_diff2)
+            Xnz = X[:,nonzero2] # this is a BIG copy!
+            beta_diff2nz = beta_diff2[nonzero2]
+            
+            grad_diff = np.dot(XTn, np.dot(Xnz, beta_diff2nz))
+            
+            num = np.dot(beta_diff2.ravel(), grad_diff.ravel())
+            den = np.linalg.norm(beta_diff2nz)
+            sigma = num / (den**2)
+            
+            mu_s = mu/sigma
+            tau_s = tau / (2.0*sigma)
         
-        # Essendo ora value non sparso... devo passarlo tutto
-        #beta = _soft_thresholding(value, tau_s)        
-        beta = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
-        
-        #coeffs.append(beta.copy())
+            ############ AGAIN!!! ############################    
+            # New solution
+            value = invariant / sigma
+            value[nonzero] += ((1.0 - mu_s) * aux_betanz)
+                   
+            #beta = _soft_thresholding(value, tau_s)        
+            beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+            ######################
+        ######## Adaptive step size ###########################################
        
         # New auxiliary beta (FISTA)
-        difference = (beta - beta_prev)
+        beta_diff = (beta_next - beta)
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
-        aux_beta = beta + ((t - 1.0)/t_next)*difference
-
-        # Convergence values
-        #th = np.abs(beta) * (tolerance / math.sqrt(k+1))
+        aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
+        ######## Adaptive step size
         
-        max_diff = np.abs(difference).max()
+        # Convergence values        
+        max_diff = np.abs(beta_diff).max()
         max_coef = np.abs(beta).max()
         tol = (tolerance / math.sqrt(k+1))
         
         # Stopping rule
-        #print tolerance / math.sqrt(k+1)
-        #if (k >= kmin-1) and ((difference <= th).all() or (k >= kmax -1)):
-        #if (k > kmin-1) and max_coef != 0.0 and max_diff / max_coef <= tol:
         if (k > kmin-1) and max_diff / max_coef <= tol:
             break
 
         # Values update
-        #beta_prev, t, der_prev = beta, t_next, der
         t = t_next
-        der_prev = der
-        
-        #beta_prev, t = beta, t_next
+        beta = beta_next
 
     if return_iterations:
-        return beta, k, None#, coeffs
+        return beta, k, None
         #return beta, k, coeffs
     else:
         return beta

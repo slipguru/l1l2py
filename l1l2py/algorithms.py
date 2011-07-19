@@ -32,6 +32,9 @@ try:
     from scipy import linalg as la
 except ImportError:
     from numpy import linalg as la
+    
+from itertools import izip
+import math
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.
@@ -202,7 +205,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     return out
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
-                        tolerance=1e-5, return_iterations=False):
+                        tolerance=1e-5, return_iterations=True,
+                        adaptive=False):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
@@ -248,97 +252,118 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     1
 
     """
-    import math
     n, d = data.shape
     
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
-        beta = np.zeros((d, 1))
+        beta = np.zeros(d)
     else:
-        beta.shape = (-1, 1)
-    aux_beta = beta
+        beta.ravel()
 
     # Useful quantities
     X = data
-    XTn = data.T / n # * sigma) - np.ascontiguousarray
-    Y = labels.reshape(-1, 1)
+    Y = labels.ravel()
+    XTn = data.T / n
+    
+    if n > d:
+        XTYn = np.dot(XTn, Y)
+    
+    tau_max = l1_bound(X, Y) * 0.8
+    if tau < tau_max:
+        #t_len =  int(tau_max / (tau_max - tau))
+        t_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
+        taus = np.logspace(np.log10(tau), np.log10(tau_max), t_len)[::-1]
+    else:
+        taus = [tau]
+    iterations = 0
     
     # First iteration with standard sigma
-    sigma = _sigma(data, mu)
-    mu_s = mu / sigma
-    tau_s = tau / (2.0*sigma)
-    t = 1.
-    kmin = 10
-
-    # Preallocations??
-    #coeffs = [beta.copy()]
-    invariant = np.empty_like(beta)
-       
-    for k in xrange(kmax):        
-        # Matrix multiplication only on the nonzero dimensions
-        # When this overhead is useless??
-        nonzero = np.flatnonzero(aux_beta)
-        datanz = X[:,nonzero] # this is a BIG copy!
-        aux_betanz = aux_beta[nonzero]
-
-        # New solution
-        np.dot(XTn, Y - np.dot(datanz, aux_betanz), out=invariant)
-        value = invariant / sigma
-        value[nonzero] += ((1.0 - mu_s) * aux_betanz)
-               
-        # Soft-Thresholding
-        beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+    sigma_0 = _sigma(data, mu)
+    mu_s_0 = mu / sigma_0
+    
+    #for tau, tolerance in izip(taus, tols):
+    for i, tau in enumerate(taus):
         
-        #coeffs.append(beta_next.copy())
-       
-        ######## Adaptive step size ###########################################
-        if True:
-            beta_diff2 = (aux_beta - beta_next)
-            nonzero2 = np.flatnonzero(beta_diff2)
-            Xnz = X[:,nonzero2] # this is a BIG copy!
-            beta_diff2nz = beta_diff2[nonzero2]
+        # Restart conditions
+        aux_beta = beta # warm-start
+        sigma = sigma_0
+        mu_s = mu_s_0
+        tau_s = tau / (2.0*sigma_0)
+        t = 1.
+           
+        for k in xrange(kmax):
+            # Pre-calculated "heavy" computation
+            if n > d:
+                precalc = XTYn - np.dot(XTn, np.dot(X, aux_beta))
+            else:
+                precalc = np.dot(XTn, Y - np.dot(X, aux_beta))
+                
+            # Se implemento in C l'algoritmo furbo per la moltiplicazione
+            # senza copia  della X?
+            # Potrei comunue implementare anche (Y - "") e il
+            # prodotto matriciale
+            #
+            # precalc = inizializzato a zero
+            # for (i = 0; i < n; i++){
+            #   out[i] = (Y + i)
+            #   for (j = 0; j < d; j++){
+            #       if ((beta + j) != 0) continue
+            #       out[i] -= (X + i * j) * (beta + j)
+            #   }
+            #   precalc[j] ??? think think think
+            #}
+            # Quanto pesa il check rispetto all'operazione?
             
-            grad_diff = np.dot(XTn, np.dot(Xnz, beta_diff2nz))
-            
-            num = np.dot(beta_diff2.ravel(), grad_diff.ravel())
-            den = np.linalg.norm(beta_diff2nz)
-            sigma = num / (den**2)
-            
-            mu_s = mu/sigma
-            tau_s = tau / (2.0*sigma)
-        
-            ############ AGAIN!!! ############################    
-            # New solution
-            value = invariant / sigma
-            value[nonzero] += ((1.0 - mu_s) * aux_betanz)
-                   
-            #beta = _soft_thresholding(value, tau_s)        
+            # Soft-Thresholding
+            value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
             beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
-            ######################
-        ######## Adaptive step size ###########################################
-       
-        # New auxiliary beta (FISTA)
-        beta_diff = (beta_next - beta)
-        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
-        aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
-        ######## Adaptive step size
+                   
+            ######## Adaptive step size #######################################
+            beta_diff = (aux_beta - beta_next)
+            
+            # Only if there is an increment of the solution
+            # we can calculate the adaptive step-size
+            if len(np.flatnonzero(beta_diff)):
+               
+                # Anche questo va sistemato rispetto alla dimensionalita
+                grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+                
+                sigma = (np.dot(beta_diff, grad_diff) / 
+                         np.dot(beta_diff, beta_diff))
+                
+                mu_s = mu / sigma
+                tau_s = tau / (2.0*sigma)
+            
+                # Soft-Thresholding
+                value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
+                beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+            ######## Adaptive step size #######################################
+            
+            #energy.append(_functional(X, Y, beta_next, tau, mu))
+           
+            # New auxiliary beta (FISTA)
+            beta_diff = (beta_next - beta)
+            t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+            aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
+            
+            # Convergence values        
+            max_diff = np.abs(beta_diff).max()
+            max_coef = np.abs(beta_next).max()
+            tol = tolerance if i == len(taus)-1 else 1e-2
+            
+            # Stopping rule
+            if (max_diff / max_coef) <= tol:
+                break
+    
+            # Values update
+            t = t_next
+            beta = beta_next
         
-        # Convergence values        
-        max_diff = np.abs(beta_diff).max()
-        max_coef = np.abs(beta).max()
-        tol = (tolerance / math.sqrt(k+1))
-        
-        # Stopping rule
-        if (k > kmin-1) and max_diff / max_coef <= tol:
-            break
-
-        # Values update
-        t = t_next
-        beta = beta_next
+        iterations += k
 
     if return_iterations:
-        return beta, k, None
-        #return beta, k, coeffs
+        return beta, iterations, None
+        #return beta, k, energy
     else:
         return beta
 
@@ -363,7 +388,7 @@ def _sigma(matrix, mu):
     else:
         tmp = np.dot(matrix.T, matrix)
 
-    return (la.eigvalsh(tmp).max()/n) + mu
+    return (la.norm(tmp, 2)/n) + mu
 
 
 def _soft_thresholding(x, th):

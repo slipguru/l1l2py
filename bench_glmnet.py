@@ -50,7 +50,23 @@ def bench(factory, X, Y, X_test, Y_test, ref_coef):
 if __name__ == '__main__':
     #from glmnet.elastic_net import Lasso as GlmnetLasso
     from l1l2py.proximal import Lasso as GlmnetLasso ######## HACK
-    from scikits.learn.linear_model import Lasso as ScikitLasso
+    #from scikits.learn.linear_model import Lasso as ScikitLasso
+    
+    from mlpy import ElasticNet ####### HACK
+    class ScikitLasso(object):
+        def __init__(self, alpha):
+            self.en = ElasticNet(tau = 2.*alpha, mu=0.0)
+        def fit(self, X, Y):
+            self.en.learn(X, Y)
+            return self
+        def predict(self, X):
+            return self.en.pred(X)
+        @property
+        def coef_(self):
+            return self.en.beta()
+            
+            
+    
     # Delayed import of pylab
     import pylab as pl
 
@@ -68,12 +84,12 @@ if __name__ == '__main__':
         X, Y, X_test, Y_test, coef = make_regression_dataset(
             n_train_samples=(i * step), n_test_samples=n_test_samples,
             n_features=n_features, noise=0.1, n_informative=n_informative)
-
+    
         print "benching scikit: "
         scikit_results.append(bench(ScikitLasso, X, Y, X_test, Y_test, coef))
         print "benching glmnet: "
         glmnet_results.append(bench(GlmnetLasso, X, Y, X_test, Y_test, coef))
-
+    
     pl.clf()
     xx = range(0, n*step, step)
     pl.title('Lasso regression on sample dataset (%d features)' % n_features)

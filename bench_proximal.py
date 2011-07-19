@@ -127,9 +127,9 @@ if __name__ == '__main__':
 
     X, Y, X_test, Y_test, coef = make_regression_dataset(
             n_train_samples=100, n_test_samples=50,
-            n_features=10000, noise=0.1, n_informative=100)
+            n_features=100000, noise=0.1, n_informative=100)
 
-    alpha = 3.
+    alpha = 2.
     tau = 2.*alpha
     mu = 0.0
 
@@ -150,12 +150,12 @@ if __name__ == '__main__':
     import time
 
     st = time.time()
-    clfprox = Lasso(alpha=alpha).fit(X, Y)
-    proxt = time.time() - st
-    
-    st = time.time()
-    clfcd = LassoSKL(alpha=alpha).fit(X, Y)
+    clfcd = LassoSKL(alpha=alpha, max_iter=100000).fit(X, Y)
     cdt = time.time() - st
+
+    st = time.time()
+    clfprox = Lasso(alpha=alpha, adaptive=True).fit(X, Y)
+    proxt = time.time() - st
     
     print
     print 'Calculated Coefficients'
@@ -183,10 +183,29 @@ if __name__ == '__main__':
     print 'Diff:', np.abs(valueprox - valuecd)
     
     # Proximal perfomances
-    #valuesprox = [_functional(x) for x in clfprox.coeffs_]
-    #pl.plot(valuesprox, 'r', label='prox')
-    #pl.axhline(min(valuesprox), c='r', ls='--')
+    #pl.plot(clfprox.energy_, 'r', label='prox')
+    #pl.axhline(min(clfprox.energy_), c='r', ls='--')
+    #pl.axhline(valueprox, c='r', ls='-.')
+    #pl.axhline(valuecd, c='b', ls='--')
     #
     #pl.legend()
     #pl.title('func vs iter')
     #pl.show()
+
+
+# lprun
+#import numpy as np
+#from scikits.learn.datasets.samples_generator import make_regression_dataset
+#import l1l2py.algorithms
+#from l1l2py.algorithms import l1l2_regularization
+#from l1l2py.proximal import Lasso
+#
+#X, Y, X_test, Y_test, coef = make_regression_dataset(
+#        n_train_samples=100, n_test_samples=50,
+#        n_features=10000, noise=0.1, n_informative=100)
+#
+#alpha = 2.
+#tau = 2.*alpha
+#mu = 0.0
+#
+#%lprun -f l1l2_regularization Lasso(alpha=alpha, adaptive=True).fit(X, Y)

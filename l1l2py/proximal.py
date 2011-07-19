@@ -29,7 +29,8 @@ class ElasticNet(LinearModel):
 
     """
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-4):
+                 precompute='auto', max_iter=100000, tol=1e-4,
+                 adaptive=False):
         self.tau = tau
         self.mu = mu
         self.coef_ = None
@@ -37,6 +38,7 @@ class ElasticNet(LinearModel):
         self.precompute = precompute
         self.max_iter = max_iter
         self.tol = tol
+        self.adaptive = adaptive
 
     def fit(self, X, y, Xy=None, coef_init=None, **params):
         """
@@ -49,20 +51,22 @@ class ElasticNet(LinearModel):
 
         self._set_params(**params)
         X = np.asanyarray(X, dtype=np.float64)
-        y = np.asanyarray(y, dtype=np.float64)
+        y = np.asanyarray(y, dtype=np.float64).ravel()
 
         X, y, Xmean, ymean = LinearModel._center_data(X, y, self.fit_intercept)
 
         if coef_init is None:
             self.coef_ = np.zeros(X.shape[1], dtype=np.float64)
         else:
-            self.coef_ = coef_init
+            self.coef_ = coef_init.ravel()
 
-        self.coef_, self.niter_, self.coeffs_ = l1l2_regularization(X, y, self.mu, self.tau,
-                                                     beta=self.coef_,
-                                                     kmax=self.max_iter,
-                                                     tolerance=self.tol,
-                                                     return_iterations=True)
+        l1l2_proximal = l1l2_regularization
+        self.coef_, self.niter_, self.energy_ = l1l2_proximal(X, y,
+                                                    self.mu, self.tau,
+                                                    beta=self.coef_,
+                                                    kmax=self.max_iter,
+                                                    tolerance=self.tol)
+        
         self.coef_ = self.coef_.ravel()
 
         self._set_intercept(Xmean, ymean)
@@ -75,13 +79,15 @@ class ElasticNet(LinearModel):
 
 class Lasso(ElasticNet):
     def __init__(self, alpha=1.0, fit_intercept=True, #### HACK
-                 precompute='auto', max_iter=100000, tol=1e-4):
+                 precompute='auto', max_iter=100000, tol=1e-4,
+                 adaptive=False):
         tau = 2.*alpha ### HACK (rho=1.0)
         self.alpha = alpha
         super(Lasso, self).__init__(tau=tau, mu=0.0,
                             fit_intercept=fit_intercept,
                             precompute=precompute, max_iter=max_iter,
-                            tol=tol)
+                            tol=tol,
+                            adaptive=adaptive)
 
 ###############################################################################
 # Elastic net tests from scikits.learn internals

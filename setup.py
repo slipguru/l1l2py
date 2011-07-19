@@ -1,5 +1,12 @@
 import os
 from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Distutils import build_ext
+import numpy
+
+ext_modules = [Extension("proximal_fast", ["l1l2py/proximal_fast.pyx"],
+                         include_dirs=[numpy.get_include()])
+]
 
 # Package path
 pkg_path = os.path.dirname(__file__)
@@ -39,5 +46,8 @@ setup(
 
     packages=['l1l2py', 'l1l2py.tests'],
     package_data={'l1l2py.tests': ['data.txt']},
-    requires=['numpy (>=1.3.0)']
+    requires=['numpy (>=1.3.0)'],
+    
+    cmdclass = {'build_ext': build_ext},
+    ext_modules = ext_modules
 )

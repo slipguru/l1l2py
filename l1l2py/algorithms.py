@@ -204,9 +204,11 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
 
     return out
 
-def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
-                        tolerance=1e-5, return_iterations=True,
-                        adaptive=False):
+def l1l2_regularization(data, labels, mu, tau,
+                        beta=None, kmax=1e5,
+                        tolerance=1e-5,
+                        continuation=True,
+                        adaptive=True):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
@@ -268,10 +270,15 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     if n > d:
         XTYn = np.dot(XTn, Y)
     
-    tau_max = l1_bound(X, Y) * 0.8
-    if tau < tau_max:
-        taus_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
-        taus = np.logspace(np.log10(tau), np.log10(tau_max), taus_len)[::-1]
+    # Continuation strategy
+    if continuation:
+        tau_max = l1_bound(X, Y) * 0.8
+        if tau < tau_max:
+            taus_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
+            taus = np.logspace(np.log10(tau), np.log10(tau_max), taus_len)[::-1]
+        else:
+            taus_len = 1
+            taus = [tau]
     else:
         taus_len = 1
         taus = [tau]
@@ -302,23 +309,24 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
             beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
                    
             ######## Adaptive step size #######################################
-            beta_diff = (aux_beta - beta_next)
-            
-            # Only if there is an increment of the solution
-            # we can calculate the adaptive step-size
-            if np.any(beta_diff):
-               
-                grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+            if adaptive:
+                beta_diff = (aux_beta - beta_next)
                 
-                sigma = (np.dot(beta_diff, grad_diff) / 
-                         np.dot(beta_diff, beta_diff))
+                # Only if there is an increment of the solution
+                # we can calculate the adaptive step-size
+                if np.any(beta_diff):
+                   
+                    grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+                    
+                    sigma = (np.dot(beta_diff, grad_diff) / 
+                             np.dot(beta_diff, beta_diff))
+                    
+                    mu_s = mu / sigma
+                    tau_s = tau / (2.0*sigma)
                 
-                mu_s = mu / sigma
-                tau_s = tau / (2.0*sigma)
-            
-                # Soft-Thresholding
-                value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
-                beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
+                    # Soft-Thresholding
+                    value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
+                    beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
             
             ######## FISTA ####################################################
             beta_diff = (beta_next - beta)
@@ -339,12 +347,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
         
         iterations += k
 
-    if return_iterations:
-        return beta, iterations, None
-        #return beta, k, energy
-    else:
-        return beta
-
+    return beta, iterations, None
+    #return beta, k, energy
 
 def _functional(X, Y, beta, tau, mu):
     n = X.shape[0]

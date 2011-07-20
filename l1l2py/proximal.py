@@ -30,7 +30,8 @@ class ElasticNet(LinearModel):
     """
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
                  precompute='auto', max_iter=100000, tol=1e-4,
-                 adaptive=False):
+                 adaptive=True,
+                 continuation=True):
         self.tau = tau
         self.mu = mu
         self.coef_ = None
@@ -39,6 +40,7 @@ class ElasticNet(LinearModel):
         self.max_iter = max_iter
         self.tol = tol
         self.adaptive = adaptive
+        self.continuation = continuation
 
     def fit(self, X, y, Xy=None, coef_init=None, **params):
         """
@@ -65,7 +67,9 @@ class ElasticNet(LinearModel):
                                                     self.mu, self.tau,
                                                     beta=self.coef_,
                                                     kmax=self.max_iter,
-                                                    tolerance=self.tol)
+                                                    tolerance=self.tol,
+                                                    adaptive=self.adaptive,
+                                                    continuation=self.continuation)
         
         self.coef_ = self.coef_.ravel()
 
@@ -78,16 +82,17 @@ class ElasticNet(LinearModel):
         return self
 
 class Lasso(ElasticNet):
-    def __init__(self, alpha=1.0, fit_intercept=True, #### HACK
+    def __init__(self, tau=0.5, fit_intercept=True,
                  precompute='auto', max_iter=100000, tol=1e-4,
-                 adaptive=False):
-        tau = 2.*alpha ### HACK (rho=1.0)
-        self.alpha = alpha
+                 adaptive=True,
+                 continuation=True):
         super(Lasso, self).__init__(tau=tau, mu=0.0,
                             fit_intercept=fit_intercept,
-                            precompute=precompute, max_iter=max_iter,
+                            precompute=precompute,
+                            max_iter=max_iter,
                             tol=tol,
-                            adaptive=adaptive)
+                            adaptive=adaptive,
+                            continuation=continuation)
 
 ###############################################################################
 # Elastic net tests from scikits.learn internals

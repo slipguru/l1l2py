@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     X, Y, X_test, Y_test, coef = make_regression_dataset(
             n_train_samples=100, n_test_samples=50,
-            n_features=100000, noise=0.1, n_informative=100)
+            n_features=50000, noise=0.1, n_informative=100)
 
     alpha = 2.
     tau = 2.*alpha

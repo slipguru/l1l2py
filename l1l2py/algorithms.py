@@ -270,10 +270,10 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     
     tau_max = l1_bound(X, Y) * 0.8
     if tau < tau_max:
-        #t_len =  int(tau_max / (tau_max - tau))
-        t_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
-        taus = np.logspace(np.log10(tau), np.log10(tau_max), t_len)[::-1]
+        taus_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
+        taus = np.logspace(np.log10(tau), np.log10(tau_max), taus_len)[::-1]
     else:
+        taus_len = 1
         taus = [tau]
     iterations = 0
     
@@ -281,10 +281,9 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
     sigma_0 = _sigma(data, mu)
     mu_s_0 = mu / sigma_0
     
-    #for tau, tolerance in izip(taus, tols):
-    for i, tau in enumerate(taus):
-        
+    for i in xrange(taus_len):    
         # Restart conditions
+        tau = taus[i]
         aux_beta = beta # warm-start
         sigma = sigma_0
         mu_s = mu_s_0
@@ -297,22 +296,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                 precalc = XTYn - np.dot(XTn, np.dot(X, aux_beta))
             else:
                 precalc = np.dot(XTn, Y - np.dot(X, aux_beta))
-                
-            # Se implemento in C l'algoritmo furbo per la moltiplicazione
-            # senza copia  della X?
-            # Potrei comunue implementare anche (Y - "") e il
-            # prodotto matriciale
-            #
-            # precalc = inizializzato a zero
-            # for (i = 0; i < n; i++){
-            #   out[i] = (Y + i)
-            #   for (j = 0; j < d; j++){
-            #       if ((beta + j) != 0) continue
-            #       out[i] -= (X + i * j) * (beta + j)
-            #   }
-            #   precalc[j] ??? think think think
-            #}
-            # Quanto pesa il check rispetto all'operazione?
             
             # Soft-Thresholding
             value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
@@ -323,9 +306,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
             
             # Only if there is an increment of the solution
             # we can calculate the adaptive step-size
-            if len(np.flatnonzero(beta_diff)):
+            if np.any(beta_diff):
                
-                # Anche questo va sistemato rispetto alla dimensionalita
                 grad_diff = np.dot(XTn, np.dot(X, beta_diff))
                 
                 sigma = (np.dot(beta_diff, grad_diff) / 
@@ -337,11 +319,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
                 # Soft-Thresholding
                 value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
                 beta_next = np.sign(value) * np.maximum(0, np.abs(value) - tau_s)
-            ######## Adaptive step size #######################################
             
-            #energy.append(_functional(X, Y, beta_next, tau, mu))
-           
-            # New auxiliary beta (FISTA)
+            ######## FISTA ####################################################
             beta_diff = (beta_next - beta)
             t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
             aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
@@ -349,11 +328,10 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=1e5,
             # Convergence values        
             max_diff = np.abs(beta_diff).max()
             max_coef = np.abs(beta_next).max()
-            tol = tolerance if i == len(taus)-1 else 1e-2
+            tol = tolerance if i == (taus_len-1) else 1e-2
             
             # Stopping rule
-            if (max_diff / max_coef) <= tol:
-                break
+            if (max_diff / max_coef) <= tol: break
     
             # Values update
             t = t_next

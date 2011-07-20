@@ -67,31 +67,31 @@ def main():
        
     n = 20
     step = 500
-    n_features = 1000
+    n_features = 10000 #1000
     n_informative = n_features / 10
     n_test_samples = 1000
-    for i in range(1, n + 1):
-        print '=================='
-        print 'Iteration %s of %s' % (i, n)
-        print '=================='
-        X, Y, X_test, Y_test, coef = make_regression_dataset(
-            n_train_samples=(i * step), n_test_samples=n_test_samples,
-            n_features=n_features, noise=0.1, n_informative=n_informative)
-
-        for name, model, kwargs in parameters:
-            print "benching %s: " % name
-            results[name].append(bench(model, X, Y,
-                                       X_test, Y_test, coef,
-                                       kwargs))
-
-    pl.clf()
-    xx = range(0, n*step, step)
-    pl.title('Lasso regression on sample dataset (%d features)' % n_features)
-    for name in results:
-        pl.plot(xx, results[name], '-', label=name)
-    pl.legend(loc='best')
-    pl.xlabel('number of samples to classify')
-    pl.ylabel('time (in seconds)')
+    #for i in range(1, n + 1):
+    #    print '=================='
+    #    print 'Iteration %s of %s' % (i, n)
+    #    print '=================='
+    #    X, Y, X_test, Y_test, coef = make_regression_dataset(
+    #        n_train_samples=(i * step), n_test_samples=n_test_samples,
+    #        n_features=n_features, noise=0.1, n_informative=n_informative)
+    #
+    #    for name, model, kwargs in parameters:
+    #        print "benching %s: " % name
+    #        results[name].append(bench(model, X, Y,
+    #                                   X_test, Y_test, coef,
+    #                                   kwargs))
+    #
+    #pl.clf()
+    #xx = range(0, n*step, step)
+    #pl.title('Lasso regression on sample dataset (%d features)' % n_features)
+    #for name in results:
+    #    pl.plot(xx, results[name], '-', label=name)
+    #pl.legend(loc='best')
+    #pl.xlabel('number of samples to classify')
+    #pl.ylabel('time (in seconds)')
     #pl.show()
     
     pickle.dump(results, open('bigN_results_tau%.3f.pkl' % tau, 'w'),
@@ -104,7 +104,7 @@ def main():
     results = dict(((name, list()) for name,_,_ in parameters))
     
     n = 20
-    step = 100
+    step = 1000#100
     n_samples = 500
 
     for i in range(1, n + 1):
@@ -138,7 +138,7 @@ def main():
                 pickle.HIGHEST_PROTOCOL)
 
     
-def old():
+def simple():
     import pylab as pl
     import l1l2py.algorithms
     from l1l2py.algorithms import l1l2_regularization
@@ -149,7 +149,7 @@ def old():
 
     X, Y, X_test, Y_test, coef = make_regression_dataset(
             n_train_samples=100, n_test_samples=50,
-            n_features=50000, noise=0.1, n_informative=100)
+            n_features=100000, noise=0.1, n_informative=100)
 
     alpha = 2.
     tau = 2.*alpha
@@ -176,7 +176,7 @@ def old():
     cdt = time.time() - st
 
     st = time.time()
-    clfprox = Lasso(tau=tau, adaptive=False, continuation=False).fit(X, Y)
+    clfprox = Lasso(tau=tau, adaptive=True, continuation=False).fit(X, Y)
     proxt = time.time() - st
     
     print
@@ -215,8 +215,8 @@ def old():
     #pl.show()
 
 if __name__ == '__main__':
-    main()
-    #old()
+    #main()
+    simple()
 
 
 # lprun

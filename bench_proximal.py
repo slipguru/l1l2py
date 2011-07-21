@@ -83,7 +83,7 @@ def main(alpha):
     # Results structure
     results = dict(((name, list()) for name, _, _ in parameters))
        
-    n = 2#20
+    n = 20
     step = 500
     n_features = 1000
     n_informative = n_features / 10
@@ -122,7 +122,7 @@ def main(alpha):
     # Results structure
     results = dict(((name, list()) for name,_,_ in parameters))
     
-    n = 2#20
+    n = 20
     step = 1000#100
     n_samples = 500
 

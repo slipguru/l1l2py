@@ -29,7 +29,7 @@ class ElasticNet(LinearModel):
 
     """
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-4,
+                 precompute='auto', max_iter=100000, tol=1e-5,
                  adaptive=True,
                  continuation=True):
         self.tau = tau
@@ -83,7 +83,7 @@ class ElasticNet(LinearModel):
 
 class Lasso(ElasticNet):
     def __init__(self, tau=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-4,
+                 precompute='auto', max_iter=100000, tol=1e-5,
                  adaptive=True,
                  continuation=True):
         super(Lasso, self).__init__(tau=tau, mu=0.0,

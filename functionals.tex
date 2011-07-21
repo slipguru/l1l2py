@@ -93,4 +93,39 @@ Iteration step
 \end{equation}
 with $\sigma = \frac{\|\X^T\X\|_2}{n}(1 + \alpha)$.
 
+
+\section{Algorithms comparison}
+Even if the complexity of cd and proximal is O(nd), for cd the real
+advantage is that we have an externa loop over the features (d) and
+for each loop one or tree O(n) operations, so at worst we have O(3n d)
+operations.
+
+With the our proximal algorithm we do not have the loop over d, but
+we calculate an update for all the variable togheter, using this updating
+rule:
+
+\begin{equation}
+    \bbeta^{p+1} = \mathbf{S}_{\frac{\tau}{2\sigma}}\{ 
+                          (1 - \frac{\mu}{\sigma})\bbeta^p + 
+                          \frac{1}{n\sigma}\X^T(\y - \X\bbeta^p)
+                    \}
+\end{equation}
+
+where $\X\bbeta^p$ is O(nd) then $\y - \X\bbeta^p$ is O(n + nd), 
+then $\X^T(\y - \X\bbeta^p)$ is O(dn + n + nd) and 
+$\bbeta^p + \X^T(\y - \X\bbeta^p)$ is O(d + dn + n + nd) and
+applying the soft thresholding and the scalar vector product 
+we obtain O(4d + 2nd + n) = O(nd) but with a lot of floaiting point
+operations!
+We have more d-dependent operations than cd (wich as only 
+n-dependent operations).
+
+From the benchmarks we can easily see that we have the same
+complexity respect to the dimension but with a different computational
+efficiency.
+
+I think that writing all in C does not speed-up the code, because
+the heavy computation is actually perfomed at C-BLAS level.
+
+
 \end{document}

@@ -66,11 +66,11 @@ def main(alpha):
     tau = 2.*alpha
     parameters = [
         ('fista', Lasso, {'tau': tau, 'adaptive': False, 'continuation': False}),
-        ('fista-continuation', Lasso, {'tau': tau, 'adaptive': False, 'continuation': True}),
+        #('fista-continuation', Lasso, {'tau': tau, 'adaptive': False, 'continuation': True}),
         ('fista-adaptive', Lasso, {'tau': tau, 'adaptive': True, 'continuation': False}),
-        ('fista-all', Lasso, {'tau': tau, 'adaptive': True, 'continuation': True}),
-        ('coord-descent', LassoSKL, {'alpha': alpha}),  
-        ('mlpy-enet', MLPyLasso, {'tau': tau})
+        #('fista-all', Lasso, {'tau': tau, 'adaptive': True, 'continuation': True}),
+        #('coord-descent', LassoSKL, {'alpha': alpha}),  
+        #('mlpy-enet', MLPyLasso, {'tau': tau})
     ]
     
     print '*********************'
@@ -158,7 +158,7 @@ def main(alpha):
                 pickle.HIGHEST_PROTOCOL)
 
     
-def simple():
+def simple(alpha):
     import pylab as pl
     import l1l2py.algorithms
     from l1l2py.algorithms import l1l2_regularization
@@ -170,10 +170,7 @@ def simple():
     X, Y, X_test, Y_test, coef = make_regression_dataset(
             n_train_samples=100, n_test_samples=50,
             n_features=50000, noise=0.1, n_informative=100)
-
-    #alpha = 2.
-    alpha = 0.2
-    #alpha = 0.02
+    
     tau = 2.*alpha
     mu = 0.0
     
@@ -204,9 +201,9 @@ def simple():
     st = time.time()
     clfprox = Lasso(tau=tau,
                     #adaptive=False, continuation=False).fit(X, Y)
-                    #adaptive=True, continuation=False).fit(X, Y)
+                    adaptive=True, continuation=False).fit(X, Y)
                     #adaptive=False, continuation=True).fit(X, Y)
-                    adaptive=True, continuation=True).fit(X, Y)
+                    #adaptive=True, continuation=True).fit(X, Y)
     proxt = time.time() - st
     
     print
@@ -245,16 +242,20 @@ def simple():
     #pl.show()
 
 if __name__ == '__main__':
-    for alpha in (1.0, 0.1, 0.01):
-        main(alpha)
-    #simple()
+    #for alpha in (1.0, 0.1, 0.01):
+        #main(alpha)
+        
+    alpha = 2.
+    #alpha = 0.2
+    #alpha = 0.02
+    simple(alpha)
 
 
 # lprun
 #import numpy as np
 #from scikits.learn.datasets.samples_generator import make_regression_dataset
 #import l1l2py.algorithms
-#from l1l2py.algorithms import l1l2_regularization
+#from l1l2py.algorithms import l1l2_regularization, _sigma
 #from l1l2py.proximal import Lasso
 #
 #X, Y, X_test, Y_test, coef = make_regression_dataset(
@@ -265,4 +266,5 @@ if __name__ == '__main__':
 #tau = 2.*alpha
 #mu = 0.0
 #
-#%lprun -f l1l2_regularization Lasso(alpha=alpha, adaptive=True).fit(X, Y)
+#%lprun -f l1l2_regularization Lasso(tau=tau, adaptive=True).fit(X, Y)
+#%lprun -f _sigma Lasso(tau=tau, adaptive=True).fit(X, Y)

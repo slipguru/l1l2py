@@ -31,7 +31,8 @@ class ElasticNet(LinearModel):
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
                  precompute='auto', max_iter=100000, tol=1e-5,
                  adaptive=True,
-                 continuation=True):
+                 continuation=True,
+                 nonzero=False):
         self.tau = tau
         self.mu = mu
         self.coef_ = None
@@ -41,6 +42,7 @@ class ElasticNet(LinearModel):
         self.tol = tol
         self.adaptive = adaptive
         self.continuation = continuation
+        self.nonzero = nonzero
 
     def fit(self, X, y, Xy=None, coef_init=None, **params):
         """
@@ -69,7 +71,8 @@ class ElasticNet(LinearModel):
                                                     kmax=self.max_iter,
                                                     tolerance=self.tol,
                                                     adaptive=self.adaptive,
-                                                    continuation=self.continuation)
+                                                    continuation=self.continuation,
+                                                    nonzero=self.nonzero)
         
         self.coef_ = self.coef_.ravel()
 
@@ -85,14 +88,16 @@ class Lasso(ElasticNet):
     def __init__(self, tau=0.5, fit_intercept=True,
                  precompute='auto', max_iter=100000, tol=1e-5,
                  adaptive=True,
-                 continuation=True):
+                 continuation=True,
+                 nonzero=False):
         super(Lasso, self).__init__(tau=tau, mu=0.0,
                             fit_intercept=fit_intercept,
                             precompute=precompute,
                             max_iter=max_iter,
                             tol=tol,
                             adaptive=adaptive,
-                            continuation=continuation)
+                            continuation=continuation,
+                            nonzero=nonzero)
 
 ###############################################################################
 # Elastic net tests from scikits.learn internals

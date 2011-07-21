@@ -208,7 +208,8 @@ def l1l2_regularization(data, labels, mu, tau,
                         beta=None, kmax=1e5,
                         tolerance=1e-5,
                         continuation=True,
-                        adaptive=True):
+                        adaptive=True,
+                        nonzero=False):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
@@ -287,7 +288,7 @@ def l1l2_regularization(data, labels, mu, tau,
     # First iteration with standard sigma
     sigma_0 = _sigma(data, mu)
     mu_s_0 = mu / sigma_0
-    
+        
     for i in xrange(taus_len):    
         # Restart conditions
         tau = taus[i]
@@ -297,7 +298,7 @@ def l1l2_regularization(data, labels, mu, tau,
         tau_s = tau / (2.0*sigma_0)
         t = 1.
            
-        for k in xrange(kmax):
+        for k in xrange(kmax):            
             # Pre-calculated "heavy" computation
             if n > d:
                 precalc = XTYn - np.dot(XTn, np.dot(X, aux_beta))
@@ -314,13 +315,13 @@ def l1l2_regularization(data, labels, mu, tau,
                 
                 # Only if there is an increment of the solution
                 # we can calculate the adaptive step-size
-                if np.any(beta_diff):
-                   
-                    grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+                if np.any(beta_diff):                    
+                    # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+                    # num = np.dot(beta_diff, grad_diff)
+                    tmp = np.dot(X, beta_diff) ##### <-- heavy
+                    num = np.dot(tmp, tmp) / n                    
                     
-                    sigma = (np.dot(beta_diff, grad_diff) / 
-                             np.dot(beta_diff, beta_diff))
-                    
+                    sigma = (num / np.dot(beta_diff, beta_diff))
                     mu_s = mu / sigma
                     tau_s = tau / (2.0*sigma)
                 

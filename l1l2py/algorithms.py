@@ -130,7 +130,7 @@ def ridge_regression(data, labels, mu=0.0):
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
-def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
               tolerance=1e-5):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
@@ -183,9 +183,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     n, p = data.shape
 
     if mu == 0.0:
-        beta_ls = ridge_regression(data, labels)
+        beta_ls = ridge_regression(data, labels).ravel()
     if beta is None:
-        beta = np.zeros((p, 1))
+        beta = np.zeros(p)
 
     out = deque()
     nonzero = 0
@@ -193,10 +193,10 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls
         else:
-            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
-                                            kmax, tolerance)
+            beta_next, k = l1l2_regularization(data, labels, mu, tau, beta,
+                                               kmax, tolerance)
 
-        nonzero = len(beta_next.nonzero()[0])
+        nonzero = len(np.flatnonzero(beta_next))
         if nonzero > 0:
             out.appendleft(beta_next)
 
@@ -205,11 +205,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=1e5,
     return out
 
 def l1l2_regularization(data, labels, mu, tau,
-                        beta=None, kmax=1e5,
+                        beta=None, kmax=10000,
                         tolerance=1e-5,
-                        continuation=True,
-                        adaptive=True,
-                        nonzero=False):
+                        adaptive=True):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
@@ -266,102 +264,72 @@ def l1l2_regularization(data, labels, mu, tau,
     # Useful quantities
     X = data
     Y = labels.ravel()
-    XTn = data.T / n
     
     if n > d:
-        XTYn = np.dot(XTn, Y)
-    
-    # Continuation strategy
-    if continuation:
-        tau_max = l1_bound(X, Y) * 0.8
-        if tau < tau_max:
-            taus_len = int(10**np.log10(tau_max) - 10**np.log10(tau))
-            taus = np.logspace(np.log10(tau), np.log10(tau_max), taus_len)[::-1]
-        else:
-            taus_len = 1
-            taus = [tau]
-    else:
-        taus_len = 1
-        taus = [tau]
-    iterations = 0
+        XTY = np.dot(X.T, Y)
     
     # First iteration with standard sigma
-    sigma_0 = _sigma(data, mu)
-    mu_s_0 = mu / sigma_0
-        
-    for i in xrange(taus_len):    
-        # Restart conditions
-        tau = taus[i]
-        aux_beta = beta # warm-start
-        sigma = sigma_0
-        mu_s = mu_s_0
-        tau_s = tau / (2.0*sigma_0)
-        t = 1.
-           
-        for k in xrange(kmax):            
-            # Pre-calculated "heavy" computation
-            if n > d:
-                precalc = XTYn - np.dot(XTn, np.dot(X, aux_beta))
-            else:
-                precalc = np.dot(XTn, Y - np.dot(X, aux_beta))
-            
-            # Soft-Thresholding
-            value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
-            beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
-                   
-            ######## Adaptive step size #######################################
-            if adaptive:
-                beta_diff = (aux_beta - beta_next)
-                
-                # Only if there is an increment of the solution
-                # we can calculate the adaptive step-size
-                if np.any(beta_diff):                    
-                    # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
-                    # num = np.dot(beta_diff, grad_diff)
-                    tmp = np.dot(X, beta_diff) ##### <-- heavy
-                    num = np.dot(tmp, tmp) / n                    
-                    
-                    sigma = (num / np.dot(beta_diff, beta_diff))
-                    mu_s = mu / sigma
-                    tau_s = tau / (2.0*sigma)
-                
-                    # Soft-Thresholding
-                    value = (precalc / sigma) + ((1.0 - mu_s) * aux_beta)
-                    beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
-            
-            ######## FISTA ####################################################
-            beta_diff = (beta_next - beta)
-            t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
-            aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
-            
-            # Convergence values        
-            max_diff = np.abs(beta_diff).max()
-            max_coef = np.abs(beta_next).max()
-            tol = tolerance if i == (taus_len-1) else 1e-2
-            
-            # Stopping rule
-            if (max_diff / max_coef) <= tol: break
+    sigma = _sigma(data, mu)
+    if sigma < np.finfo(float).eps: # is zero...
+        return np.zeros(d), 0
     
-            # Values update
-            t = t_next
-            beta = beta_next
+    mu_s = mu / sigma
+    tau_s = tau / (2.0 * sigma)
+    nsigma = n * sigma
+    
+    # Starting conditions
+    aux_beta = beta
+    t = 1.
+       
+    for k in xrange(kmax):            
+        # Pre-calculated "heavy" computation
+        if n > d:
+            precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
+        else:
+            precalc = np.dot(X.T, Y - np.dot(X, aux_beta))
         
-        iterations += k
+        # Soft-Thresholding
+        value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
+        beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
+               
+        ######## Adaptive step size #######################################
+        if adaptive:
+            beta_diff = (aux_beta - beta_next)
+            
+            # Only if there is an increment of the solution
+            # we can calculate the adaptive step-size
+            if np.any(beta_diff):                    
+                # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
+                # num = np.dot(beta_diff, grad_diff)
+                tmp = np.dot(X, beta_diff) # <-- adaptive-step-size drawback
+                num = np.dot(tmp, tmp) / n                    
+                
+                sigma = (num / np.dot(beta_diff, beta_diff))
+                mu_s = mu / sigma
+                tau_s = tau / (2.0*sigma)
+                nsigma = n * sigma
+            
+                # Soft-Thresholding
+                value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
+                beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
+        
+        ######## FISTA ####################################################
+        beta_diff = (beta_next - beta)
+        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
+        
+        # Convergence values        
+        max_diff = np.abs(beta_diff).max()
+        max_coef = np.abs(beta_next).max()
+               
+        # Stopping rule
+        if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
 
-    return beta, iterations, None
-    #return beta, k, energy
+        # Values update
+        t = t_next
+        beta = beta_next
 
-def _functional(X, Y, beta, tau, mu):
-    n = X.shape[0]
-
-    loss = Y - np.dot(X, beta)
-    loss_quadratic_norm = np.linalg.norm(loss) ** 2
-    beta_quadratic_norm = np.linalg.norm(beta) ** 2
-    beta_l1_norm = np.abs(beta).sum()
-
-    return (((1./n) * loss_quadratic_norm)
-             + mu * beta_quadratic_norm
-             + tau * beta_l1_norm)
+    return beta, k
 
 def _sigma(matrix, mu):
     n, p = matrix.shape
@@ -372,8 +340,3 @@ def _sigma(matrix, mu):
         tmp = np.dot(matrix.T, matrix)
 
     return (la.norm(tmp, 2)/n) + mu
-
-
-def _soft_thresholding(x, th):
-    return np.sign(x) * np.maximum(0, np.abs(x) - th)#/2.0)
-    #return np.sign(x) * np.clip(np.abs(x) - th, 0, np.inf)

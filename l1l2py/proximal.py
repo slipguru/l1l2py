@@ -1,7 +1,15 @@
+# Author: Alexandre Gramfort <alexandre.gramfort@inria.fr>
+#         Fabian Pedregosa <fabian.pedregosa@inria.fr>
+#         Olivier Grisel <olivier.grisel@ensta.org>
+#
+# License: BSD Style.
+
 import warnings
 import numpy as np
 
 from scikits.learn.linear_model.base import LinearModel
+
+from .algorithms import l1l2_regularization, l1l2_path
 
 class ElasticNet(LinearModel):
     """
@@ -29,53 +37,34 @@ class ElasticNet(LinearModel):
 
     """
     def __init__(self, tau=0.5, mu=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-5,
-                 adaptive=True,
-                 continuation=True,
-                 nonzero=False):
+                 adaptive_step_size=True, max_iter=10000, tol=1e-5):
         self.tau = tau
         self.mu = mu
-        self.coef_ = None
         self.fit_intercept = fit_intercept
-        self.precompute = precompute
         self.max_iter = max_iter
         self.tol = tol
-        self.adaptive = adaptive
-        self.continuation = continuation
-        self.nonzero = nonzero
+        self.adaptive_step_size = adaptive_step_size
+        self.coef_ = None
 
-    def fit(self, X, y, Xy=None, coef_init=None, **params):
-        """
-        Notes: Xy is related to Gram and precompute parameter
-
-        params may be each "init" parameter that the user want to
-        override in the specific fit
-        """
-        from .algorithms import l1l2_regularization
-
-        self._set_params(**params)
-        X = np.asanyarray(X, dtype=np.float64)
-        y = np.asanyarray(y, dtype=np.float64).ravel()
+    def fit(self, X, y, coef_init=None, **fit_params):
+        self._set_params(**fit_params)
+        X = np.asanyarray(X)
+        y = np.asanyarray(y)
 
         X, y, Xmean, ymean = LinearModel._center_data(X, y, self.fit_intercept)
 
         if coef_init is None:
             self.coef_ = np.zeros(X.shape[1], dtype=np.float64)
         else:
-            self.coef_ = coef_init.ravel()
+            self.coef_ = np.asanyarray(coef_init)
 
         l1l2_proximal = l1l2_regularization
-        self.coef_, self.niter_, self.energy_ = l1l2_proximal(X, y,
-                                                    self.mu, self.tau,
-                                                    beta=self.coef_,
-                                                    kmax=self.max_iter,
-                                                    tolerance=self.tol,
-                                                    adaptive=self.adaptive,
-                                                    continuation=self.continuation,
-                                                    nonzero=self.nonzero)
-        
-        self.coef_ = self.coef_.ravel()
-
+        self.coef_, self.niter_ = l1l2_proximal(X, y,
+                                                self.mu, self.tau,
+                                                beta=self.coef_,
+                                                kmax=self.max_iter,
+                                                tolerance=self.tol,
+                                                adaptive=self.adaptive_step_size)
         self._set_intercept(Xmean, ymean)
 
         if self.niter_ == self.max_iter:
@@ -86,90 +75,77 @@ class ElasticNet(LinearModel):
 
 class Lasso(ElasticNet):
     def __init__(self, tau=0.5, fit_intercept=True,
-                 precompute='auto', max_iter=100000, tol=1e-5,
-                 adaptive=True,
-                 continuation=True,
-                 nonzero=False):
+                 adaptive_step_size=True, max_iter=10000, tol=1e-5):
+
         super(Lasso, self).__init__(tau=tau, mu=0.0,
-                            fit_intercept=fit_intercept,
-                            precompute=precompute,
-                            max_iter=max_iter,
-                            tol=tol,
-                            adaptive=adaptive,
-                            continuation=continuation,
-                            nonzero=nonzero)
+                                    fit_intercept=fit_intercept,
+                                    adaptive_step_size=adaptive_step_size, 
+                                    max_iter=max_iter,
+                                    tol=tol)
 
-###############################################################################
-# Elastic net tests from scikits.learn internals
-##############################################################################
+def elasticnet_path():
+    pass
+    
 
-from scikits.learn.linear_model.coordinate_descent import ElasticNet as ElasticNetSK
-from numpy.testing.utils import assert_array_almost_equal, assert_almost_equal
+class ElasticNetCV(LinearModel):
+    def __init__(self, taus, mu, cv=None, fit_intercept=True,
+                 adaptive_step_size=True, max_iter=10000, tol=1e-5):
+        self.taus = taus
+        self.mu = mu
+        self.cv = cv
+        self.fit_intercept=fit_intercept
+        self.adaptive_step_size = adaptive_step_size
+        self.max_iter = max_iter
+        self.tol = tol
+        self.coef_ = None
+        
+    def fit(self, X, y, **fit_params):
+        pass
+        
+    @staticmethod
+    def path(X, y, taus, mu, fit_intercept=False, **fit_params):
+        r"""TODO: rewrite using Lasso/ElasticNet classes"""
+        from collections import deque
+        from .algorithms import ridge_regression, l1l2_regularization
+        from scikits.learn.linear_model import LinearRegression
+        from scikits.learn.base import clone
+        
+        X = np.asanyarray(X)
+        y = np.asanyarray(y)
+        n, p = X.shape
+        
+        X, y, Xmean, ymean = LinearModel._center_data(X, y, fit_intercept)
+    
+        if mu == 0.0:
+            model_ls = LinearRegression().fit(X, y)
+            if fit_intercept:
+                model_ls.fit_intercept = True
+                model_ls._set_intercept(Xmean, ymean)
+        beta = None #init
+    
+        out = deque()
+        nonzero = 0
+        for tau in reversed(taus):
+            if mu == 0.0 and nonzero >= n: # lasso saturation
+                model_next = clone(model_ls)
+                beta_next = model_next.coef_
+            else:
+                model_next = ElasticNet(tau=tau, mu=mu, fit_intercept=False)
+                model_next.fit(X, y, coef_init=beta, **fit_params)
+                if fit_intercept:
+                    model_next.fit_intercept = True
+                    model_next._set_intercept(Xmean, ymean)
+                
+                beta_next = model_next.coef_
+                k = model_next.niter_
+    
+            nonzero = len(np.flatnonzero(beta_next))
+            if nonzero > 0:
+                out.appendleft(model_next)
+    
+            beta = beta_next
+    
+        return out
 
-def conv_(alpha, rho):
-    tau, mu = 2.*alpha*rho, alpha*(1-rho)
-    return {'tau': tau, 'mu': mu}
-
-def test_enet_toy_both():
-    for en in ElasticNetSK, ElasticNet:
-        yield _test_enet_toy, en
-
-def _test_enet_toy(ElasticNet):
-    """
-    Test ElasticNet for various parameters of alpha and rho.
-
-    Actualy, the parameters alpha = 0 should not be alowed. However,
-    we test it as a border case.
-
-    ElasticNet is tested with and without precomputed Gram matrix
-    """
-
-    X = np.array([[-1.], [0.], [1.]])
-    Y = [-1, 0, 1]       # just a straight line
-    T = [[2.], [3.], [4.]]  # test sample
-
-    n = X.shape[0]
-
-    # this should be the same as lasso... no OLS
-    try:
-        clf = ElasticNet(alpha=0, rho=1.0)
-    except:
-        clf = ElasticNet(**conv_(alpha=0, rho=1.0))
-    clf.fit(X, Y)
-    pred = clf.predict(T)
-    assert_array_almost_equal(clf.coef_, [1])
-    assert_array_almost_equal(pred, [2, 3, 4])
-    #assert_almost_equal(clf.dual_gap_, 0)
-
-    try:
-        clf = ElasticNet(alpha=0.5, rho=0.3)
-    except:
-        clf = ElasticNet(**conv_(alpha=0.5, rho=0.3))
-    clf.fit(X, Y, max_iter=1000, precompute=False)
-    pred = clf.predict(T)
-    assert_array_almost_equal(clf.coef_, [0.50819], decimal=3)
-    assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
-    #assert_almost_equal(clf.dual_gap_, 0)
-    #
-    #clf.fit(X, Y, max_iter=1000, precompute=True) # with Gram
-    #pred = clf.predict(T)
-    #assert_array_almost_equal(clf.coef_, [0.50819], decimal=3)
-    #assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
-    #assert_almost_equal(clf.dual_gap_, 0)
-    #
-    #clf.fit(X, Y, max_iter=1000, precompute=np.dot(X.T, X)) # with Gram
-    #pred = clf.predict(T)
-    #assert_array_almost_equal(clf.coef_, [0.50819], decimal=3)
-    #assert_array_almost_equal(pred, [1.0163, 1.5245, 2.0327], decimal=3)
-    #assert_almost_equal(clf.dual_gap_, 0)
-    #
-
-    try:
-        clf = ElasticNet(alpha=0.5, rho=0.5)
-    except:
-        clf = ElasticNet(**conv_(alpha=0.5, rho=0.5))
-    clf.fit(X, Y)
-    pred = clf.predict(T)
-    assert_array_almost_equal(clf.coef_, [0.45454], 3)
-    assert_array_almost_equal(pred, [0.9090, 1.3636, 1.8181], 3)
-    #assert_almost_equal(clf.dual_gap_, 0)
+class LassoCV(ElasticNetCV):
+    pass

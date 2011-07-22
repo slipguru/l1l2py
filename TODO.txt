@@ -57,7 +57,7 @@ OO (scikits.learn restyling)
             * len(coeff) = len(selected)
             * len(coeff) = len(selected[nonzero(selected)])
 
-        The DoublePredicter has to be implemented as a standard
+        The DoublePredictor has to be implemented as a standard
         scikits.learn Predictor where the list of parameters is the union of the
         two internal predictor's parameters.
 

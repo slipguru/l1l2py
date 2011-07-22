@@ -65,10 +65,8 @@ def main(alpha):
     
     tau = 2.*alpha
     parameters = [
-        ('fista', Lasso, {'tau': tau, 'adaptive': False, 'continuation': False}),
-        #('fista-continuation', Lasso, {'tau': tau, 'adaptive': False, 'continuation': True}),
-        ('fista-adaptive', Lasso, {'tau': tau, 'adaptive': True, 'continuation': False}),
-        #('fista-all', Lasso, {'tau': tau, 'adaptive': True, 'continuation': True}),
+        ('fista', Lasso, {'tau': tau, 'adaptive': False}),
+        ('fista-adaptive', Lasso, {'tau': tau, 'adaptive': True}),
         #('coord-descent', LassoSKL, {'alpha': alpha}),  
         #('mlpy-enet', MLPyLasso, {'tau': tau})
     ]
@@ -103,7 +101,7 @@ def main(alpha):
                                        kwargs))
     
     pl.clf()
-    xx = range(0, n*step, step)
+    xx = range(step, n*step, step)
     pl.title('Lasso regression on sample dataset (%d features)' % n_features)
     for name in results:
         pl.plot(xx, results[name], '-', label=name)
@@ -142,7 +140,7 @@ def main(alpha):
                                        X_test, Y_test, coef,
                                        kwargs))
 
-    xx = np.arange(100, 100 + n * step, step)
+    xx = np.arange(step, n*step, step)
     pl.figure()
     pl.title('Regression in high dimensional spaces (%d samples)' % n_samples)    
     for name in results:
@@ -200,10 +198,8 @@ def simple(alpha):
 
     st = time.time()
     clfprox = Lasso(tau=tau,
-                    #adaptive=False, continuation=False).fit(X, Y)
-                    adaptive=True, continuation=False).fit(X, Y)
-                    #adaptive=False, continuation=True).fit(X, Y)
-                    #adaptive=True, continuation=True).fit(X, Y)
+                    #adaptive=False).fit(X, Y)
+                    adaptive=True).fit(X, Y)
     proxt = time.time() - st
     
     print

@@ -1,0 +1,544 @@
+*********************
+Test with tau = 2.000
+*********************
+==================
+Iteration 01 of 20
+==================
+benching fista: 
+duration: 0.754s (77 iter)
+rmse: 7.467635
+mean coef abs diff: 0.064943
+benching fista-continuation: 
+duration: 0.826s (85 iter)
+rmse: 7.467633
+mean coef abs diff: 0.064943
+benching fista-adaptive: 
+duration: 0.521s (17 iter)
+rmse: 7.467630
+mean coef abs diff: 0.064943
+benching fista-all: 
+duration: 0.533s (18 iter)
+rmse: 7.467629
+mean coef abs diff: 0.064943
+benching coord-descent: 
+duration: 0.065s
+rmse: 7.467623
+mean coef abs diff: 0.064943
+benching mlpy-enet: 
+duration: 0.642s (47 iter)
+rmse: 7.467443
+mean coef abs diff: 0.064943
+==================
+Iteration 02 of 20
+==================
+benching fista: 
+duration: 4.752s (45 iter)
+rmse: 6.993088
+mean coef abs diff: 0.060094
+benching fista-continuation: 
+duration: 4.712s (45 iter)
+rmse: 6.993088
+mean coef abs diff: 0.060094
+benching fista-adaptive: 
+duration: 4.498s (11 iter)
+rmse: 6.993099
+mean coef abs diff: 0.060094
+benching fista-all: 
+duration: 4.377s (11 iter)
+rmse: 6.993099
+mean coef abs diff: 0.060094
+benching coord-descent: 
+duration: 0.119s
+rmse: 6.993103
+mean coef abs diff: 0.060095
+benching mlpy-enet: 
+duration: 4.408s (27 iter)
+rmse: 6.995473
+mean coef abs diff: 0.060094
+==================
+Iteration 03 of 20
+==================
+benching fista: 
+duration: 5.128s (40 iter)
+rmse: 7.171604
+mean coef abs diff: 0.061378
+benching fista-continuation: 
+duration: 5.103s (46 iter)
+rmse: 7.171598
+mean coef abs diff: 0.061378
+benching fista-adaptive: 
+duration: 4.732s (11 iter)
+rmse: 7.171565
+mean coef abs diff: 0.061378
+benching fista-all: 
+duration: 4.854s (13 iter)
+rmse: 7.171565
+mean coef abs diff: 0.061378
+benching coord-descent: 
+duration: 0.461s
+rmse: 7.171571
+mean coef abs diff: 0.061378
+benching mlpy-enet: 
+duration: 15.528s (19 iter)
+rmse: 7.175927
+mean coef abs diff: 0.061378
+==================
+Iteration 04 of 20
+==================
+benching fista: 
+duration: 5.212s (35 iter)
+rmse: 7.702994
+mean coef abs diff: 0.067645
+benching fista-continuation: 
+duration: 5.664s (47 iter)
+rmse: 7.702981
+mean coef abs diff: 0.067645
+benching fista-adaptive: 
+duration: 4.878s (9 iter)
+rmse: 7.702971
+mean coef abs diff: 0.067645
+benching fista-all: 
+duration: 5.167s (12 iter)
+rmse: 7.702970
+mean coef abs diff: 0.067645
+benching coord-descent: 
+duration: 0.414s
+rmse: 7.702972
+mean coef abs diff: 0.067645
+benching mlpy-enet: 
+duration: 35.851s (15 iter)
+rmse: 7.697490
+mean coef abs diff: 0.067645
+==================
+Iteration 05 of 20
+==================
+benching fista: 
+duration: 5.623s (31 iter)
+rmse: 6.665445
+mean coef abs diff: 0.058505
+benching fista-continuation: 
+duration: 5.635s (34 iter)
+rmse: 6.665404
+mean coef abs diff: 0.058505
+benching fista-adaptive: 
+duration: 5.131s (8 iter)
+rmse: 6.665440
+mean coef abs diff: 0.058505
+benching fista-all: 
+duration: 5.204s (10 iter)
+rmse: 6.665439
+mean coef abs diff: 0.058505
+benching coord-descent: 
+duration: 0.658s
+rmse: 6.665444
+mean coef abs diff: 0.058505
+benching mlpy-enet: 
+duration: 69.668s (15 iter)
+rmse: 6.664644
+mean coef abs diff: 0.058505
+==================
+Iteration 06 of 20
+==================
+benching fista: 
+duration: 5.659s (26 iter)
+rmse: 6.816622
+mean coef abs diff: 0.057036
+benching fista-continuation: 
+duration: 6.132s (37 iter)
+rmse: 6.816626
+mean coef abs diff: 0.057036
+benching fista-adaptive: 
+duration: 5.328s (8 iter)
+rmse: 6.816657
+mean coef abs diff: 0.057036
+benching fista-all: 
+duration: 5.781s (11 iter)
+rmse: 6.816661
+mean coef abs diff: 0.057036
+benching coord-descent: 
+duration: 0.863s
+rmse: 6.816647
+mean coef abs diff: 0.057036
+benching mlpy-enet: 
+duration: 119.243s (9 iter)
+rmse: 6.817941
+mean coef abs diff: 0.057036
+==================
+Iteration 07 of 20
+==================
+benching fista: 
+duration: 5.821s (25 iter)
+rmse: 6.731520
+mean coef abs diff: 0.058345
+benching fista-continuation: 
+duration: 6.134s (31 iter)
+rmse: 6.731524
+mean coef abs diff: 0.058345
+benching fista-adaptive: 
+duration: 5.456s (8 iter)
+rmse: 6.731550
+mean coef abs diff: 0.058345
+benching fista-all: 
+duration: 5.683s (10 iter)
+rmse: 6.731551
+mean coef abs diff: 0.058345
+benching coord-descent: 
+duration: 1.124s
+rmse: 6.731551
+mean coef abs diff: 0.058345
+benching mlpy-enet: 
+duration: 190.842s (8 iter)
+rmse: 6.731909
+mean coef abs diff: 0.058345
+==================
+Iteration 08 of 20
+==================
+benching fista: 
+duration: 6.057s (25 iter)
+rmse: 7.190816
+mean coef abs diff: 0.062492
+benching fista-continuation: 
+duration: 6.570s (31 iter)
+rmse: 7.190816
+mean coef abs diff: 0.062492
+benching fista-adaptive: 
+duration: 5.857s (8 iter)
+rmse: 7.190845
+mean coef abs diff: 0.062492
+benching fista-all: 
+duration: 5.937s (9 iter)
+rmse: 7.190844
+mean coef abs diff: 0.062492
+benching coord-descent: 
+duration: 1.110s
+rmse: 7.190852
+mean coef abs diff: 0.062492
+benching mlpy-enet: 
+duration: 281.948s (7 iter)
+rmse: 7.190805
+mean coef abs diff: 0.062493
+==================
+Iteration 09 of 20
+==================
+benching fista: 
+duration: 6.463s (24 iter)
+rmse: 6.498049
+mean coef abs diff: 0.056894
+benching fista-continuation: 
+duration: 6.557s (24 iter)
+rmse: 6.498049
+mean coef abs diff: 0.056894
+benching fista-adaptive: 
+duration: 6.123s (8 iter)
+rmse: 6.498064
+mean coef abs diff: 0.056894
+benching fista-all: 
+duration: 6.132s (8 iter)
+rmse: 6.498064
+mean coef abs diff: 0.056894
+benching coord-descent: 
+duration: 1.422s
+rmse: 6.498065
+mean coef abs diff: 0.056894
+benching mlpy-enet: 
+duration: 404.441s (7 iter)
+rmse: 6.498350
+mean coef abs diff: 0.056894
+==================
+Iteration 10 of 20
+==================
+benching fista: 
+duration: 6.694s (23 iter)
+rmse: 6.947993
+mean coef abs diff: 0.060048
+benching fista-continuation: 
+duration: 7.027s (28 iter)
+rmse: 6.947994
+mean coef abs diff: 0.060048
+benching fista-adaptive: 
+duration: 6.234s (8 iter)
+rmse: 6.948015
+mean coef abs diff: 0.060048
+benching fista-all: 
+duration: 6.859s (10 iter)
+rmse: 6.948016
+mean coef abs diff: 0.060048
+benching coord-descent: 
+duration: 1.501s
+rmse: 6.948019
+mean coef abs diff: 0.060048
+benching mlpy-enet: 
+duration: 552.028s (5 iter)
+rmse: 6.947922
+mean coef abs diff: 0.060051
+==================
+Iteration 11 of 20
+==================
+benching fista: 
+duration: 6.808s (22 iter)
+rmse: 7.633461
+mean coef abs diff: 0.065623
+benching fista-continuation: 
+duration: 7.323s (27 iter)
+rmse: 7.633461
+mean coef abs diff: 0.065623
+benching fista-adaptive: 
+duration: 6.495s (7 iter)
+rmse: 7.633477
+mean coef abs diff: 0.065623
+benching fista-all: 
+duration: 6.715s (8 iter)
+rmse: 7.633476
+mean coef abs diff: 0.065623
+benching coord-descent: 
+duration: 1.566s
+rmse: 7.633474
+mean coef abs diff: 0.065623
+benching mlpy-enet: 
+duration: 740.848s (8 iter)
+rmse: 7.612979
+mean coef abs diff: 0.065623
+==================
+Iteration 12 of 20
+==================
+benching fista: 
+duration: 7.104s (22 iter)
+rmse: 6.844748
+mean coef abs diff: 0.058029
+benching fista-continuation: 
+duration: 7.568s (27 iter)
+rmse: 6.844750
+mean coef abs diff: 0.058029
+benching fista-adaptive: 
+duration: 6.623s (7 iter)
+rmse: 6.844773
+mean coef abs diff: 0.058029
+benching fista-all: 
+duration: 7.141s (9 iter)
+rmse: 6.844773
+mean coef abs diff: 0.058029
+benching coord-descent: 
+duration: 1.771s
+rmse: 6.844767
+mean coef abs diff: 0.058029
+benching mlpy-enet: 
+duration: 960.184s (8 iter)
+rmse: 6.846931
+mean coef abs diff: 0.058029
+==================
+Iteration 13 of 20
+==================
+benching fista: 
+duration: 7.290s (21 iter)
+rmse: 7.370586
+mean coef abs diff: 0.065197
+benching fista-continuation: 
+duration: 7.333s (21 iter)
+rmse: 7.370586
+mean coef abs diff: 0.065197
+benching fista-adaptive: 
+duration: 7.032s (8 iter)
+rmse: 7.370595
+mean coef abs diff: 0.065197
+benching fista-all: 
+duration: 7.046s (8 iter)
+rmse: 7.370595
+mean coef abs diff: 0.065197
+benching coord-descent: 
+duration: 2.158s
+rmse: 7.370597
+mean coef abs diff: 0.065197
+benching mlpy-enet: 
+duration: 1227.877s (5 iter)
+rmse: 7.367428
+mean coef abs diff: 0.065197
+==================
+Iteration 14 of 20
+==================
+benching fista: 
+duration: 7.702s (21 iter)
+rmse: 7.540334
+mean coef abs diff: 0.065724
+benching fista-continuation: 
+duration: 8.394s (26 iter)
+rmse: 7.540334
+mean coef abs diff: 0.065724
+benching fista-adaptive: 
+duration: 7.538s (8 iter)
+rmse: 7.540339
+mean coef abs diff: 0.065724
+benching fista-all: 
+duration: 7.667s (9 iter)
+rmse: 7.540346
+mean coef abs diff: 0.065724
+benching coord-descent: 
+duration: 2.070s
+rmse: 7.540341
+mean coef abs diff: 0.065724
+benching mlpy-enet: 
+duration: 1524.775s (6 iter)
+rmse: 7.539103
+mean coef abs diff: 0.065724
+==================
+Iteration 15 of 20
+==================
+benching fista: 
+duration: 7.999s (21 iter)
+rmse: 6.723330
+mean coef abs diff: 0.062585
+benching fista-continuation: 
+duration: 8.683s (27 iter)
+rmse: 6.723389
+mean coef abs diff: 0.062586
+benching fista-adaptive: 
+duration: 7.386s (7 iter)
+rmse: 6.723339
+mean coef abs diff: 0.062585
+benching fista-all: 
+duration: 8.271s (10 iter)
+rmse: 6.723340
+mean coef abs diff: 0.062585
+benching coord-descent: 
+duration: 2.255s
+rmse: 6.723342
+mean coef abs diff: 0.062585
+benching mlpy-enet: 
+duration: 1896.349s (4 iter)
+rmse: 6.720715
+mean coef abs diff: 0.062585
+==================
+Iteration 16 of 20
+==================
+benching fista: 
+duration: 8.393s (21 iter)
+rmse: 7.932503
+mean coef abs diff: 0.066635
+benching fista-continuation: 
+duration: 8.622s (25 iter)
+rmse: 7.932519
+mean coef abs diff: 0.066635
+benching fista-adaptive: 
+duration: 8.019s (8 iter)
+rmse: 7.932511
+mean coef abs diff: 0.066635
+benching fista-all: 
+duration: 8.603s (10 iter)
+rmse: 7.932511
+mean coef abs diff: 0.066635
+benching coord-descent: 
+duration: 2.320s
+rmse: 7.932515
+mean coef abs diff: 0.066635
+benching mlpy-enet: 
+duration: 2302.154s (4 iter)
+rmse: 7.932090
+mean coef abs diff: 0.066635
+==================
+Iteration 17 of 20
+==================
+benching fista: 
+duration: 8.382s (17 iter)
+rmse: 6.737401
+mean coef abs diff: 0.060238
+benching fista-continuation: 
+duration: 9.089s (22 iter)
+rmse: 6.737398
+mean coef abs diff: 0.060238
+benching fista-adaptive: 
+duration: 8.168s (7 iter)
+rmse: 6.737361
+mean coef abs diff: 0.060238
+benching fista-all: 
+duration: 8.167s (9 iter)
+rmse: 6.737361
+mean coef abs diff: 0.060238
+benching coord-descent: 
+duration: 2.850s
+rmse: 6.737363
+mean coef abs diff: 0.060238
+benching mlpy-enet: 
+duration: 2784.760s (6 iter)
+rmse: 6.737310
+mean coef abs diff: 0.060238
+==================
+Iteration 18 of 20
+==================
+benching fista: 
+duration: 8.974s (20 iter)
+rmse: 7.916128
+mean coef abs diff: 0.070768
+benching fista-continuation: 
+duration: 9.672s (25 iter)
+rmse: 7.916128
+mean coef abs diff: 0.070768
+benching fista-adaptive: 
+duration: 8.510s (7 iter)
+rmse: 7.916138
+mean coef abs diff: 0.070768
+benching fista-all: 
+duration: 8.932s (8 iter)
+rmse: 7.916138
+mean coef abs diff: 0.070768
+benching coord-descent: 
+duration: 2.663s
+rmse: 7.916138
+mean coef abs diff: 0.070768
+benching mlpy-enet: 
+duration: 3277.292s (5 iter)
+rmse: 7.917417
+mean coef abs diff: 0.070768
+==================
+Iteration 19 of 20
+==================
+benching fista: 
+duration: 9.117s (20 iter)
+rmse: 7.468930
+mean coef abs diff: 0.068237
+benching fista-continuation: 
+duration: 9.752s (24 iter)
+rmse: 7.468931
+mean coef abs diff: 0.068237
+benching fista-adaptive: 
+duration: 8.624s (7 iter)
+rmse: 7.468939
+mean coef abs diff: 0.068237
+benching fista-all: 
+duration: 9.269s (9 iter)
+rmse: 7.468939
+mean coef abs diff: 0.068237
+benching coord-descent: 
+duration: 2.860s
+rmse: 7.468939
+mean coef abs diff: 0.068237
+benching mlpy-enet: 
+duration: 3874.975s (6 iter)
+rmse: 7.469235
+mean coef abs diff: 0.068237
+==================
+Iteration 20 of 20
+==================
+benching fista: 
+duration: 9.176s (17 iter)
+rmse: 6.916503
+mean coef abs diff: 0.059249
+benching fista-continuation: 
+duration: 9.185s (17 iter)
+rmse: 6.916503
+mean coef abs diff: 0.059249
+benching fista-adaptive: 
+duration: 9.236s (7 iter)
+rmse: 6.916478
+mean coef abs diff: 0.059249
+benching fista-all: 
+duration: 9.235s (7 iter)
+rmse: 6.916478
+mean coef abs diff: 0.059249
+benching coord-descent: 
+duration: 3.022s
+rmse: 6.916479
+mean coef abs diff: 0.059249
+benching mlpy-enet: 
+duration: 4483.355s (5 iter)
+rmse: 6.910257
+mean coef abs diff: 0.059249
+Unable to access the X Display, is $DISPLAY set properly?

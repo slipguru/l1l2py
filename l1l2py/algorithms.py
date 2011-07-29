@@ -32,7 +32,7 @@ try:
     from scipy import linalg as la
 except ImportError:
     from numpy import linalg as la
-    
+
 from itertools import izip
 import math
 
@@ -205,9 +205,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
     return out
 
 def l1l2_regularization(data, labels, mu, tau,
-                        beta=None, kmax=10000,
+                        beta=None, kmax=100000,
                         tolerance=1e-5,
-                        adaptive=True):
+                        adaptive=False):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
 
@@ -254,7 +254,7 @@ def l1l2_regularization(data, labels, mu, tau,
 
     """
     n, d = data.shape
-    
+
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         beta = np.zeros(d)
@@ -264,70 +264,70 @@ def l1l2_regularization(data, labels, mu, tau,
     # Useful quantities
     X = data
     Y = labels.ravel()
-    
+
     if n > d:
         XTY = np.dot(X.T, Y)
-    
+
     # First iteration with standard sigma
     sigma = _sigma(data, mu)
     if sigma < np.finfo(float).eps: # is zero...
         return np.zeros(d), 0
-    
+
     mu_s = mu / sigma
     tau_s = tau / (2.0 * sigma)
     nsigma = n * sigma
-    
+
     # Starting conditions
     aux_beta = beta
     t = 1.
-       
-    for k in xrange(kmax):            
+
+    for k in xrange(kmax):
         # Pre-calculated "heavy" computation
         if n > d:
             precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
         else:
             precalc = np.dot(X.T, Y - np.dot(X, aux_beta))
-        
+
         # Soft-Thresholding
         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
         beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
-               
+
         ######## Adaptive step size #######################################
         if adaptive:
             beta_diff = (aux_beta - beta_next)
-            
+
             # Only if there is an increment of the solution
             # we can calculate the adaptive step-size
-            if np.any(beta_diff):                    
+            if np.any(beta_diff):
                 # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
                 # num = np.dot(beta_diff, grad_diff)
                 tmp = np.dot(X, beta_diff) # <-- adaptive-step-size drawback
-                num = np.dot(tmp, tmp) / n                    
-                
+                num = np.dot(tmp, tmp) / n
+
                 sigma = (num / np.dot(beta_diff, beta_diff))
                 mu_s = mu / sigma
                 tau_s = tau / (2.0*sigma)
                 nsigma = n * sigma
-            
+
                 # Soft-Thresholding
                 value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
                 beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
-        
+
         ######## FISTA ####################################################
         beta_diff = (beta_next - beta)
         t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
         aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
-        
-        # Convergence values        
+
+        # Convergence values
         max_diff = np.abs(beta_diff).max()
         max_coef = np.abs(beta_next).max()
-               
-        # Stopping rule
-        if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
 
         # Values update
         t = t_next
         beta = beta_next
+
+        # Stopping rule (exit even if beta_next contains only zeros)
+        if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
 
     return beta, k
 

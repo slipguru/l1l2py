@@ -15,3 +15,4 @@ build
 *.egg*
 MANIFEST
 .coverage
+data/

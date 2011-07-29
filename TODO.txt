@@ -27,7 +27,7 @@ Phases
 2. Removing duplicates/useless classes (for comparision with scikits)
 3. Implementing external_dep classes to test the library without
    scikits.learn installed
-   
+
 See: http://scikit-learn.sourceforge.net/ml-benchmarks/
 
 
@@ -113,10 +113,47 @@ is a DoublePredictorCV with LassoCV and a FinalPredictorCV... wow)
 
 
 
+Test Correlazione
+------------------
+Per ogni test manteniamo congelate le stopping rules e usiamo
+prima la tolleranza standard e poi proviamo con una alta per vedere
+come varia accuratezza e velocità
+nota che in molti casi il limite di 1000 iterazioni di glmnet è davvero
+ridicolo.
+
+SIMPLE_LASSO            tol 1e-4            tol 1e-8
+    glmnet          aumentano le iterazioni richieste ma l'accuratezza è buona
+    prox            meno preciso, con maggiore tolleranza è più lento ma migliora
+
+HIGH_DIMENSION
+    glmnet          come sopra
+    prox            come sopra
+
+LESS_CORRELATED
+    glmnet          cominciano ad essere richieste più iterazioni e una tolleranza minore
+    prox            con una tolleranza bassa comincia a rallentare ma va benino anche con tolleranza alta
+
+HIGHLY_CORRELATED
+    glmnet          con tolleranza alta è velocissimo ma il path è sballato.
+                    abbassando la tolleranza comincia ad avere problemi di convergenza
+                    il path è buono ma l'errore intorno a 1e-2
+    prox            stesso problema a tolleranza alta.
+                    con tolleranza bassa va *davvero* piano su alcuni tau
+                    ma il path calcolato è migliore di glmnet (anche perché
+                    non arriva mai al massimo di iterazioni)
+
+VERY_HIGHLY_CORRELATED
+    glmnet          i path ad alta tolleranza è quasi random :p, è la precisione
+                    è bassa. A tolleranza bassa il path migliora molto,
+                    ma in alcuni casi i tempi sono biblici (estremi di tau).
+    prox            anche in questo caso il path è sbagliato ma si nota
+                    la proprietà di aver mantenuto accoppiate le variabili
+                    correlate (un clustering dei coefficienti troverebbe il gruppo)
+                    velocità comoparabili a glmnet.
+                    A tolleranza bassa i tempi e i risultati sono migliori.
 
 
-
-
+TUTTO DA CONFERMARE SU DIVERSE MATRICI RANDOM!
 
 
 * 1.0.1

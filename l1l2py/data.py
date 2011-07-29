@@ -21,7 +21,9 @@
 
 import numpy as np
 
-def correlated_dataset(num_samples, num_variables, groups, weights,
+def correlated_dataset(num_samples, num_variables,
+                       groups_cardinality,
+                       weights,
                        variables_stdev=1.0,
                        correlations_stdev=1e-2,
                        labels_stdev=1e-2):
@@ -36,7 +38,7 @@ def correlated_dataset(num_samples, num_variables, groups, weights,
         Number of samples.
     num_variables : int
         Number of variables.
-    groups : tuple of int
+    groups_cardinality : tuple of int
         For each group of relevant variables indicates the group cardinality.
     weights : array_like of sum(groups) float
         True regression model.
@@ -104,27 +106,32 @@ def correlated_dataset(num_samples, num_variables, groups, weights,
 
     """
 
-    num_relevants = sum(groups)
+    num_relevants = sum(groups_cardinality)
     num_noisy = num_variables - num_relevants
 
-    X = np.empty((num_samples, num_variables))
-    weights = np.asarray(weights).reshape(-1, 1)
+    X = np.empty((num_samples, 0))
+    weights = np.asarray(weights)
 
     # For each group generates the correlated variables
     var_idx = 0
-    for g in groups:
-        x = np.random.normal(scale=variables_stdev, size=(num_samples,1))
+    for g in groups_cardinality:
+        x = np.random.normal(scale=variables_stdev, size=(num_samples, 1))
         err_x = np.random.normal(scale=correlations_stdev, size=(num_samples, g))
-        X[:, var_idx:var_idx+g] = x + err_x
+        X = np.c_[X, x + err_x]
         var_idx += g
 
     # Generates the outcomes
-    err_y = np.random.normal(scale=labels_stdev, size=(num_samples,1))
-    Y = np.dot(X[:,:num_relevants], weights) + err_y
+    err_y = np.random.normal(scale=labels_stdev, size=num_samples)
+    Y = np.dot(X, weights) + err_y
 
     # Add noisy variables
-    X[:, num_relevants:] = np.random.normal(scale=variables_stdev,
-                                            size=(num_samples, num_noisy))
+    unrelevant = np.random.normal(scale=variables_stdev,
+                                  size=(num_samples, num_noisy))
+    X = np.c_[X, unrelevant]
+
+    n, d = X.shape
+    assert d == num_variables
+    assert n == num_samples
 
     return X, Y
 

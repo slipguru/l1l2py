@@ -5,7 +5,9 @@
 import warnings
 import numpy as np
 
+from scikits.learn.base import clone
 from scikits.learn.linear_model.base import LinearModel
+from scikits.learn.linear_model import LinearRegression
 
 from .algorithms import l1l2_regularization, l1l2_path
 
@@ -86,49 +88,36 @@ class Lasso(ElasticNet):
 def lasso_path():
     pass
 
-def enet_path(X, y, taus, mu, fit_intercept=False, **fit_params):
-    r"""TODO: rewrite using Lasso/ElasticNet classes"""
-    from collections import deque
-    from .algorithms import ridge_regression, l1l2_regularization
-    from scikits.learn.linear_model import LinearRegression
-    from scikits.learn.base import clone
-
-    X = np.asanyarray(X)
-    y = np.asanyarray(y)
-    n, p = X.shape
+def enet_path(X, y, mu=0.5, eps=1e-3, n_taus=100, taus=None,
+              fit_intercept=True, verbose=False, **fit_params):
+    r"""The code is very similar to the scikits one.... mumble mumble"""
 
     X, y, Xmean, ymean = LinearModel._center_data(X, y, fit_intercept)
 
-    if mu == 0.0:
-        model_ls = LinearRegression().fit(X, y)
+    n_samples = X.shape[0]
+    if taus is None:
+        tau_max = np.abs(np.dot(X.T, y)).max() * (2.0 / n_samples)
+        taus = np.logspace(np.log10(tau_max * eps), np.log10(tau_max),
+                           num=n_taus)[::-1]
+    else:
+        taus = np.sort(taus)[::-1]  # make sure alphas are properly ordered
+
+    coef_ = None  # init coef_
+    models = []
+
+    for tau in taus:
+        model = ElasticNet(tau=tau, mu=mu, fit_intercept=False)
+        model.fit(X, y, coef_init=coef_, **fit_params)
         if fit_intercept:
-            model_ls.fit_intercept = True
-            model_ls._set_intercept(Xmean, ymean)
-    beta = None #init
+            model.fit_intercept = True
+            model._set_intercept(Xmean, ymean)
+        if verbose:
+            print model
+        coef_ = model.coef_
+        models.append(model)
 
-    out = deque()
-    nonzero = 0
-    for tau in reversed(taus):
-        if mu == 0.0 and nonzero >= n: # lasso saturation
-            model_next = clone(model_ls)
-            beta_next = model_next.coef_
-        else:
-            model_next = ElasticNet(tau=tau, mu=mu, fit_intercept=False)
-            model_next.fit(X, y, coef_init=beta, **fit_params)
-            if fit_intercept:
-                model_next.fit_intercept = True
-                model_next._set_intercept(Xmean, ymean)
+    return models
 
-            beta_next = model_next.coef_
-            k = model_next.niter_
-
-        nonzero = len(np.flatnonzero(beta_next))
-        if nonzero > 0:
-            out.appendleft(model_next)
-
-        beta = beta_next
-
-    return out
 
 
 ###############################################################################

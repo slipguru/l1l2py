@@ -2,7 +2,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 
-from ..proximal import ElasticNet, Lasso, ElasticNetCV, LassoCV
+from ..proximal import ElasticNet, Lasso, enet_path
 
 def test_lasso_zero():
     """Check that Lasso can handle zero data."""
@@ -16,126 +16,125 @@ def test_lasso_zero():
 
 def test_lasso_on_examples():
     """Test Lasso for different values of tau."""
-    
+
     # A simple sum function
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
-  
+
     clf = Lasso(tau=0.0) # OLS
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
-    
+
     clf = Lasso(tau=0.5)
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.953, .953], clf.coef_, 3)
     assert_array_almost_equal([14.625, 18.437, 3.187], pred, 3)
-    
+
     clf = Lasso(tau=1.0)
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.906, .906], clf.coef_, 3)
     assert_array_almost_equal([14.25, 17.875, 3.375], pred, 3)
-    
+
 def test_elasticnet_on_examples():
     """Test Elastic Net for different values of tau and mu."""
-    
+
     # A simple sum function
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
-  
+
     clf = ElasticNet(tau=0.0, mu=0.0) # OLS
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
-    
+
     clf = ElasticNet(tau=0.5, mu=0.0) # as Lasso
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.953, .953], clf.coef_, 3)
     assert_array_almost_equal([14.625, 18.437, 3.187], pred, 3)
-    
+
     clf = ElasticNet(tau=0.0, mu=0.5) # RLS
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.914, .914], clf.coef_, 3)
     assert_array_almost_equal([14.314, 17.971, 3.343], pred, 3)
-    
+
     clf = ElasticNet(tau=0.5, mu=0.5) # default
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.871, .871], clf.coef_, 3)
     assert_array_almost_equal([13.971, 17.457, 3.514], pred, 3)
-    
+
     clf = ElasticNet(tau=0.5, mu=0.5, adaptive_step_size=False) # without adaptive
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([.871,  .871], clf.coef_, 3)
     assert_array_almost_equal([13.971, 17.457, 3.514], pred, 3)
-    
-    
+
+
 def test_intercept():
     """Test for a manual intercept fit."""
-    
+
     # A simple sum function
     X = np.array([[1, 2], [3, 4], [5, 6]])
     y = np.array([sum(x) for x in X])
     T = np.array([[7, 8], [9, 10], [2, 1]])
-    
+
     meanx, meany = X.mean(axis=0), y.mean()
     Xc = X - meanx
     yc = y - meany
-    
+
     clf = Lasso(tau=0.0, fit_intercept=False) # OLS
     clf.fit(Xc, yc)
     pred = clf.predict(T-meanx) + meany
-    
+
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
 
-
-def test_l1l2_path():
+def test_enet_path():
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
-    
-    values = np.linspace(0.1, 1.0, 5)
-    beta_path = ElasticNetCV.path(X, y, values, 0.1)
-    
-    ## TODO: sistemare il path e controllare che i
-    #risultati siano coerenti anche in caso di fit_intercept false...
-    # inglobare il calcolo automatico del range, il check sul
-    #maggiore così da non aver problemi per ritornare modelli
-    # nulli che quindi sono modelli validi.
-    assert False
 
-    assert_true(len(beta_path) <= len(values))
-    for i in xrange(1, len(beta_path)):
+    X = np.asarray(X)
+    y = np.asarray(y)
+    T = np.asarray(T)
 
-        b = beta_path[i].coef_
-        b_prev = beta_path[i-1].coef_
+    models = enet_path(X, y, mu=0.0, n_taus=10, eps=1e-3)
+    assert_equals(10, len(models))
+    assert_almost_equal(1e-3, models[-1].tau/models[0].tau)
 
-        selected_prev = len(b_prev[b_prev != 0.0])
-        selected = len(b[b != 0.0])
-        assert_true(selected <= selected_prev)
-        
-        
+    # External intercept
+    X, y, Xmean, ymean = ElasticNet._center_data(X, y, True)
+    models_test = enet_path(X, y, mu=0.0, n_taus=10, eps=1e-3, fit_intercept=False)
+    for m, mt in zip(models, models_test):
+        assert_array_almost_equal(m.coef_, mt.coef_)
+
+    # Manual taus
+    models_test = enet_path(X, y, mu=0.0, taus=[m.tau for m in models])
+    for m, mt in zip(models, models_test):
+        assert_array_almost_equal(m.coef_, mt.coef_)
+
+
+
 # Per il path abbiamo bisogno della RidgeRegression
 def _test_ridge():
     from scikits.learn.linear_model import Ridge, ElasticNet as ElasticNetSKL
     X = np.random.random((100, 1001))
     y = np.random.random(100)
-    
+
     print ridge_regression(X, y, mu=0.0)
     clf = Ridge(alpha=0.0, fit_intercept=False)
     clf.fit(X, y)
     print clf.coef_
-    
+
     # Nota che tra mu ed alpha c'è una differenza...
     # La nostra ridge regression fornisce gli stessi risultati
     # di enet con tau=0.0, la Ridge invece deve avere in input
@@ -144,7 +143,7 @@ def _test_ridge():
     clf = Ridge(alpha=len(y)*0.5, fit_intercept=False) ### nota la relazione
     clf.fit(X, y)
     print clf.coef_
-    
+
     # L'implementazione cd di enet non può essere
     # portata a quella della ridge regression,
     # ma in ogni caso i lambda sono diversi dai mu... può aver senso

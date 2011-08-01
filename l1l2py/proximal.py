@@ -8,6 +8,7 @@ import numpy as np
 from scikits.learn.base import clone
 from scikits.learn.linear_model.base import LinearModel
 from scikits.learn.linear_model import LinearRegression
+from scikits.learn.cross_val import KFold
 
 from .algorithms import l1l2_regularization, l1l2_path
 
@@ -85,8 +86,10 @@ class Lasso(ElasticNet):
                                     tol=tol)
 
 ##############################################################################
-def lasso_path():
-    pass
+def lasso_path(X, y, eps=1e-3, n_taus=100, taus=None,
+              fit_intercept=True, verbose=False, **fit_params):
+    return enet_path(X, y, mu=0.0, eps=eps, n_alphas=n_alphas, alphas=alphas,
+                     fit_intercept=fit_intercept, verbose=verbose, **fit_params)
 
 def enet_path(X, y, mu=0.5, eps=1e-3, n_taus=100, taus=None,
               fit_intercept=True, verbose=False, **fit_params):
@@ -127,19 +130,78 @@ class ElasticNetCV(LinearModel):
     path = staticmethod(enet_path)
     estimator = ElasticNet
 
-    def __init__(self, taus, mu, cv=None, fit_intercept=True,
-                 adaptive_step_size=True, max_iter=100000, tol=1e-5):
-        self.taus = taus
+    def __init__(self, mu=0.5, eps=1e-3, n_taus=100, taus=None,
+                 fit_intercept=True, max_iter=100000, 
+                 tol=1e-5, cv=None, adaptive_step_size=True):
         self.mu = mu
-        self.cv = cv
+        self.eps = eps
+        self.n_taus = n_taus
+        self.taus = taus
         self.fit_intercept=fit_intercept
-        self.adaptive_step_size = adaptive_step_size
         self.max_iter = max_iter
         self.tol = tol
-        self.coef_ = None
+        self.cv = cv
+        self.adaptive_step_size = adaptive_step_size
+        self.coef_ = None        
 
     def fit(self, X, y, **fit_params):
-        pass
+        self._set_params(**fit_params)
+        X = np.asanyarray(X)
+        y = np.asanyarray(y)
+        
+        n_samples = X.shape[0]
+        
+        ### TODO: this should be optional....
+        # Start to compute path on full data
+        
+        # All LinearModelCV parameters except 'cv' are acceptable
+        path_params = self._get_params()
+        del path_params['cv']     
+        models = self.path(X, y, **path_params)
+        
+        # But I have to calculate the right set of taus
+        taus = [model.tau for model in models]
+        n_taus = len(taus)
+        path_params.update({'taus':taus, 'n_taus':n_taus})
+    
+        # This is a cut and paste from enet path ##############################    
+        #n_samples = X.shape[0]
+        #if taus is None:
+        #    tau_max = np.abs(np.dot(X.T, y)).max() * (2.0 / n_samples)
+        #    taus = np.logspace(np.log10(tau_max * eps), np.log10(tau_max),
+        #                       num=n_taus)[::-1]
+        #else:
+        #    taus = np.sort(taus)[::-1]  # make sure alphas are properly ordered
+        #n_taus = len(taus)
+        #######################################################################
+
+        # init cross-validation generator
+        cv = self.cv if self.cv else KFold(n_samples, 5)
+       
+        # Optional parameter for the error function
+
+        # Compute path for all folds and compute MSE to get the best alpha
+        folds = list(cv)
+        mse_taus = np.zeros((len(folds), n_taus))
+        for i, (train, test) in enumerate(folds):
+            models_train = self.path(X[train], y[train], **path_params)
+            for i_tau, model in enumerate(models_train):
+                y_ = model.predict(X[test])
+                mse_taus[i, i_tau] += ((y_ - y[test]) ** 2).mean()
+
+        i_best_tau = np.argmin(np.mean(mse_taus, axis=0))
+        model = models[i_best_tau]
+        
+        ## TODO: now, if the full path is not required I have to fit
+        ## the model with the best tau and set coef_ etc...
+
+        self.coef_ = model.coef_
+        self.intercept_ = model.intercept_
+        self.tau = model.tau
+        self.taus = np.asarray(taus)
+        self.coef_path_ = np.asarray([model.coef_ for model in models])
+        self.mse_path_ = mse_taus.T
+        return self
 
 class LassoCV(ElasticNetCV):
     path = staticmethod(lasso_path)

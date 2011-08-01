@@ -2,7 +2,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 
-from ..proximal import ElasticNet, Lasso, enet_path
+from ..proximal import ElasticNet, Lasso, ElasticNetCV, enet_path
 
 def test_lasso_zero():
     """Check that Lasso can handle zero data."""
@@ -113,7 +113,8 @@ def test_enet_path():
 
     # External intercept
     X, y, Xmean, ymean = ElasticNet._center_data(X, y, True)
-    models_test = enet_path(X, y, mu=0.0, n_taus=10, eps=1e-3, fit_intercept=False)
+    models_test = enet_path(X, y, mu=0.0, n_taus=10, eps=1e-3,
+                            fit_intercept=False)
     for m, mt in zip(models, models_test):
         assert_array_almost_equal(m.coef_, mt.coef_)
 
@@ -121,6 +122,20 @@ def test_enet_path():
     models_test = enet_path(X, y, mu=0.0, taus=[m.tau for m in models])
     for m, mt in zip(models, models_test):
         assert_array_almost_equal(m.coef_, mt.coef_)
+        
+def test_enet_cv():
+    # Data creation
+    np.random.seed(0)
+    coef = np.random.randn(200)
+    coef[10:] = 0.0 # only the top 10 features are impacting the model
+    X = np.random.randn(50, 200)
+    y = np.dot(X, coef) # without error
+    
+    # Automatic generation of the taus
+    clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e-1)
+    clf.fit(X, y, max_iter=50)
+    
+    assert_almost_equal(clf.tau, 0.5575, 2)
 
 
 
@@ -187,17 +202,6 @@ class TestAlgorithms(object):
         expected = ridge_regression(X, Y, 0.0)
         value = ridge_regression(X, Y)
         assert_true(np.allclose(expected, value))
-
-    def test_l1l2_path_saturation(self):
-        values = [0.1, 1e1, 1e3, 1e4]
-        beta_path = l1l2_path(self.X, self.Y, 0.1, values)
-        assert_equals(len(beta_path), 2)
-
-        for i in xrange(2):
-            b = beta_path[i]
-            selected = len(b[b != 0.0])
-
-            assert_true(selected <= len(b))
 
     def test_l1_bound(self):
         tau_max = l1_bound(self.X, self.Y)

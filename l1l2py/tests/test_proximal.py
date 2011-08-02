@@ -122,7 +122,7 @@ def test_enet_path():
     models_test = enet_path(X, y, mu=0.0, taus=[m.tau for m in models])
     for m, mt in zip(models, models_test):
         assert_array_almost_equal(m.coef_, mt.coef_)
-        
+
 def test_enet_cv():
     # Data creation
     np.random.seed(0)
@@ -130,11 +130,15 @@ def test_enet_cv():
     coef[10:] = 0.0 # only the top 10 features are impacting the model
     X = np.random.randn(50, 200)
     y = np.dot(X, coef) # without error
-    
+
     # Automatic generation of the taus
     clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e-1)
-    clf.fit(X, y, max_iter=50)
-    
+    clf.fit(X, y, max_iter=10)
+
+    import pylab as pl
+    pl.plot(clf.mse_path_)
+    pl.show()
+
     assert_almost_equal(clf.tau, 0.5575, 2)
 
 

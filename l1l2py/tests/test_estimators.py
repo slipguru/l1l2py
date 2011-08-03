@@ -2,7 +2,35 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 
-from ..proximal import ElasticNet, Lasso, ElasticNetCV, enet_path
+from ..estimators import Ridge, ElasticNet, Lasso, \
+                         ElasticNetCV, LassoCV, enet_path, GlmElasticNet
+
+def test_ridge_on_examples():
+    """Test Ridge regression for different values of mu."""
+    
+    # A simple sum function
+    X = [[1, 2], [3, 4], [5, 6]]
+    y = [sum(x) for x in X]
+    T = [[7, 8], [9, 10], [2, 1]]
+    
+    clf = Ridge(mu=0.0) # OLS
+    clf.fit(X, y)
+    pred = clf.predict(T)
+    assert_array_almost_equal([1, 1], clf.coef_)
+    assert_array_almost_equal([15, 19, 3], pred)
+    
+    clf = Ridge(mu=0.5)
+    clf.fit(X, y)
+    pred = clf.predict(T)
+    assert_array_almost_equal([0.91428571, 0.91428571], clf.coef_)
+    assert_array_almost_equal([14.31428571, 17.97142857, 3.34285714], pred)
+    
+    clf = Ridge(mu=1.0)
+    clf.fit(X, y)
+    pred = clf.predict(T)
+    assert_array_almost_equal([0.84210526, 0.84210526], clf.coef_)
+    assert_array_almost_equal([13.73684211, 17.10526316, 3.63157895], pred)
+
 
 def test_lasso_zero():
     """Check that Lasso can handle zero data."""
@@ -97,8 +125,39 @@ def test_intercept():
 
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
+    
+
+def test_estimators_equivalences():
+    """ Test the equivalence of the estimators with different parameters."""
+    # Data creation
+    np.random.seed(0)
+    coef = np.random.randn(200)
+    coef[10:] = 0.0 # only the top 10 features are impacting the model
+    X = np.random.randn(50, 200)
+    y = np.dot(X, coef) # without error
+    
+    # OLS
+    enet = ElasticNet(tau=0.0, mu=0.0).fit(X, y)
+    lasso = Lasso(tau=0.0).fit(X, y)
+    ridge = Ridge(mu=0.0).fit(X, y) 
+    assert_array_almost_equal(enet.coef_, lasso.coef_, 3)
+    assert_array_almost_equal(enet.coef_, ridge.coef_, 3)
+    assert_array_almost_equal(lasso.coef_, ridge.coef_, 3)
+    
+    # Ridge
+    enet = ElasticNet(tau=0.0, mu=0.5).fit(X, y)
+    ridge = Ridge(mu=0.5).fit(X, y)
+    assert_array_almost_equal(enet.coef_, ridge.coef_, 3)
+    
+    # Lasso
+    enet = ElasticNet(tau=0.5, mu=0.0).fit(X, y)
+    lasso = Lasso(tau=0.5).fit(X, y)
+    assert_array_almost_equal(enet.coef_, lasso.coef_, 3)
+
 
 def test_enet_path():
+    """Test elastic net path."""
+    
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
@@ -124,6 +183,8 @@ def test_enet_path():
         assert_array_almost_equal(m.coef_, mt.coef_)
 
 def test_enet_cv():
+    """ Test ElasticNet cross validation."""
+    
     # Data creation
     np.random.seed(0)
     coef = np.random.randn(200)
@@ -132,43 +193,25 @@ def test_enet_cv():
     y = np.dot(X, coef) # without error
 
     # Automatic generation of the taus
-    clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e-1)
-    clf.fit(X, y, max_iter=10)
-
-    import pylab as pl
-    pl.plot(clf.mse_path_)
-    pl.show()
-
-    assert_almost_equal(clf.tau, 0.5575, 2)
-
-
-
-# Per il path abbiamo bisogno della RidgeRegression
-def _test_ridge():
-    from scikits.learn.linear_model import Ridge, ElasticNet as ElasticNetSKL
-    X = np.random.random((100, 1001))
-    y = np.random.random(100)
-
-    print ridge_regression(X, y, mu=0.0)
-    clf = Ridge(alpha=0.0, fit_intercept=False)
+    clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e-2, max_iter=10)
     clf.fit(X, y)
-    print clf.coef_
+    assert_almost_equal(clf.tau, 0.1481, 2)
+    
+def test_lasso_cv():
+    """ Test Lasso cross validation."""
+    
+    # Data creation
+    np.random.seed(0)
+    coef = np.random.randn(200)
+    coef[10:] = 0.0 # only the top 10 features are impacting the model
+    X = np.random.randn(50, 200)
+    y = np.dot(X, coef) # without error
 
-    # Nota che tra mu ed alpha c'è una differenza...
-    # La nostra ridge regression fornisce gli stessi risultati
-    # di enet con tau=0.0, la Ridge invece deve avere in input
-    # alpha = N*mu ma è in genere più veloce
-    print ridge_regression(X, y, mu=0.5)
-    clf = Ridge(alpha=len(y)*0.5, fit_intercept=False) ### nota la relazione
+    # Automatic generation of the taus
+    clf = LassoCV(n_taus=100, eps=1e-3, max_iter=10)
     clf.fit(X, y)
-    print clf.coef_
+    assert_almost_equal(clf.tau, 0.02099, 2)
 
-    # L'implementazione cd di enet non può essere
-    # portata a quella della ridge regression,
-    # ma in ogni caso i lambda sono diversi dai mu... può aver senso
-    #en = ElasticNetSKL(alpha=1.0, rho=0.0)
-    #en.fit(X, y, fit_intercept=False)
-    #print np.asarray(en.coef_)
 
 
 from l1l2py.algorithms import *
@@ -182,11 +225,7 @@ class TestAlgorithms(object):
         self.X = data[:,:-1]
         self.Y = data[:,-1]
 
-    def test_data(self):
-        assert_equals((30, 40), self.X.shape)
-        assert_equals((30, ), self.Y.shape)
-
-    def test_rls(self):
+    def _test_rls(self):
         # case n >= d
         for penalty in np.linspace(0.0, 1.0, 5):
             value = ridge_regression(self.X, self.Y, penalty)
@@ -207,11 +246,3 @@ class TestAlgorithms(object):
         value = ridge_regression(X, Y)
         assert_true(np.allclose(expected, value))
 
-    def test_l1_bound(self):
-        tau_max = l1_bound(self.X, self.Y)
-
-        beta, k = l1l2_regularization(self.X, self.Y, 0.0, tau_max+1e3)
-        assert_equals(0, len(np.flatnonzero(beta)))
-
-        beta, k = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-3)
-        assert_equals(1, len(np.flatnonzero(beta)))

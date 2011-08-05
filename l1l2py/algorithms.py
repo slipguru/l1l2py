@@ -171,7 +171,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         Maximum number of iterations.
     tolerance : float, optional (default is `1e-5`)
         Convergence tolerance.
-    adaptive: bool, optional (default is `False`)
+    adaptive : bool, optional (default is `False`)
         If `True`, minimization is performed calculating an adaptive step size
         for each iteration.
 
@@ -236,7 +236,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `10`.
-    adaptive: bool, optional (default is `False`)
+    adaptive : bool, optional (default is `False`)
         If `True`, minimization is performed calculating an adaptive step size
         for each iteration.
 

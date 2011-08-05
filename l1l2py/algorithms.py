@@ -130,7 +130,7 @@ def ridge_regression(data, labels, mu=0.0):
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5):
+              tolerance=1e-5, adaptive=False):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -171,6 +171,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         Maximum number of iterations.
     tolerance : float, optional (default is `1e-5`)
         Convergence tolerance.
+    adaptive: bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
 
     Returns
     -------
@@ -193,7 +196,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
             beta_next = beta_ls
         else:
             beta_next = l1l2_regularization(data, labels, mu, tau, beta,
-                                            kmax, tolerance)
+                                            kmax, tolerance, adaptive=adaptive)
 
         nonzero = len(beta_next.nonzero()[0])
         if nonzero > 0:

@@ -1,5 +1,14 @@
 CHANGELOG
 
+1.0.4
+-----
+New Features:
+    * Improved l1l2_regularization
+    * Added adaptive step size calculation
+
+Bug Fixes:
+    * Fixed l1l2_bound test
+
 1.0.3
 -----
 New Features:

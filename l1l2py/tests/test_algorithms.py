@@ -23,7 +23,6 @@ import numpy as np
 from nose.tools import *
 from nose.plugins.attrib import attr
 from l1l2py.algorithms import *
-from l1l2py.algorithms import _soft_thresholding
 from l1l2py.tests import _TEST_DATA_PATH
 
 class TestAlgorithms(object):
@@ -127,14 +126,3 @@ class TestAlgorithms(object):
         beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-3)
         assert_equals(1, len(beta.nonzero()[0]))
 
-    def test_soft_thresholding(self):
-        beta = ridge_regression(self.X, self.Y)
-        for th in np.linspace(0.0, 10.0, 50):
-            out = _soft_thresholding(beta, th)
-
-            # Verbose and slow version
-            out_exp = beta - (np.sign(beta) * th)#/2.0)
-            #out_exp[np.abs(beta) <= th/2.0] = 0.0
-            out_exp[np.abs(beta) <= th] = 0.0
-
-            assert_true(np.allclose(out, out_exp))

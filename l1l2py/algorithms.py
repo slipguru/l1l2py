@@ -27,6 +27,8 @@ elaboration of the data.
 
 __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
+from math import sqrt
+
 import numpy as np
 try:
     from scipy import linalg as la
@@ -130,8 +132,9 @@ def ridge_regression(data, labels, mu=0.0):
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
-def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
-              tolerance=1e-5):
+
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
+              tolerance=1e-5, adaptive=False):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -172,6 +175,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
         Maximum number of iterations.
     tolerance : float, optional (default is `1e-5`)
         Convergence tolerance.
+    adaptive : bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
 
     Returns
     -------
@@ -193,9 +199,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls
         else:
-            beta_next, k = l1l2_regularization(data, labels, mu, tau, beta,
-                                               kmax, tolerance)
-
+            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
+                                            kmax, tolerance, adaptive=adaptive)
         nonzero = len(np.flatnonzero(beta_next))
         if nonzero > 0:
             out.appendleft(beta_next)
@@ -204,9 +209,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=10000,
 
     return out
 
-def l1l2_regularization(data, labels, mu, tau,
-                        beta=None, kmax=100000,
-                        tolerance=1e-5,
+
+def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
+                        tolerance=1e-5, return_iterations=False,
                         adaptive=False):
     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
     to solve a least squares problem with `l1l2` penalty.
@@ -235,6 +240,9 @@ def l1l2_regularization(data, labels, mu, tau,
         If `True`, returns the number of iterations performed.
         The algorithm has a predefined minimum number of iterations
         equal to `10`.
+    adaptive : bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
 
     Returns
     -------
@@ -259,7 +267,7 @@ def l1l2_regularization(data, labels, mu, tau,
     if beta is None:
         beta = np.zeros(d)
     else:
-        beta.ravel()
+        beta = beta.ravel()
 
     # Useful quantities
     X = data
@@ -315,7 +323,7 @@ def l1l2_regularization(data, labels, mu, tau,
 
         ######## FISTA ####################################################
         beta_diff = (beta_next - beta)
-        t_next = 0.5 * (1.0 + math.sqrt(1.0 + 4.0 * t*t))
+        t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
         aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
 
         # Convergence values
@@ -329,7 +337,10 @@ def l1l2_regularization(data, labels, mu, tau,
         # Stopping rule (exit even if beta_next contains only zeros)
         if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
 
-    return beta, k
+    if return_iterations:
+        return beta, k+1
+    return beta
+
 
 def _sigma(matrix, mu):
     n, p = matrix.shape

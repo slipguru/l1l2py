@@ -64,7 +64,7 @@ class TestAlgorithms(object):
         for mu, tau in product(values, values):
             beta, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
                                            return_iterations=True)
-            assert_equal(beta.shape, (self.X.shape[1], 1))
+            assert_equal(len(beta), self.X.shape[1])
 
             beta, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
                                            tolerance=1e-3,

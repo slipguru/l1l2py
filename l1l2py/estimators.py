@@ -150,6 +150,7 @@ class ElasticNet(LinearModel):
                                                 beta=self.coef_,
                                                 kmax=self.max_iter,
                                                 tolerance=self.tol,
+                                                return_iterations=True,
                                                 adaptive=self.adaptive_step_size)
         self._set_intercept(Xmean, ymean)
 

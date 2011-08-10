@@ -17,6 +17,23 @@ from .tools import kfold_splits
 ##############################################################################
 # Models
 
+## Copied from scikits... but it need correction
+class CoefSelectTransformerMixin(object):
+    """Mixin for linear models that can find sparse solutions.
+    """
+
+    def transform(self, X, threshold=1e-10):
+        if len(self.coef_.shape) == 1 or self.coef_.shape[1] == 1:
+            # 2-class case
+            coef = np.ravel(self.coef_)
+        else:
+            # multi-class case
+            coef = np.mean(self.coef_, axis=0)
+
+        self.selected_ = np.abs(coef) >= threshold
+        return X[:, self.selected_]        
+
+
 class LinearModel(object):
     """TODO"""
     
@@ -97,7 +114,7 @@ class Ridge(LinearModel):
         
         return self
 
-class ElasticNet(LinearModel):
+class ElasticNet(LinearModel, CoefSelectTransformerMixin):
     """
     scikits.learn model is:
         (1/2n)*||y - X*b||^2 + alpha*rho*||b||_1 + 0.5*alpha*(1-rho)||b||^2
@@ -214,7 +231,7 @@ def enet_path(X, y, mu=0.5, eps=1e-3, n_taus=100, taus=None,
 ###############################################################################
 # CV Estimators
 
-class ElasticNetCV(LinearModel):
+class ElasticNetCV(LinearModel, CoefSelectTransformerMixin):
     path = staticmethod(enet_path)
     estimator = ElasticNet
 

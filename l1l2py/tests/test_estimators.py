@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
+from nose.tools import *
 
 from ..estimators import Ridge, ElasticNet, Lasso, \
                          ElasticNetCV, LassoCV, enet_path, GlmElasticNet
@@ -211,38 +212,3 @@ def test_lasso_cv():
     clf = LassoCV(n_taus=100, eps=1e-3, max_iter=10)
     clf.fit(X, y)
     assert_almost_equal(clf.tau, 0.02099, 2)
-
-
-
-from l1l2py.algorithms import *
-from l1l2py.tests import _TEST_DATA_PATH
-from nose.tools import *
-
-class TestAlgorithms(object):
-
-    def setup(self):
-        data = np.loadtxt(_TEST_DATA_PATH)
-        self.X = data[:,:-1]
-        self.Y = data[:,-1]
-
-    def _test_rls(self):
-        # case n >= d
-        for penalty in np.linspace(0.0, 1.0, 5):
-            value = ridge_regression(self.X, self.Y, penalty)
-            assert_equal(value.shape, (self.X.shape[1], 1))
-
-        expected = ridge_regression(self.X, self.Y, 0.0)
-        value = ridge_regression(self.X, self.Y)
-        assert_true(np.allclose(expected, value))
-
-        # case d > n
-        X = self.X.T
-        Y = self.X[0:1,:].T
-        for penalty in np.linspace(0.0, 1.0, 5):
-            value = ridge_regression(X, Y, penalty)
-            assert_equal(value.shape, (X.shape[1], 1))
-
-        expected = ridge_regression(X, Y, 0.0)
-        value = ridge_regression(X, Y)
-        assert_true(np.allclose(expected, value))
-

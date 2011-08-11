@@ -6,52 +6,30 @@ from nose.tools import *
 from ..double import DoubleStepEstimator
 from ..estimators import Ridge, Lasso
 
-class Selector(object):
-    def __init__(self, n_sel=None):
-        self.n_sel = n_sel
-    def fit(self, X, y):
-        self.coef_ = np.random.randn(X.shape[1])
-        self.coef_[self.n_sel:] = 0.0
-    def transform(self, X):
-        nonzero = np.flatnonzero(self.coef_)
-        return X[:,nonzero]
-
-def test_selector():
-    """..."""
-    # Data creation
-    np.random.seed(0)
-    coef = np.random.randn(200)
-    X = np.random.randn(50, 200)
-    y = np.empty(50) # random labels
-    
-    sel = Selector(n_sel=10)
-    sel.fit(X, y)
-    assert_equal(10, len(np.flatnonzero(sel.coef_)))
-    assert_array_almost_equal(X[:,:10], sel.transform(X))
-    
 def test_pipe():
-    """..."""
-    # Data creation
+    """Test double optimization on a simple example."""
+    # A simple sparse-sum function
+    X = [[1, 2], [3, 4], [5, 6]]
+    y = [sum(x) for x in X]
+    T = [[7, 8], [9, 10], [2, 1]]
+    
+    # noisy variables
     np.random.seed(0)
-    coef = np.random.randn(200)
-    coef[10:] = 0.0 # only the top 10 features are impacting the model
-    X = np.random.randn(50, 200)
-    y = np.dot(X, coef) # without error
+    X = np.c_[X, np.random.random((3, 100))]
+    T = np.c_[T, np.random.random((3, 100))]    
     
-    lasso = Lasso(tau=1.0)
-    ridge = Ridge(mu=1.0)
-    dstep = DoubleStepEstimator(lasso, ridge)
+    # Select the first 2 variables and calculate a linear model on them
+    dstep = DoubleStepEstimator(Lasso(tau=1.0), Ridge(mu=0.0)).fit(X, y)
     
-    dstep.fit(X, y)
-    lasso.fit(X, y)
-       
-    ridge.fit(lasso.transform(X), y)   
+    # Coefficients
+    lasso = dstep.selector
+    ridge = dstep.regressor
+    assert_array_almost_equal([0.90635646, 0.90635646], lasso.coef_[:2])
+    assert_array_almost_equal([1.0, 1.0], ridge.coef_)
+    assert_array_almost_equal([1.0, 1.0], dstep.coef_[:2])
     
-    assert_equal(len(lasso.coef_), len(dstep.coef_))
-    assert_equal(len(ridge.coef_), len(np.flatnonzero(dstep.coef_)))
-    
-    ridge_pred = ridge.predict(lasso.transform(X))
-    dstep_pred = dstep.predict(X)
-    assert_array_almost_equal(ridge_pred, dstep_pred)
+    # Prediction
+    y_ = dstep.predict(T)
+    assert_array_almost_equal([15., 19., 3.], y_)
     
     

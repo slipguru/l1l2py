@@ -1,10 +1,6 @@
 TODO
 ----
 
-Keep in mind that there are a default and a stable branch, 
-when we finish a new version, we add a tag and merge the default branch
-into the stable one (remember the order of the branches before merge)
-
 Giustification
 ===============
 We want a double-face library which ca be used alone (only with numpy)
@@ -14,7 +10,7 @@ the base classes??), but we can mantain the same
 structure eg:
 
 l1l2py
-    cross_val.py (our implementation of the iterators)
+    cross_val.py (our implementation of the iterators)... Done
     metrics.py
     external_dep.py (scikits cut and paste... mumble mumble)
     utils.py (center and standardize as Transformers)

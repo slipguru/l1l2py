@@ -21,6 +21,157 @@
 
 import numpy as np
 
+# Normalization ---------------------------------------------------------------
+def center(matrix, optional_matrix=None, return_mean=False):
+    r"""Center columns of a matrix setting each column to zero mean.
+
+    The function returns the centered ``matrix`` given as input.
+    Optionally centers an ``optional_matrix`` with respect to the mean value evaluated
+    for ``matrix``.
+
+    .. note::
+
+        A one dimensional matrix is considered as a column vector.
+
+    Parameters
+    ----------
+    matrix : (N,) or (N, P) ndarray
+        Input matrix whose columns are to be centered.
+    optional_matrix : (N,) or (N, P) ndarray, optional (default is `None`)
+        Optional matrix whose columns are to be centered
+        using mean of ``matrix``.
+        It must have the same number of columns as ``matrix``.
+    return_mean : bool, optional (default is `False`)
+        If `True` returns mean of ``matrix``.
+
+    Returns
+    -------
+    matrix_centered : (N,) or (N, P) ndarray
+        Centered ``matrix``.
+    optional_matrix_centered : (N,) or (N, P) ndarray, optional
+        Centered ``optional_matrix`` with respect to ``matrix``
+    mean : float or (P,) ndarray, optional
+        Mean of ``matrix`` columns.
+
+    Examples
+    --------
+    >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
+    >>> l1l2py.tools.center(X)
+    array([[-1.5, -1.5, -1.5],
+           [ 1.5,  1.5,  1.5]])
+    >>> l1l2py.tools.center(X, return_mean=True)
+    (array([[-1.5, -1.5, -1.5],
+           [ 1.5,  1.5,  1.5]]), array([ 2.5,  3.5,  4.5]))
+    >>> x = numpy.array([[1, 2, 3]])             # 2-dimensional matrix
+    >>> l1l2py.tools.center(x, return_mean=True)
+    (array([[ 0.,  0.,  0.]]), array([ 1.,  2.,  3.]))
+    >>> x = numpy.array([1, 2, 3])               # 1-dimensional matrix
+    >>> l1l2py.tools.center(x, return_mean=True) # centered as a (3, 1) matrix
+    (array([-1.,  0.,  1.]), 2.0)
+    >>> l1l2py.tools.center(X, X[:,:2])
+    Traceback (most recent call last):
+        ...
+    ValueError: shape mismatch: objects cannot be broadcast to a single shape
+
+    """
+    mean = matrix.mean(axis=0)
+
+    # Simple case
+    if optional_matrix is None and return_mean is False:
+        return matrix - mean
+
+    if optional_matrix is None: # than return_mean is True
+        return (matrix - mean, mean)
+
+    if return_mean is False: # otherwise
+        return (matrix - mean, optional_matrix - mean)
+
+    # Full case
+    return (matrix - mean, optional_matrix - mean, mean)
+
+def standardize(matrix, optional_matrix=None, return_factors=False):
+    r"""Standardize columns of a matrix setting each column with zero mean and
+    unitary standard deviation.
+
+    The function returns the standardized ``matrix`` given as input.
+    Optionally it standardizes an ``optional_matrix`` with respect to the
+    mean and standard deviation evaluatted for ``matrix``.
+
+    .. note::
+
+        A one dimensional matrix is considered as a column vector.
+
+    Parameters
+    ----------
+    matrix : (N,) or (N, P) ndarray
+        Input matrix whose columns are to be standardized
+        to mean `0` and standard deviation `1`.
+    optional_matrix : (N,) or (N, P) ndarray, optional (default is `None`)
+        Optional matrix whose columns are to be standardized
+        using mean and standard deviation of ``matrix``.
+        It must have same number of columns as ``matrix``.
+    return_factors : bool, optional (default is `False`)
+        If `True`, returns mean and standard deviation of ``matrix``.
+
+    Returns
+    -------
+    matrix_standardized : (N,) or (N, P) ndarray
+        Standardized ``matrix``.
+    optional_matrix_standardized : (N,) or (N, P) ndarray, optional
+        Standardized ``optional_matrix`` with respect to ``matrix``
+    mean : float or (P,) ndarray, optional
+        Mean of ``matrix`` columns.
+    std : float or (P,) ndarray, optional
+        Standard deviation of ``matrix`` columns.
+
+    Raises
+    ------
+    ValueError
+        If ``matrix`` has only one row.
+
+    Examples
+    --------
+    >>> X = numpy.array([[1, 2, 3], [4, 5, 6]])
+    >>> l1l2py.tools.standardize(X)
+    array([[-0.70710678, -0.70710678, -0.70710678],
+           [ 0.70710678,  0.70710678,  0.70710678]])
+    >>> l1l2py.tools.standardize(X, return_factors=True)
+    (array([[-0.70710678, -0.70710678, -0.70710678],
+           [ 0.70710678,  0.70710678,  0.70710678]]), array([ 2.5,  3.5,  4.5]), array([ 2.12132034,  2.12132034,  2.12132034]))
+    >>> x = numpy.array([[1, 2, 3]])                     # 1 row matrix
+    >>> l1l2py.tools.standardize(x, return_factors=True)
+    Traceback (most recent call last):
+        ...
+    ValueError: 'matrix' must have more than one row
+    >>> x = numpy.array([1, 2, 3])                       # 1-dimensional matrix
+    >>> l1l2py.tools.standardize(x, return_factors=True) # standardized as a (3, 1) matrix
+    (array([-1.,  0.,  1.]), 2.0, 1.0)
+    >>> l1l2py.tools.center(X, X[:,:2])
+    Traceback (most recent call last):
+        ...
+    ValueError: shape mismatch: objects cannot be broadcast to a single shape
+
+    """
+
+    if matrix.ndim == 2 and matrix.shape[0] == 1:
+        raise ValueError("'matrix' must have more than one row")
+
+    mean = matrix.mean(axis=0)
+    std = matrix.std(axis=0, ddof=1)
+
+    # Simple case
+    if optional_matrix is None and return_factors is False:
+        return (matrix - mean)/std
+
+    if optional_matrix is None: # than return_factors is True
+        return (matrix - mean)/std, mean, std
+
+    if return_factors is False: # otherwise
+        return (matrix - mean)/std, (optional_matrix - mean)/std
+
+    # Full case
+    return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
+
 def correlated_dataset(num_samples, num_variables,
                        groups_cardinality,
                        weights,

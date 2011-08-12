@@ -295,6 +295,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
             precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
         else:
             precalc = np.dot(X.T, Y - np.dot(X, aux_beta))
+            
+        # TODO: stopping rule based on r = Y - Xbeta ??
 
         # Soft-Thresholding
         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)

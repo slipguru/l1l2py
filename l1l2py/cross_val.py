@@ -18,6 +18,43 @@ def _check_random_state(seed):
                      ' instance' % seed)
 
 class KFold(object):
+    r"""k-fold cross validation splits.
+
+    Given a list of labels, the function produces a list of ``k`` splits.
+    Each split is a pair of tuples containing the indexes of the training set
+    and the indexes of the test set.
+
+    Parameters
+    ----------
+    labels : array_like, shape (N,)
+        Data labels.
+    k : int, greater than `0`
+        Number of splits.
+    rseed : int, optional (default is `0`)
+        Random seed.
+
+    Returns
+    -------
+    splits : list of ``k`` tuples
+        Each tuple contains two lists with the training set and test set
+        indexes.
+
+    Raises
+    ------
+    ValueError
+        If ``k`` is less than 2 or greater than `N`.
+
+    Examples
+    --------
+    >>> labels = range(10)
+    >>> l1l2py.tools.kfold_splits(labels, 2)
+    [([7, 1, 3, 6, 8], [9, 4, 0, 5, 2]), ([9, 4, 0, 5, 2], [7, 1, 3, 6, 8])]
+    >>> l1l2py.tools.kfold_splits(labels, 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: 'k' must be greater than one and smaller or equal than the number of samples
+
+    """
     def __init__(self, n, k, random_state=None):
         self.n = n
         self.k = k
@@ -60,6 +97,52 @@ class KFold(object):
         return self.k
     
 class StratifiedKFold(KFold):
+    """Sstratified k-fold cross validation splits.
+
+    This function is a variation of ``kfold_splits``, which
+    returns stratified splits. The divisions are made by preserving
+    the percentage of samples for each class, assuming that the problem
+    is binary.
+
+    Parameters
+    ----------
+    labels : array_like, shape (N,)
+        Data labels (usually contains only 1s and -1s).
+    k : int, greater than `0`
+        Number of splits.
+    rseed : int, optional (default is `0`)
+        Random seed.
+
+    Returns
+    -------
+    splits : list of ``k`` tuples
+        Each tuple contains two lists with the training set and test set
+        indexes.
+
+    Raises
+    ------
+    ValueError
+        If `labels` contains more than two classes labels.
+    ValueError
+        If ``k`` is less than 2 or greater than number of positive or negative
+        samples in `labels`.
+
+    Examples
+    --------
+    >>> labels = range(10)
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
+    Traceback (most recent call last):
+        ...
+    ValueError: 'labels' must contains only two class labels
+    >>> labels = [1, 1, 1, 1, 1, 1, -1, -1, -1, -1]
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 2)
+    [([8, 9, 5, 2, 1], [7, 6, 3, 0, 4]), ([7, 6, 3, 0, 4], [8, 9, 5, 2, 1])]
+    >>> l1l2py.tools.stratified_kfold_splits(labels, 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: 'k' must be greater than one and smaller or equal than number of positive and negative samples
+
+    """
     def __init__(self, labels, k, random_state=None):
         self.labels = labels
         self.k = k

@@ -11,8 +11,8 @@ except ImportError:
     from numpy import linalg as la
 
 from .algorithms import l1l2_regularization, l1l2_path
-from .tools import regression_error
-from .tools import kfold_splits
+from .metrics import regression_error
+from .cross_val import KFold
 
 ##############################################################################
 # Models
@@ -255,7 +255,7 @@ class ElasticNetCV(LinearModel):
         path_params.update({'taus': taus, 'n_taus': n_taus})
 
         # init cross-validation generator
-        cv = self.cv if self.cv else kfold_splits(y, 5)
+        cv = self.cv if self.cv else KFold(len(y), 5)
         
         # init loss function
         loss = self.loss if self.loss else regression_error

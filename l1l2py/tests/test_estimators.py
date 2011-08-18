@@ -195,7 +195,8 @@ def test_enet_cv():
     # Automatic generation of the taus
     clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e2, max_iter=10)
     clf.fit(X, y)
-    assert_almost_equal(clf.tau, 0.8474, 2)
+    
+    assert_almost_equal(clf.tau, 0.9743, 2)
     
 def test_lasso_cv():
     """ Test Lasso cross validation."""

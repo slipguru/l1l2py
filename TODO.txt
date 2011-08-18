@@ -11,9 +11,9 @@ structure eg:
 
 l1l2py
     cross_val.py (our implementation of the iterators)... Done
-    metrics.py
+    metrics.py ... Done
     external_dep.py (scikits cut and paste... mumble mumble)
-    utils.py (center and standardize as Transformers)
+    data.py (center and standardize as Transformers) 
     proximal.py (eventually "pyx")
     _core.py (contains L1L2Fw and DoubleOptimizer)
 

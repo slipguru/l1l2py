@@ -74,7 +74,11 @@ def center(matrix, optional_matrix=None, return_mean=False):
     ValueError: shape mismatch: objects cannot be broadcast to a single shape
 
     """
+    matrix = np.asanyarray(matrix)
     mean = matrix.mean(axis=0)
+    
+    if not optional_matrix is None:
+        optional_matrix = np.asanyarray(optional_matrix)
 
     # Simple case
     if optional_matrix is None and return_mean is False:
@@ -95,7 +99,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 
     The function returns the standardized ``matrix`` given as input.
     Optionally it standardizes an ``optional_matrix`` with respect to the
-    mean and standard deviation evaluatted for ``matrix``.
+    mean and standard deviation evaluated from ``matrix``.
 
     .. note::
 
@@ -152,12 +156,16 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     ValueError: shape mismatch: objects cannot be broadcast to a single shape
 
     """
-
+    matrix = np.asanyarray(matrix)
+    
     if matrix.ndim == 2 and matrix.shape[0] == 1:
         raise ValueError("'matrix' must have more than one row")
 
     mean = matrix.mean(axis=0)
     std = matrix.std(axis=0, ddof=1)
+    
+    if not optional_matrix is None:
+        optional_matrix = np.asanyarray(optional_matrix)
 
     # Simple case
     if optional_matrix is None and return_factors is False:
@@ -171,6 +179,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
 
     # Full case
     return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
+
 
 def correlated_dataset(num_samples, num_variables,
                        groups_cardinality,

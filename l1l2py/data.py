@@ -181,6 +181,54 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
 
 
+def tau_max(data, labels):
+    r"""Estimation of an useful maximum bound for the `l1` penalty term.
+
+    Fixing ``mu`` close to `0.0` and using the maximum value calculated with
+    this function as ``tau`` in the `l1l2` regularization, the solution vector
+    contains only zero elements.
+
+    For each value of ``tau`` smaller than the maximum bound the solution vector
+    contains at least one non zero element.
+
+    .. warning
+
+        That is, bounds are right if you run the `l1l2` regularization
+        algorithm with the same data matrices.
+
+    Parameters
+    ----------
+    data : (N, P) ndarray
+        Data matrix.
+    labels : (N,)  or (N, 1) ndarray
+        Labels vector.
+
+    Returns
+    -------
+    tau_max : float
+        Maximum ``tau``.
+
+    Examples
+    --------
+    >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
+    >>> beta = numpy.array([0.1, 0.1, 0.0])
+    >>> Y = numpy.dot(X, beta)
+    >>> tau_max = l1l2py.algorithms.l1_bound(X, Y)
+    >>> l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max).T
+    array([[ 0.,  0.,  0.]])
+    >>> beta = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5)
+    >>> len(numpy.flatnonzero(beta))
+    1
+
+    """
+    X = np.asanyarray(data)
+    y = np.asanyarray(labels)
+    
+    n = X.shape[0]
+    corr = np.abs(np.dot(X.T, y))
+
+    return (corr.max() * (2.0/n))
+
 def correlated_dataset(num_samples, num_variables,
                        groups_cardinality,
                        weights,

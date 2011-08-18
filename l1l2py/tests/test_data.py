@@ -23,7 +23,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from nose.tools import *
 
-from ..data import center, standardize
+from ..data import center, standardize, tau_max
+from ..estimators import Lasso
 
 
 def test_centering():
@@ -82,6 +83,18 @@ def test_standardization_outputs():
     assert_equals(2, len(standardize(X, X)))
     assert_equals(3, len(standardize(X, return_factors=True)))
     assert_equals(4, len(standardize(X, X, return_factors=True)))
+
+
+def test_tau_max():
+    X = [[1., 2.], [3., 4.]]
+    y = [1., -1.]
+    
+    tmax = tau_max(X, y)
+    assert_equals(2.0, tmax)
+
+    lasso = Lasso(tau=tmax).fit(X, y)
+    assert_equals(0, len(lasso.coef_.nonzero()[0]))
+
 
 def test_correlated_dataset():
     pass

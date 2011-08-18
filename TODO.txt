@@ -13,12 +13,12 @@ l1l2py
     cross_val.py (our implementation of the iterators)... Done
     metrics.py ... Done
     external_dep.py (scikits cut and paste... mumble mumble)
-    data.py (center and standardize as Transformers) 
-    proximal.py (eventually "pyx")
+    data.py (center and standardize)...Done
+    proximal.py (eventually "pyx")... Done
     _core.py (contains L1L2Fw and DoubleOptimizer)
 
 To Remove:
-    - linear_range, geometric_range (numpy functions)
+    - linear_range, geometric_range (numpy functions)... Done
 
 Phases
 ======

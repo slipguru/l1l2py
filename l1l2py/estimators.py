@@ -10,7 +10,7 @@ try:
 except ImportError:
     from numpy import linalg as la
 
-from .algorithms import l1l2_regularization, l1l2_path
+from .proximal import l1l2_regularization
 from .metrics import regression_error
 from .cross_val import KFold
 
@@ -143,7 +143,6 @@ class ElasticNet(LinearModel):
         else:
             self.coef_ = np.asanyarray(coef_init)
 
-        #from l1l2py.algorithms_orig import l1l2_regularization
         l1l2_proximal = l1l2_regularization
         self.coef_, self.niter_ = l1l2_proximal(X, y,
                                                 self.mu, self.tau,

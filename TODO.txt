@@ -1,32 +1,31 @@
 TODO
 ----
 
-Giustification
-===============
-We want a double-face library which ca be used alone (only with numpy)
-or as a companion for scikits.learn.
-To do this we have to replicate something (we have to cut and paste
-the base classes??), but we can mantain the same
-structure eg:
+Target
+======
+We want a double-face library which can be used alone (only with numpy)
+or extended using implementation from sklearn.
+
+Structure
+=========
 
 l1l2py
-    cross_val.py (our implementation of the iterators)... Done
-    metrics.py ... Done
-    external_dep.py (scikits cut and paste... mumble mumble)
-    data.py (center and standardize)...Done
-    proximal.py (eventually "pyx")... Done
-    _core.py (contains L1L2Fw and DoubleOptimizer)
-
-To Remove:
-    - linear_range, geometric_range (numpy functions)... Done
-
-Phases
-======
-1. Replication of all the function to the new style, using scikits when
-   possible
-2. Removing duplicates/useless classes (for comparision with scikits)
-3. Implementing external_dep classes to test the library without
-   scikits.learn installed
+    - estimators.py
+        Estimators classes (Ridge, Enet, Lasso and related CV
+        estimators as in sklearn)
+        We will respect the same sklearn API for the estimators:
+            http://scikit-learn.sourceforge.net/developers/index.html#estimators
+    - cross_val.py
+        Splits iterators
+    - metrics.py
+        error functions
+    - data.py
+        normalization functions, data generators and bound estimation
+    - proximal.py
+        core optimization code
+    - _core.py
+        L1L2Fw and DoubleOptimizer
+    - external_dep.py (scikits cut and paste... mumble mumble)
 
 See: http://scikit-learn.sourceforge.net/ml-benchmarks/
 

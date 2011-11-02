@@ -19,7 +19,7 @@ from .cross_val import KFold
 
 class LinearModel(object):
     """TODO"""
-    
+
     def predict(self, X):
         """Predict using the linear model
 
@@ -65,36 +65,36 @@ class LinearModel(object):
 
 class Ridge(LinearModel):
     """TODO"""
-    
+
     def __init__(self, mu=0.5, fit_intercept=True): ## DEFINE better defaults
         self.mu = mu
         self.fit_intercept = fit_intercept
         self.coef_ = None
-        
+
     def fit(self, X, y):
         X = np.asanyarray(X)
         y = np.asanyarray(y)
         n_samples, n_features = X.shape
-        
+
         X, y, Xmean, ymean = Ridge._center_data(X, y, self.fit_intercept)
-    
+
         if n_samples < n_features:
             tmp = np.dot(X, X.T)
             if self.mu != 0.0:
                 tmp += self.mu*n_samples*np.eye(n_samples)
             tmp = la.pinv(tmp)
-    
+
             self.coef_ =  np.dot(np.dot(X.T, tmp), y)
         else:
             tmp = np.dot(X.T, X)
             if self.mu != 0.0:
                 tmp += self.mu*n_samples*np.eye(n_features)
             tmp = la.pinv(tmp)
-    
+
             self.coef_ = np.dot(tmp, np.dot(X.T, y))
-            
+
         self._set_intercept(Xmean, ymean)
-        
+
         return self
 
 class ElasticNet(LinearModel):
@@ -218,7 +218,7 @@ class ElasticNetCV(LinearModel):
     estimator = ElasticNet
 
     def __init__(self, mu=0.5, eps=1e-3, n_taus=100, taus=None,
-                 fit_intercept=True, max_iter=10000, 
+                 fit_intercept=True, max_iter=10000,
                  tol=1e-4, cv=None,
                  adaptive_step_size=False,
                  loss=None):
@@ -232,22 +232,22 @@ class ElasticNetCV(LinearModel):
         self.cv = cv
         self.adaptive_step_size = adaptive_step_size
         self.loss = loss
-        self.coef_ = None        
+        self.coef_ = None
 
     def fit(self, X, y):
         X = np.asanyarray(X)
-        y = np.asanyarray(y)        
+        y = np.asanyarray(y)
         n_samples = X.shape[0]
-        
+
         # Path parmeters creation
         path_params = self.__dict__.copy()
         for p in ('cv', 'loss', 'coef_'):
             del path_params[p]
-        
+
         # TODO: optional????
         # Start to compute path on full data
         models = self.path(X, y, **path_params)
-        
+
         # Update the taus list
         taus = [model.tau for model in models]
         n_taus = len(taus)
@@ -255,11 +255,11 @@ class ElasticNetCV(LinearModel):
 
         # init cross-validation generator
         cv = self.cv if self.cv else KFold(len(y), 5)
-        
+
         # init loss function
         loss = self.loss if self.loss else regression_error
 
-        # Compute path for all folds and compute MSE to get the best tau        
+        # Compute path for all folds and compute MSE to get the best tau
         folds = list(cv)
         loss_taus = np.zeros((len(folds), n_taus))
         for i, (train, test) in enumerate(folds):
@@ -282,9 +282,9 @@ class ElasticNetCV(LinearModel):
 class LassoCV(ElasticNetCV):
     path = staticmethod(lasso_path)
     estimator = Lasso
-    
+
     def __init__(self, eps=1e-3, n_taus=100, taus=None,
-                 fit_intercept=True, max_iter=10000, 
+                 fit_intercept=True, max_iter=10000,
                  tol=1e-4, cv=None,
                  adaptive_step_size=False,
                  loss=None):
@@ -292,40 +292,38 @@ class LassoCV(ElasticNetCV):
                                       eps=eps,
                                       n_taus=n_taus, taus=taus,
                                       fit_intercept=fit_intercept,
-                                      max_iter=max_iter, 
+                                      max_iter=max_iter,
                                       tol=tol, cv=cv,
                                       adaptive_step_size=adaptive_step_size,
                                       loss=loss)
-        
-        
+
+
 ##############################################################################
 # GLMNet models
-try:
-    from scikits.learn.linear_model import ElasticNet as _GlmElasticNet
-    from scikits.learn.linear_model import Lasso as _GlmLasso
-    from scikits.learn.linear_model import ElasticNetCV as _GlmElasticNetCV
-    from scikits.learn.linear_model import LassoCV as _GlmLassoCV
-    
-    ## TODO better.....
-    class GlmElasticNet(ElasticNet):
-        def __init__(self, tau=0.5, mu=0.5, **params):
-            alpha = tau + mu
-            if tau == mu == 0.0:
-                rho = 0.0
-            else:
-                rho = tau / (tau + mu)
-            
-            self.tau = tau
-            self.mu = mu
-            self._estimator = _GlmElasticNet(alpha=alpha, rho=rho, **params)
-        
-        def fit(self, X, y):
-            return self._estimator.fit(X, y)
-            
-        def __getattr__(self, key):
-            return getattr(self._estimator, key)
-        
-except:
-    pass
-    
-    
+#try:
+#    from sklearn.linear_model import ElasticNet as _GlmElasticNet
+#    from sklearn.linear_model import Lasso as _GlmLasso
+#    from sklearn.linear_model import ElasticNetCV as _GlmElasticNetCV
+#    from sklearn.linear_model import LassoCV as _GlmLassoCV
+#
+#    ## TODO better.....
+#    class GlmElasticNet(ElasticNet):
+#        def __init__(self, tau=0.5, mu=0.5, **params):
+#            alpha = tau + mu
+#            if tau == mu == 0.0:
+#                rho = 0.0
+#            else:
+#                rho = tau / (tau + mu)
+#
+#            self.tau = tau
+#            self.mu = mu
+#            self._estimator = _GlmElasticNet(alpha=alpha, rho=rho, **params)
+#
+#        def fit(self, X, y):
+#            return self._estimator.fit(X, y)
+#
+#        def __getattr__(self, key):
+#            return getattr(self._estimator, key)
+#
+#except:
+#    pass

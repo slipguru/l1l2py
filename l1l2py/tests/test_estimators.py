@@ -3,28 +3,28 @@ from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from nose.tools import *
 
 from ..estimators import Ridge, ElasticNet, Lasso, \
-                         ElasticNetCV, LassoCV, enet_path, GlmElasticNet
+                         ElasticNetCV, LassoCV, enet_path
 
 def test_ridge_on_examples():
     """Test Ridge regression for different values of mu."""
-    
+
     # A simple sum function
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
-    
+
     clf = Ridge(mu=0.0) # OLS
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
-    
+
     clf = Ridge(mu=0.5)
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([0.91428571, 0.91428571], clf.coef_)
     assert_array_almost_equal([14.31428571, 17.97142857, 3.34285714], pred)
-    
+
     clf = Ridge(mu=1.0)
     clf.fit(X, y)
     pred = clf.predict(T)
@@ -125,7 +125,7 @@ def test_intercept():
 
     assert_array_almost_equal([1, 1], clf.coef_)
     assert_array_almost_equal([15, 19, 3], pred)
-    
+
 
 def test_estimators_equivalences():
     """ Test the equivalence of the estimators with different parameters."""
@@ -135,20 +135,20 @@ def test_estimators_equivalences():
     coef[10:] = 0.0 # only the top 10 features are impacting the model
     X = np.random.randn(50, 200)
     y = np.dot(X, coef) # without error
-    
+
     # OLS
     enet = ElasticNet(tau=0.0, mu=0.0).fit(X, y)
     lasso = Lasso(tau=0.0).fit(X, y)
-    ridge = Ridge(mu=0.0).fit(X, y) 
+    ridge = Ridge(mu=0.0).fit(X, y)
     assert_array_almost_equal(enet.coef_, lasso.coef_, 3)
     assert_array_almost_equal(enet.coef_, ridge.coef_, 3)
     assert_array_almost_equal(lasso.coef_, ridge.coef_, 3)
-    
+
     # Ridge
     enet = ElasticNet(tau=0.0, mu=0.5).fit(X, y)
     ridge = Ridge(mu=0.5).fit(X, y)
     assert_array_almost_equal(enet.coef_, ridge.coef_, 3)
-    
+
     # Lasso
     enet = ElasticNet(tau=0.5, mu=0.0).fit(X, y)
     lasso = Lasso(tau=0.5).fit(X, y)
@@ -157,7 +157,7 @@ def test_estimators_equivalences():
 
 def test_enet_path():
     """Test elastic net path."""
-    
+
     X = [[1, 2], [3, 4], [5, 6]]
     y = [sum(x) for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
@@ -184,7 +184,7 @@ def test_enet_path():
 
 def test_enet_cv():
     """ Test ElasticNet cross validation."""
-    
+
     # Data creation
     np.random.seed(0)
     coef = np.random.randn(200)
@@ -195,12 +195,12 @@ def test_enet_cv():
     # Automatic generation of the taus
     clf = ElasticNetCV(n_taus=100, eps=1e-3, mu=1e2, max_iter=10)
     clf.fit(X, y)
-    
+
     assert_almost_equal(clf.tau, 0.9743, 2)
-    
+
 def test_lasso_cv():
     """ Test Lasso cross validation."""
-    
+
     # Data creation
     np.random.seed(0)
     coef = np.random.randn(200)

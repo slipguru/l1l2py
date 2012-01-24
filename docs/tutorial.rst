@@ -29,16 +29,23 @@ There are two ways you can get it:
 
       $ easy_install -U L1L2Py
 
+  or `pip <http://www.pip-installer.org/>`_
+  
+  .. code-block:: bash
+
+      $ pip install -U L1L2Py
+
+
 * **Manual Installation**
 
   Download the latest official version
-  `L1L2Py-1.0.4.tar.gz <http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-1.0.4.tar.gz>`_,
+  `L1L2Py-1.0.5.tar.gz <http://slipguru.disi.unige.it/Software/L1L2Py/L1L2Py-1.0.5.tar.gz>`_,
   then:
 
   .. code-block:: bash
 
-      $ tar xzvf L1L2Py-1.0.4.tar.gz
-      $ cd L1L2Py-1.0.4
+      $ tar xzvf L1L2Py-1.0.5.tar.gz
+      $ cd L1L2Py-1.0.5
       $ python setup.py install
 
   Using this manual installation, if the testing framework
@@ -74,7 +81,7 @@ Synthetic Data Generation
 
 Using the script
 :download:`dataset_generation.py<tutorial/dataset_generation.py>`
-(:file:`L1L2Py-1.0.4/docs/tutorial/dataset_generation.py`),
+(:file:`L1L2Py-1.0.5/docs/tutorial/dataset_generation.py`),
 synthetic data can be generated for a supervised regression problem.
 The script contains a function (called :func:`correlated_dataset`) which
 generates a data matrix with some relevant, correlated and noisy variables.
@@ -99,7 +106,7 @@ The
 :download:`data matrix<tutorial/data.txt>` and the
 :download:`labels matrix<tutorial/labels.txt>` generated with the script
 and used in this tutorial can be found in the the directory
-:file:`L1L2py-1.0.4/docs/tutorial`), where the script itself is located.
+:file:`L1L2py-1.0.5/docs/tutorial`), where the script itself is located.
 
 To familiarize with the ``l1l2py`` code, the two files can be copied where
 needed and used following the tutorial steps below (alternatively, different
@@ -213,7 +220,7 @@ The optimal value of :math:`\tau` and :math:`\lambda` found in the
 0.451073293459 0.000316227766017
 
 The module :download:`plot.py<tutorial/plot.py>`
-(:file:`L1L2py-1.0.4/docs/tutorial/plot.py`), provides
+(:file:`L1L2py-1.0.5/docs/tutorial/plot.py`), provides
 a function (called :func:`kcv_errors`) to plot the mean cross validation
 error (remember that for some high values of :math:`\tau`, the solution
 could be void on some cross validation splits, see :ref:`stage_i`, so the

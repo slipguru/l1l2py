@@ -294,7 +294,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
         # Soft-Thresholding
         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-        beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
+        beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
 
         ######## Adaptive step size #######################################
         if adaptive:
@@ -315,7 +315,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
                 # Soft-Thresholding
                 value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-                beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
+                beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
 
         ######## FISTA ####################################################
         beta_diff = (beta_next - beta)

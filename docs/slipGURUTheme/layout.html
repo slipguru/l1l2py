@@ -29,16 +29,18 @@
    {% else %}
       <h3>Download</h3>
       <p>Current version: <b>{{ release }}</b></p>
-      <p>Get L1L2Py from the
-         <a href="http://pypi.python.org/pypi/L1L2Py">Python Package Index</a>,
-         or install it with:
-      </p>
-      <pre>easy_install -U L1L2Py</pre>
-      <p>Latest
-         <a href="http://slipguru.disi.unige.it/Research/L1L2Py/l1l2py.pdf">
-            documentation in pdf
-         </a>
-         is also available.
-      </p>
-   {% endif %}
-{% endblock %}
+	      <p>Get L1L2Py from the
+		 <a href="http://pypi.python.org/pypi/L1L2Py">Python Package Index</a>,
+		 or install it with:
+	      </p>
+              <pre>pip install -U {{ project }}</pre>
+              or:
+	      <pre>easy_install -U L1L2Py</pre>
+	      <p>Latest
+		 <a href="http://slipguru.disi.unige.it/Software/L1L2Py/l1l2py.pdf">
+		    documentation in pdf
+		 </a>
+		 is also available.
+	      </p>
+	   {% endif %}
+	{% endblock %}

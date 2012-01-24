@@ -23,15 +23,17 @@ from l1l2py import __version__ as version
 setup(
     name='L1L2Py',
     version=version,
-    url='http://slipguru.disi.unige.it/Research/L1L2Py',
+    url='http://slipguru.disi.unige.it/Software/L1L2Py',
     description=description,
     long_description=long_description,
     keywords='feature selection, regularization, regression, classification,'
              'l1-norm, l2-norm',
     author='L1L2Py developers - SlipGURU',
-    author_email='salvatore.masecchia@disi.unige.it',
+    author_email='slipguru@disi.unige.it',
+    maintainer='Salvatore Masecchia',
+    maintainer_email='salvatore.masecchia@disi.unige.it',
     license='GNU GPL version 3',
-    download_url = 'http://slipguru.disi.unige.it/Research/L1L2Py/L1L2Py-%s.tar.gz' % version,
+    download_url = 'http://slipguru.disi.unige.it/Software/L1L2Py/L1L2Py-%s.tar.gz' % version,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',

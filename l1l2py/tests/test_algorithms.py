@@ -57,36 +57,44 @@ class TestAlgorithms(object):
         value = ridge_regression(X, Y)
         assert_true(np.allclose(expected, value))
 
-    def test_l1l2_regularization(self):
+    def test_l1l2_bigd(self):
+        self.l1l2_regtest(self.X, self.Y)
+
+    def test_l1l2_bign(self):
+        Y = np.r_[self.Y, self.Y[:10]]
+        Y = Y.reshape((-1, 1))
+        self.l1l2_regtest(self.X.T, Y)
+
+    def l1l2_regtest(self, X, Y):
         from itertools import product
 
         values = np.linspace(0.1, 1.0, 5)
         for mu, tau in product(values, values):
-            beta, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta, k1 = l1l2_regularization(X, Y, mu, tau,
                                            return_iterations=True)
-            assert_equal(beta.shape, (self.X.shape[1], 1))
+            assert_equal(beta.shape, (X.shape[1], 1))
 
-            beta, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta, k2 = l1l2_regularization(X, Y, mu, tau,
                                            tolerance=1e-3,
                                            return_iterations=True)
             assert_true(k2 <= k1)
 
-            beta, k3 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta, k3 = l1l2_regularization(X, Y, mu, tau,
                                            tolerance=1e-3, kmax=10,
                                            return_iterations=True)
             assert_true(k3 <= k2)
             assert_true(k3 == 10)
 
-            beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta1, k1 = l1l2_regularization(X, Y, mu, tau,
                                             return_iterations=True)
-            beta2, k2 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta2, k2 = l1l2_regularization(X, Y, mu, tau,
                                             beta=beta1.squeeze(),
                                             return_iterations=True)
             assert_true(k2 <= k1)
 
-            beta1, k1 = l1l2_regularization(self.X, self.Y, mu, tau,
+            beta1, k1 = l1l2_regularization(X, Y, mu, tau,
                                             return_iterations=True)
-            beta2, k2 = l1l2_regularization(self.X, self.Y.squeeze(), mu, tau,
+            beta2, k2 = l1l2_regularization(X, Y.squeeze(), mu, tau,
                                             return_iterations=True)
             assert_equal(k1, k2)
             assert_true(beta1.shape, beta2.shape)
@@ -125,4 +133,3 @@ class TestAlgorithms(object):
 
         beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-3)
         assert_equals(1, len(beta.nonzero()[0]))
-

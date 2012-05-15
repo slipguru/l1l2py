@@ -257,17 +257,17 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     1
 
     """
+
+    # Useful quantities
+    X = np.asarray(data)
+    Y = np.asarray(labels).reshape(-1, 1)
     n, d = data.shape
 
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
-        beta = np.zeros(d)
+        beta = np.zeros((d, 1))
     else:
-        beta = beta.ravel()
-
-    # Useful quantities
-    X = data
-    Y = labels.ravel()
+        beta = beta.reshape((d, 1))
 
     if n > d:
         XTY = np.dot(X.T, Y)
@@ -275,7 +275,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     # First iteration with standard sigma
     sigma = _sigma(data, mu)
     if sigma < np.finfo(float).eps: # is zero...
-        return np.zeros(d), 0
+        return beta, 0
 
     mu_s = mu / sigma
     tau_s = tau / (2.0 * sigma)
@@ -334,8 +334,8 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
         if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
 
     if return_iterations:
-        return beta.reshape(-1, 1), k+1
-    return beta.reshape(-1, 1)
+        return beta, k+1
+    return beta
 
 def _sigma(matrix, mu):
     n, p = matrix.shape

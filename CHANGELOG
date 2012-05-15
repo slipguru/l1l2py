@@ -1,9 +1,14 @@
 CHANGELOG
 
+1.0.6
+-----
+Bug Fixes:
+    * Fixed bug with n>>d matrices in l1l2_regularization
+
 1.0.5
 -----
 Bug Fixes:
-    * Fixed RuntimeWarning in l1l2_regularization 
+    * Fixed RuntimeWarning in l1l2_regularization
       (due to numpy division by zero)
 
 1.0.4

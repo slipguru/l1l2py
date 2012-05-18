@@ -10,26 +10,27 @@ def test_ridge_on_examples():
 
     # A simple sum function
     X = [[1, 2], [3, 4], [5, 6]]
-    y = [sum(x) for x in X]
+    y = [sum(x)+1 for x in X]
     T = [[7, 8], [9, 10], [2, 1]]
-
+        
     clf = Ridge(mu=0.0) # OLS
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([1, 1], clf.coef_)
-    assert_array_almost_equal([15, 19, 3], pred)
+    assert_array_almost_equal([16, 20, 4], pred)
+    assert_almost_equal(1.0, clf.intercept_)
 
     clf = Ridge(mu=0.5)
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([0.91428571, 0.91428571], clf.coef_)
-    assert_array_almost_equal([14.31428571, 17.97142857, 3.34285714], pred)
-
+    assert_array_almost_equal([15.31428571, 18.97142857, 4.34285714], pred)
+    
     clf = Ridge(mu=1.0)
     clf.fit(X, y)
     pred = clf.predict(T)
     assert_array_almost_equal([0.84210526, 0.84210526], clf.coef_)
-    assert_array_almost_equal([13.73684211, 17.10526316, 3.63157895], pred)
+    assert_array_almost_equal([14.73684211, 18.10526316, 4.63157895], pred)
 
 
 def test_lasso_zero():

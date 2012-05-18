@@ -41,13 +41,10 @@ class LinearModel(object):
         Centers data to have mean zero along axis 0. This is here because
         nearly all linear models will want their data to be centered.
         """
-        import scipy.sparse  # importing scipy.sparse just for this is overkill
         if fit_intercept:
-            if scipy.sparse.issparse(X):
-                Xmean = np.zeros(X.shape[1])
-            else:
-                Xmean = X.mean(axis=0)
-                X = X - Xmean
+            Xmean = X.mean(axis=0)
+            X = X - Xmean
+            
             ymean = y.mean()
             y = y - ymean
         else:

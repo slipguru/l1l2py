@@ -1,8 +1,9 @@
 import numpy as np
 
-from .estimators import LinearModel
+from .base import AbstractLinearModel
 
-class DoubleStepEstimator(LinearModel):
+# TODO!!
+class DoubleStepEstimator(AbstractLinearModel):
     def __init__(self, selector, estimator, threshold=1e-10):
         self.selector = selector
         self.estimator = estimator
@@ -31,7 +32,7 @@ class DoubleStepEstimator(LinearModel):
         
         return self
     
-class DoubleStepEstimatorCV(LinearModel):
+class DoubleStepEstimatorCV(AbstractLinearModel):
     pass
 
         

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal, assert_almost_equal
 from nose.tools import *
 
-from ..estimators import Ridge
+from ..base import RidgeRegression
 from ..data import center
 from ..metrics import regression_error, classification_error, \
                       balanced_classification_error
@@ -38,7 +38,7 @@ def test_regression_error():
     X = random_state.randn(10, 100)
     y = random_state.randn(10)
     
-    ridge = Ridge(mu=0.0).fit(X, y)    
+    ridge = RidgeRegression(mu=0.0).train(X, y)    
     predictions = ridge.predict(X)
     error = regression_error(y, predictions)
     assert_almost_equals(0.0, error)

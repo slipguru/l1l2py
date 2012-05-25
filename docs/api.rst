@@ -26,8 +26,13 @@ implemented Model that match with the theoretical base functional.
 
 **TODO**
 
-* Model(parameters....) # Read-only (properties)
-* train(X, y)
+* Model(parameters....) # Read-only parameter identifying an instance of the underlying
+                        # algorithm(properties)
+* train(X, y, ... training related arguments ...)
 * y = predict(X)
 * m.beta (property...)
 
+Output as read-only properties and parameters as public attributes...
+this simply permits to modify parameters at run-time and train again the model.
+Simple enough and in-line with the simplicity and not full-checking behaviour
+of the library... (different from sklearn)

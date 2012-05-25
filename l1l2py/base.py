@@ -9,10 +9,12 @@ from .data import center
 class AbstractLinearModel(object):
     """Abstract Linear Model. """
     
-    def __init__(self):
+    def __init__(self, fit_intercept=True):
         self._beta = None
         self._intercept = None
         self._trained = False
+        
+        self.fit_intercept = fit_intercept
         
     @property
     def beta(self):
@@ -23,7 +25,7 @@ class AbstractLinearModel(object):
         return self._intercept
     
     @property
-    def trained(self):
+    def trained(self): ### is_trained?
         return self._trained
     
     def predict(self, X):
@@ -44,12 +46,12 @@ class AbstractLinearModel(object):
         X = np.asanyarray(X)
         return np.dot(X, self._beta) + self._intercept
         
-    def train(self, X, y, fit_intercept=True, *args, **kwargs):
+    def train(self, X, y, *args, **kwargs):
         X = np.asanyarray(X)
         y = np.asanyarray(y)
         
         # Centering Data
-        if fit_intercept:
+        if self.fit_intercept:
             X, Xmean = center(X, return_mean=True)
             y, ymean = center(y, return_mean=True)
         
@@ -57,7 +59,7 @@ class AbstractLinearModel(object):
         self._train(X, y, *args, **kwargs)
         
         # Fitting the intercept if required
-        if fit_intercept:
+        if self.fit_intercept:
             self._intercept = ymean - np.dot(Xmean, self._beta)
         else:
             self._intercept = 0.0
@@ -75,26 +77,22 @@ class RidgeRegression(AbstractLinearModel):
 
     def __init__(self, mu=0.0):
         super(RidgeRegression, self).__init__()
-        self._mu = mu
-        
-    @property
-    def mu(self):
-        return self._mu
+        self.mu = mu
 
     def _train(self, X, y):
         n, d = X.shape
 
         if n < d:
             tmp = np.dot(X, X.T)
-            if self._mu != 0.0:
-                tmp += self._mu * n * np.eye(n)
+            if self.mu != 0.0:
+                tmp += self.mu * n * np.eye(n)
             tmp = la.pinv(tmp)
 
             self._beta =  np.dot(np.dot(X.T, tmp), y)
         else:
             tmp = np.dot(X.T, X)
-            if self._mu != 0.0:
-                tmp += self._mu * n * np.eye(d)
+            if self.mu != 0.0:
+                tmp += self.mu * n * np.eye(d)
             tmp = la.pinv(tmp)
 
             self._beta = np.dot(tmp, np.dot(X.T, y))

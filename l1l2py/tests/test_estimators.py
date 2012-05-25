@@ -10,7 +10,7 @@ def test_ridge_on_examples():
 
     # A simple sum function
     X = [[1, 2], [3, 4], [5, 6]]
-    y = [sum(x)+1 for x in X]
+    y = [sum(x)+1 for x in X]       # Tested intercept different to zero
     T = [[7, 8], [9, 10], [2, 1]]
         
     clf = Ridge(mu=0.0) # OLS

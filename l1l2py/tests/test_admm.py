@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import *
 
-from ..admm import Lasso#, ElasticNetCV, LassoCV, enet_path
+from ..admm import Lasso, ElasticNet #, ElasticNetCV, LassoCV, enet_path
 #from ..base import RidgeRegression
 
 def test_lasso_zero():
@@ -66,3 +66,31 @@ def test_lasso_on_examples_fat():
     pred = model.predict(T)
     assert_array_almost_equal([.968, .968, .968, .968], model.beta, 3)
     assert_array_almost_equal([33.5, 41.25], pred, 3)
+    
+def test_elasticnet_on_examples():
+    """Test Elastic Net for different values of tau and mu."""
+
+    # A simple sum function
+    X = [[1, 2], [3, 4], [5, 6]]
+    y = [sum(x) for x in X]
+    T = [[7, 8], [9, 10], [2, 1]]
+
+    model = ElasticNet(tau=0.0, mu=0.0).train(X, y) # OLS
+    pred = model.predict(T)
+    assert_array_almost_equal([1, 1], model.beta)
+    assert_array_almost_equal([15, 19, 3], pred)
+
+    model = ElasticNet(tau=0.5, mu=0.0).train(X, y) # as Lasso
+    pred = model.predict(T)
+    assert_array_almost_equal([.953, .953], model.beta, 3)
+    assert_array_almost_equal([14.625, 18.437, 3.187], pred, 3)
+    
+    model = ElasticNet(tau=0.0, mu=0.5).train(X, y) # RLS
+    pred = model.predict(T)
+    assert_array_almost_equal([.914, .914], model.beta, 3)
+    assert_array_almost_equal([14.314, 17.971, 3.343], pred, 3)
+    
+    model = ElasticNet(tau=0.5, mu=0.5).train(X, y) # default
+    pred = model.predict(T)
+    assert_array_almost_equal([.871, .871], model.beta, 3)
+    assert_array_almost_equal([13.971, 17.457, 3.514], pred, 3)

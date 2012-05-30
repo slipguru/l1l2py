@@ -3,13 +3,15 @@ from scipy import linalg as la
 
 from .base import AbstractLinearModel
 
-class Lasso(AbstractLinearModel):
-    def __init__(self, fit_intercept=True, tau=0.5,
+class ElasticNet(AbstractLinearModel):
+    def __init__(self, fit_intercept=True, tau=0.5, mu=0.5, 
                  rho=1.0, alpha=1.0,
                  max_iter=1000, abs_tol=1e-6, rel_tol=1e-4):
-        super(Lasso, self).__init__(fit_intercept)
+        
+        super(ElasticNet, self).__init__(fit_intercept)
         
         self.tau = tau
+        self.mu = mu
         self.rho = rho      # step size
         self.alpha = alpha  # over relaxation parameter
         self.max_iter = max_iter
@@ -25,7 +27,7 @@ class Lasso(AbstractLinearModel):
         z = np.zeros(d)
         u = np.zeros(d)
         
-        L, U = factor(X, self.rho)
+        L, U = factor(X, self.rho, self.mu)
         
         for k in xrange(self.max_iter):
             #x-update
@@ -67,12 +69,22 @@ class Lasso(AbstractLinearModel):
             # anyway
             self._beta = z
 
-def factor(X, rho):
+class Lasso(ElasticNet):
+    def __init__(self, fit_intercept=True, tau=0.5,
+                 rho=1.0, alpha=1.0,
+                 max_iter=1000, abs_tol=1e-6, rel_tol=1e-4):
+        super(Lasso, self).__init__(fit_intercept=fit_intercept,
+                                         tau=tau, mu=0.0, rho=rho, alpha=alpha,
+                                         max_iter=max_iter, abs_tol=abs_tol,
+                                         rel_tol=rel_tol)
+
+def factor(X, rho, mu=0.0):
     n, d = X.shape
     
     if n >= d:
-        L = la.cholesky((2./n) * np.dot(X.T, X) + rho * np.eye(d), lower=True)
+        L = la.cholesky((2./n) * np.dot(X.T, X) + (2.*mu + rho) * np.eye(d), lower=True)
     else:
         L = la.cholesky(np.eye(n) + 1./rho * np.dot(X, X.T), lower=True)
+        # works because L is the same witout modifications?
         
     return L, L.T # L, U

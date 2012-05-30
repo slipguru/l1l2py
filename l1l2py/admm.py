@@ -42,7 +42,7 @@ class ElasticNet(AbstractLinearModel):
                                           la.solve_triangular(L, np.dot(X, q),
                                                               lower=True),
                                           lower=False)
-                x = (q / self.rho) - ( np.dot(X.T, tmp) / (self.rho * self.rho))
+                x = (q / self.rho) - ( np.dot(X.T, tmp) * (2 / (n * self.rho * self.rho)) )
         
             # z-update with relaxation
             zold = z
@@ -84,7 +84,6 @@ def factor(X, rho, mu=0.0):
     if n >= d:
         L = la.cholesky((2./n) * np.dot(X.T, X) + (2.*mu + rho) * np.eye(d), lower=True)
     else:
-        L = la.cholesky(np.eye(n) + 1./rho * np.dot(X, X.T), lower=True)
-        # works because L is the same witout modifications?
+        L = la.cholesky(np.eye(n) + (2. / (rho*n)) * np.dot(X, X.T), lower=True)
         
     return L, L.T # L, U

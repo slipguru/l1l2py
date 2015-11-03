@@ -192,3 +192,61 @@ def _cu_sigma(gpu_matrix, mu):
     linalg.scale(1./n, gpu_norm)
 
     return gpu_norm.get() + mu
+
+
+def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
+                        tolerance=1e-5, return_iterations=False,
+                        adaptive=False):
+    r"""[PYCUDA]Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
+    to solve a least squares problem with `l1l2` penalty.
+
+    It solves the `l1l2` regularization problem with parameter ``mu`` on the
+    `l2-norm` and parameter ``tau`` on the `l1-norm`.
+
+    Parameters
+    ----------
+    data : (N, P) ndarray
+        Data matrix.
+    labels : (N,) or (N, 1) ndarray
+        Labels vector.
+    mu : float
+        `l2-norm` penalty.
+    tau : float
+        `l1-norm` penalty.
+    beta : (P,) or (P, 1) ndarray, optional (default is `None`)
+        Starting value for the iterations.
+        If `None`, then iterations starts from the empty model.
+    kmax : int, optional (default is `1e5`)
+        Maximum number of iterations.
+    tolerance : float, optional (default is `1e-5`)
+        Convergence tolerance.
+    return_iterations : bool, optional (default is `False`)
+        If `True`, returns the number of iterations performed.
+        The algorithm has a predefined minimum number of iterations
+        equal to `10`.
+    adaptive : bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
+
+    Returns
+    -------
+    beta : (P, 1) ndarray
+        `l1l2` solution.
+    k : int, optional
+        Number of iterations performed.
+
+    Examples
+    --------
+    >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
+    >>> beta = numpy.array([0.1, 0.1, 0.0])
+    >>> Y = numpy.dot(X, beta)
+    >>> beta = l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1)
+    >>> len(numpy.flatnonzero(beta))
+    1
+
+    """
+
+    d_data = gpuarray.to_gpu(data.astype(np.float32))
+    d_labels = gpuarray.to_gpu(labels.astype(np.float32))
+
+    return cu_l1l2_regularization(d_data, d_labels, mu, tau, beta=beta, kmax=kmax, tolerance=tolerance, return_iterations=return_iterations, adaptive=adaptive)

@@ -3,9 +3,9 @@
 
 import os
 import numpy as np
-import pycuda.gpuarray as gpuarray
-import pycuda.autoinit
-import skcuda.linalg as linalg
+# import pycuda.gpuarray as gpuarray
+# import pycuda.autoinit
+# import skcuda.linalg as linalg
 
 import time
 import cPickle as pkl

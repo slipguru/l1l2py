@@ -228,7 +228,8 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         if not data_normalizer is None:
             data_tr, data_ts = data_normalizer(data_tr, data_ts)
 
-        labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
+        #labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
+        labels_tr, labels_ts = labels[train_idxs], labels[test_idxs]
         if not labels_normalizer is None:
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
 

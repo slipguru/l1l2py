@@ -158,7 +158,7 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
         gpu_beta = gpu_beta_next
 
         # Stopping rule (exit even if beta_next contains only zeros)
-        if np.allclose(max_coef, 0) or (max_diff / max_coef) <= tolerance: break
+        # if np.allclose(max_coef, 0) or (max_diff / max_coef) <= tolerance: break
 
     if return_iterations:
         return gpu_beta.get(), k+1
@@ -247,6 +247,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     """
 
     d_data = gpuarray.to_gpu(data.astype(np.float32))
-    d_labels = gpuarray.to_gpu(labels.astype(np.float32))
+    d_labels = gpuarray.to_gpu(labels.astype(np.float32).reshape((data.shape[0],1)))
 
     return cu_l1l2_regularization(d_data, d_labels, mu, tau, beta=beta, kmax=kmax, tolerance=tolerance, return_iterations=return_iterations, adaptive=adaptive)

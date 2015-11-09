@@ -3,19 +3,15 @@
 
 import os
 import numpy as np
-# import pycuda.gpuarray as gpuarray
-# import pycuda.autoinit
-# import skcuda.linalg as linalg
 
 import time
 import cPickle as pkl
 import matplotlib.pyplot as plt
 
-from l1l2py.algorithms import l1l2_regularization
-from l1l2py.cu_algorithms import l1l2_regularization as cu_l1l2reg
+from algorithms_lite import l1l2_regularization
+from l1l2py.pycu_algorithms import l1l2_regularization as cu_l1l2reg
 
 from glados.utils.gendata import grouped
-# from l1l2signature.utils import to_numpy_format
 
 def test_l1l2_regularization(n_samples = 100, n_features_array = np.linspace(1e2, 1e5, 10)):
 
@@ -27,9 +23,9 @@ def test_l1l2_regularization(n_samples = 100, n_features_array = np.linspace(1e2
 
         X, Y = grouped(n_samples, n_features)
 
-        _tau = 0.001
-        _mu = 0.05
-        kmax = 800
+        _tau = 1
+        _mu = 0.01
+        kmax = 10000
 
         # CPU 64bit
         tic = time.time()
@@ -133,7 +129,6 @@ def show_speedup(cpu_time, gpu_time, xaxis, yaxis):
     plt.plot(np.array(xaxis), np.array(cpu_time), 'ob', label = 'CPU')
     plt.plot(np.array(xaxis), np.array(gpu_time), 'og', label = 'GPU')
     plt.xlabel('n_features')
-    plt.xlabel('n_entries')
     plt.ylabel('time [sec]')
     plt.grid('on')
     plt.legend()
@@ -143,12 +138,10 @@ def show_speedup(cpu_time, gpu_time, xaxis, yaxis):
     plt.grid('on')
     plt.title('Speedup')
     plt.xlabel('n_features')
-    plt.xlabel('n_entries')
-    plt.ylabel('time [sec]')
 
 def main():
     n_samples = 200
-    n_features_array = np.arange(500, 50000, 500)
+    n_features_array = np.arange(500, 50000, 1000)
     xaxis = n_features_array
     yaxis = []
 

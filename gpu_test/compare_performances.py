@@ -3,7 +3,7 @@ import time
 
 import sys
 
-from l1l2py.algorithms import l1l2_regularization
+from algorithms_lite import l1l2_regularization
 from l1l2py.cu_algorithms import l1l2_regularization as cu_l1l2reg
 
 import matplotlib
@@ -80,7 +80,7 @@ def run_tests():
 
     for n in ns:
         for p in ps:
-
+            print("\n\n*********************************************\n\n")
             print("n = {}, p = {}".format(n,p))
             print("Reading data...\n\n")
 

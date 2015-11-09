@@ -10,3 +10,5 @@ build
 *.egg*
 MANIFEST
 .coverage
+RESULTS
+*.png

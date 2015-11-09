@@ -32,6 +32,15 @@ import itertools as it
 
 from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
 
+def distributed_model_selection():
+    r"""Distrubute the model selection procedure across multiple workers.
+
+    see l1l2py.model_selection
+    """
+    return 0
+
+
+
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
                     cv_splits, cv_error_function, error_function,

@@ -129,6 +129,22 @@ def ridge_regression(data, labels, mu=0.0):
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
+# def l1l2_path_job(*args, jobid, return_dict):
+#     r""" Job wrapper of l1l2_path. Used for l1l2py._core.multiprocess_minimal_model.
+#
+#     See l1l2_path for the list of parameters.
+#
+#     Extra Parameters
+#     ----------------
+#     jobid : int
+#         The job identifier.
+#     return_dict : multiprocessing.managers.DictProxy
+#         The dictionary that collects the results of the job: {'jobid': <res_jobid>}
+#     """
+#     return_dict[jobid] = {'beta_casc' : l1l2_path(*args)}   # run the l1l2_path on the input args
+
+
+
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
               tolerance=1e-5, adaptive=False):
     r"""Efficient solution of different `l1l2` regularization problems on

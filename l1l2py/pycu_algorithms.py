@@ -6,10 +6,7 @@ import numpy as np
 import pycuda.gpuarray as gpuarray
 import pycuda.autoinit
 import skcuda.linalg as linalg
-from skcuda.misc import multiply as cu_mul
 from skcuda.misc import maxabs as cu_maxabs
-from skcuda.misc import subtract as cu_sub
-from skcuda.misc import add as cu_add
 from math import sqrt
 
 import time, sys
@@ -143,7 +140,7 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
                              block = (block_dim, 1, 1), grid = (num_block+1, 1))
 
         ######## FISTA ####################################################
-        gpu_beta_diff = cu_sub(gpu_beta_next, gpu_beta) ## check if minus is faster
+        gpu_beta_diff = gpu_beta_next - gpu_beta
 
         # Convergence value
         max_diff = cu_maxabs(gpu_beta_diff).get()
@@ -151,14 +148,14 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
 
         t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
         linalg.scale(((t - 1.0)/t_next), gpu_beta_diff)
-        gpu_aux_beta = cu_add(gpu_beta_next, gpu_beta_diff) ## check +
+        gpu_aux_beta = gpu_beta_next + gpu_beta_diff
 
         # Values update
         t = t_next
         gpu_beta = gpu_beta_next
 
         # Stopping rule (exit even if beta_next contains only zeros)
-        # if np.allclose(max_coef, 0) or (max_diff / max_coef) <= tolerance: break
+        if np.allclose(max_coef, 0.0) or (max_diff / max_coef) <= tolerance: break
 
     if return_iterations:
         return gpu_beta.get(), k+1

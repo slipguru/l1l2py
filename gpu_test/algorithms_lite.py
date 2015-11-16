@@ -115,6 +115,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
         # Stopping rule (exit even if beta_next contains only zeros)
         # if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
+        if np.allclose(max_coef, 0.0) or (max_diff / max_coef) <= tolerance: break
 
     if return_iterations:
         return beta.reshape(-1, 1), k+1

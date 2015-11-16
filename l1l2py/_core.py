@@ -30,16 +30,7 @@ __all__ = ['model_selection', 'minimal_model', 'nested_models']
 import numpy as np
 import itertools as it
 
-from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
-
-def distributed_model_selection():
-    r"""Distrubute the model selection procedure across multiple workers.
-
-    see l1l2py.model_selection
-    """
-    return 0
-
-
+from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path#, l1l2_path_job
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
@@ -113,6 +104,10 @@ def model_selection(data, labels, test_data, test_labels,
                                tau_range, lambda_range,
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer)
+   # stage1_out = multiprocess_minimal_model(data, labels, mu_range[0],
+   #                                         tau_range, lambda_range,
+   #                                         cv_splits, cv_error_function,
+   #                                         data_normalizer, labels_normalizer)
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
 
     # KCV MINIMUM SELECTION
@@ -158,6 +153,59 @@ def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
     lam_idx = max(d[tau_idx]) if regularized else min(d[tau_idx])
 
     return tau_idx, lam_idx
+
+# def
+
+
+# def multiprocess_minimal_model(data, labels, mu, tau_range, lambda_range,
+#                                cv_splits, error_function,
+#                                data_normalizer=None, labels_normalizer=None):
+#     r"""A multiprocess implementation of minimal_model.
+#
+#     See minimal_model.
+#     """
+#     import multiprocessing as mltp
+#
+#     err_ts = list()
+#     err_tr = list()
+#     max_tau_num = len(tau_range)
+#
+#     # Multiprocessing utilities
+#     jobs = list() # the list of created jobs
+#     manager = mltp.Manager()
+#     return_dict = manager.dict() # the dictionary that stores the results
+#
+#     for i, train_idxs, test_idxs in enumerate(cv_splits):
+#         # First create a view and then normalize (eventually)
+#         data_tr, data_ts = data[train_idxs, :], data[test_idxs, :]
+#         if not data_normalizer is None:
+#             data_tr, data_ts = data_normalizer(data_tr, data_ts)
+#
+#         #labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
+#         labels_tr, labels_ts = labels[train_idxs], labels[test_idxs]
+#         if not labels_normalizer is None:
+#             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
+#
+#         # Builds a classifier for each value of tau
+#         # beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
+#         proc = mltp.Process(target = l1l2_path_job,
+#                             args = data_tr, labels_tr, mu,
+#                                    tau_range[:max_tau_num], i, return_dict))
+#         jobs.append(proc)
+#         proc.start()
+#         print('  * Interal split %02d submitted!' % (i+1))
+#
+#     # Collect jobs results
+#     for proc in jobs:
+#         proc.join()
+#
+#     for proc in return_dict.keys():
+#         if len(return_dict[proc]['beta_casc']) == 0:
+#             raise ValueError("the given range of 'tau' values produces all "
+#                              "void solutions with the given data splits")
+
+
+
 
 def minimal_model(data, labels, mu, tau_range, lambda_range,
                   cv_splits, error_function,

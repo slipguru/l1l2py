@@ -117,14 +117,18 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
     nsigma = (n * sigma).astype(np.float32)
 
     # Starting conditions
-    gpu_aux_beta = gpu_beta.copy() ### check if copy is necessary
-    t = 1.
+    gpu_aux_beta = gpu_beta.copy()
+    t = np.float32(1.0)
 
     # Get the soft thresh kernel
-    cu_soft_thresholding = l1l2_kernels.get_function('soft_thresholding')
+    # cu_soft_thresholding = l1l2_kernels.get_function('soft_thresholding')
+    cu_soft_thresholdingFISTA = l1l2_kernels.get_function('soft_thresholdingFISTA')
 
     block_dim = min(BLOCK_MAX, d)
     num_block = max(n,d) // block_dim
+
+    # CUDA dummy init
+    t_next = gpuarray.to_gpu(np.array(np.float32(1.0)))
 
     for k in xrange(kmax):
         # Pre-calculated "heavy" computation
@@ -134,25 +138,35 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
             gpu_precalc = linalg.dot(gpu_X, gpu_Y - linalg.dot(gpu_X, gpu_aux_beta), transa = 'T')
 
         ######## SOFT THRESHOLDING ####################################################
-        gpu_beta_next = gpuarray.empty_like(gpu_beta) ## check for
-        cu_soft_thresholding(gpu_precalc, np.uint32(d), nsigma, mu_s, tau_s,
-                             gpu_aux_beta, gpu_beta_next,
-                             block = (block_dim, 1, 1), grid = (num_block+1, 1))
 
-        ######## FISTA ####################################################
-        gpu_beta_diff = gpu_beta_next - gpu_beta
+        # cu_soft_thresholding(gpu_precalc, np.uint32(d), nsigma, mu_s, tau_s,
+        #                      gpu_aux_beta, gpu_beta_next,
+        #                      block = (block_dim, 1, 1), grid = (num_block+1, 1))
+
+        # ######## FISTA ####################################################
+        # gpu_beta_diff = gpu_beta_next - gpu_beta
+
+        ######## SOFT THRESHOLDING + FISTA #############################################
+        gpu_beta_next = gpuarray.empty_like(gpu_beta)
+        gpu_beta_diff = gpuarray.empty_like(gpu_beta)
+
+        cu_soft_thresholdingFISTA(gpu_precalc, np.uint32(d), nsigma, mu_s, tau_s,
+                                  gpu_beta, gpu_aux_beta, gpu_beta_next, t,
+                                  t_next, gpu_beta_diff,
+                                  block = (block_dim, 1, 1), grid = (num_block+1, 1))
 
         # Convergence value
         max_diff = cu_maxabs(gpu_beta_diff).get()
         max_coef = cu_maxabs(gpu_beta_next).get()
 
-        t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
-        linalg.scale(((t - 1.0)/t_next), gpu_beta_diff)
-        gpu_aux_beta = gpu_beta_next + gpu_beta_diff
+        # t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
+        # linalg.scale(((t - 1.0)/t_next), gpu_beta_diff)
+        # gpu_aux_beta = gpu_beta_next + gpu_beta_diff
 
         # Values update
-        t = t_next
-        gpu_beta = gpu_beta_next
+        t = t_next.get().copy()
+        gpu_beta = gpu_beta_next.copy()
+        # pycuda.driver.memcpy_dtod(gpu_beta_next, gpu_beta, gpu_beta.size)
 
         # Stopping rule (exit even if beta_next contains only zeros)
         if np.allclose(max_coef, 0.0) or (max_diff / max_coef) <= tolerance: break

@@ -7,6 +7,7 @@ import pycuda.gpuarray as gpuarray
 import pycuda.autoinit
 import skcuda.linalg as linalg
 from skcuda.misc import maxabs as cu_maxabs
+import pycuda.driver as cuda
 from math import sqrt
 
 import time, sys
@@ -53,7 +54,7 @@ def cu_ridge_regression(gpu_data, gpu_labels, mu=0.0):
 
     return linalg.transpose(gpu_out).get()
 
-def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000,
+def cu_l1l2_regularization(gpu_X, gpu_Y, mu, tau, beta=None, kmax=100000,
                         tolerance=1e-5, return_iterations=False,
                         adaptive=False):
     """
@@ -91,17 +92,13 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
     k : int, optional
         Number of iterations performed.
     """
-    n, d = gpu_data.shape
+    n, d = gpu_X.shape
 
     # beta starts from 0 and we assume also that the previous value is 0
     if beta is None:
         gpu_beta = gpuarray.zeros((d,1),np.float32) # single precision
     else:
         gpu_beta = gpuarray.to_gpu(beta.reshape((d,1)).astype(np.float32))
-
-    # Easier to read
-    gpu_X = gpu_data
-    gpu_Y = gpu_labels
 
     if n > d:
         gpu_XTY = linalg.dot(gpu_X, gpu_Y, transa = 'T')
@@ -129,12 +126,19 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
 
     # CUDA dummy init
     t_next = gpuarray.to_gpu(np.array(np.float32(1.0)))
+    _d = np.uint32(d)
+    gpu_beta_next = gpuarray.empty_like(gpu_beta)
+    gpu_beta_diff = gpuarray.empty_like(gpu_beta)
+
 
     for k in xrange(kmax):
         # Pre-calculated "heavy" computation
         if n > d:
             gpu_precalc = gpu_XTY - linalg.dot(gpu_X, linalg.dot(gpu_X, gpu_aux_beta), transa = 'T')
         else:
+            print gpu_X.shape
+            print gpu_Y.shape
+            print gpu_aux_beta.shape
             gpu_precalc = linalg.dot(gpu_X, gpu_Y - linalg.dot(gpu_X, gpu_aux_beta), transa = 'T')
 
         ######## SOFT THRESHOLDING ####################################################
@@ -147,14 +151,11 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
         # gpu_beta_diff = gpu_beta_next - gpu_beta
 
         ######## SOFT THRESHOLDING + FISTA #############################################
-        gpu_beta_next = gpuarray.empty_like(gpu_beta)
-        gpu_beta_diff = gpuarray.empty_like(gpu_beta)
 
-        cu_soft_thresholdingFISTA(gpu_precalc, np.uint32(d), nsigma, mu_s, tau_s,
+        cu_soft_thresholdingFISTA(gpu_precalc, _d, nsigma, mu_s, tau_s,
                                   gpu_beta, gpu_aux_beta, gpu_beta_next, t,
                                   t_next, gpu_beta_diff,
                                   block = (block_dim, 1, 1), grid = (num_block+1, 1))
-
         # Convergence value
         max_diff = cu_maxabs(gpu_beta_diff).get()
         max_coef = cu_maxabs(gpu_beta_next).get()
@@ -164,11 +165,11 @@ def cu_l1l2_regularization(gpu_data, gpu_labels, mu, tau, beta=None, kmax=100000
         # gpu_aux_beta = gpu_beta_next + gpu_beta_diff
 
         # Values update
-        t = t_next.get().copy()
+        t = t_next.get()
         gpu_beta = gpu_beta_next.copy()
-        # pycuda.driver.memcpy_dtod(gpu_beta_next, gpu_beta, gpu_beta.size)
 
         # Stopping rule (exit even if beta_next contains only zeros)
+        # print("t:{}\n\n".format(t))
         if np.allclose(max_coef, 0.0) or (max_diff / max_coef) <= tolerance: break
 
     if return_iterations:
@@ -203,7 +204,6 @@ def _cu_sigma(gpu_matrix, mu):
     linalg.scale(1./n, gpu_norm)
 
     return gpu_norm.get() + mu
-
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
                         tolerance=1e-5, return_iterations=False,
@@ -256,8 +256,88 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     1
 
     """
-
-    d_data = gpuarray.to_gpu(data.astype(np.float32))
-    d_labels = gpuarray.to_gpu(labels.astype(np.float32).reshape((data.shape[0],1)))
+    tic = time.time()
+    d_data = gpuarray.to_gpu_async(data.astype(np.float32))
+    d_labels = gpuarray.to_gpu_async(labels.astype(np.float32).reshape((data.shape[0],1)))
+    print("\t[*** GPU data transfer time: {} ***]".format(time.time()-tic))
 
     return cu_l1l2_regularization(d_data, d_labels, mu, tau, beta=beta, kmax=kmax, tolerance=tolerance, return_iterations=return_iterations, adaptive=adaptive)
+
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
+              tolerance=1e-5, adaptive=False):
+    r"""[PYCUDA] Implementation of l1l2py.l1l2_path.
+
+    Efficient solution of different `l1l2` regularization problems on
+    increasing values of the `l1-norm` parameter.
+
+    Finds the `l1l2` regularization path for each value in ``tau_range`` and
+    fixed value of ``mu``.
+
+    The values in ``tau_range`` are used during the computation in reverse
+    order, while the output path has the same ordering of the `tau` values.
+
+    .. note ::
+
+        For efficency purposes, if ``mu = 0.0`` and the number of non-zero
+        values is higher than `N` for a given value of tau (that means algorithm
+        has reached the limit of allowed iterations), the following solutions
+        (for smaller values of ``tau``) are simply the least squares solutions.
+
+    .. warning ::
+
+        The number of solutions can differ from ``len(tau_range)``.
+        The function returns only the solutions with at least one non-zero
+        element.
+        For values higher than *tau_max* a solution have all zero values.
+
+    Parameters
+    ----------
+    data : (N, P) ndarray
+        Data matrix.
+    labels : (N,) or (N, 1) ndarray
+        Labels vector.
+    mu : float
+        `l2-norm` penalty.
+    tau_range : array_like of float
+        `l1-norm` penalties in increasing order.
+    beta : (P,) or (P, 1) ndarray, optional (default is `None`)
+        Starting value of the iterations.
+        If `None`, then iterations starts from the empty model.
+    kmax : int, optional (default is `1e5`)
+        Maximum number of iterations.
+    tolerance : float, optional (default is `1e-5`)
+        Convergence tolerance.
+    adaptive : bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
+
+    Returns
+    -------
+    beta_path : list of (P,) or (P, 1) ndarrays
+        `l1l2` solutions with at least one non-zero element.
+
+    """
+    from collections import deque
+    n, p = data.shape
+
+    if mu == 0.0:
+        beta_ls = ridge_regression(data, labels)
+    if beta is None:
+        beta = np.zeros((p, 1))
+
+    out = deque()
+    nonzero = 0
+    for tau in reversed(tau_range):
+        if mu == 0.0 and nonzero >= n: # lasso saturation
+            beta_next = beta_ls
+        else:
+            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
+                                            kmax, tolerance, adaptive=adaptive)
+
+        nonzero = len(beta_next.nonzero()[0])
+        if nonzero > 0:
+            out.appendleft(beta_next)
+
+        beta = beta_next
+
+    return out

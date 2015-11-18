@@ -177,3 +177,81 @@ def ridge_regression(data, labels, mu=0.0):
         tmp = la.pinv(tmp)
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
+
+
+def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
+              tolerance=1e-5, adaptive=False):
+    r"""Efficient solution of different `l1l2` regularization problems on
+    increasing values of the `l1-norm` parameter.
+
+    Finds the `l1l2` regularization path for each value in ``tau_range`` and
+    fixed value of ``mu``.
+
+    The values in ``tau_range`` are used during the computation in reverse
+    order, while the output path has the same ordering of the `tau` values.
+
+    .. note ::
+
+        For efficency purposes, if ``mu = 0.0`` and the number of non-zero
+        values is higher than `N` for a given value of tau (that means algorithm
+        has reached the limit of allowed iterations), the following solutions
+        (for smaller values of ``tau``) are simply the least squares solutions.
+
+    .. warning ::
+
+        The number of solutions can differ from ``len(tau_range)``.
+        The function returns only the solutions with at least one non-zero
+        element.
+        For values higher than *tau_max* a solution have all zero values.
+
+    Parameters
+    ----------
+    data : (N, P) ndarray
+        Data matrix.
+    labels : (N,) or (N, 1) ndarray
+        Labels vector.
+    mu : float
+        `l2-norm` penalty.
+    tau_range : array_like of float
+        `l1-norm` penalties in increasing order.
+    beta : (P,) or (P, 1) ndarray, optional (default is `None`)
+        Starting value of the iterations.
+        If `None`, then iterations starts from the empty model.
+    kmax : int, optional (default is `1e5`)
+        Maximum number of iterations.
+    tolerance : float, optional (default is `1e-5`)
+        Convergence tolerance.
+    adaptive : bool, optional (default is `False`)
+        If `True`, minimization is performed calculating an adaptive step size
+        for each iteration.
+
+    Returns
+    -------
+    beta_path : list of (P,) or (P, 1) ndarrays
+        `l1l2` solutions with at least one non-zero element.
+
+    """
+    from collections import deque
+    n, p = data.shape
+
+    if mu == 0.0:
+        beta_ls = ridge_regression(data, labels)
+    if beta is None:
+        beta = np.zeros((p, 1))
+
+    out = deque()
+    nonzero = 0
+    for tau in reversed(tau_range):
+        if mu == 0.0 and nonzero >= n: # lasso saturation
+            beta_next = beta_ls
+        else:
+            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
+                                            kmax, tolerance, adaptive=adaptive)
+
+        nonzero = len(beta_next.nonzero()[0])
+        if nonzero > 0:
+            out.appendleft(beta_next)
+
+        beta = beta_next
+
+    return out

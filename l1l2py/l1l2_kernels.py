@@ -47,6 +47,7 @@ __global__ void soft_thresholdingFISTA(float* precalc, const int N, float nsigma
 
         /* aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff */
         aux_beta[idx] = beta_next[idx] + ((t - 1.0)/t_next[0])*beta_diff[idx];
+
     }
 }
 """)

@@ -44,6 +44,7 @@ l1l2py.tools
 
 from _core import *
 import algorithms
+# import algorithms_cuda as algorithms
 import tools
 
 from _version import version as __version__

@@ -30,7 +30,14 @@ __all__ = ['model_selection', 'minimal_model', 'nested_models']
 import numpy as np
 import itertools as it
 
-from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
+# from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
+
+### NON CUDA VERSION
+from l1l2py.algorithms import ridge_regression, l1l2_regularization
+# from l1l2py.algorithms import l1l2_path
+
+### CUDA VERSION
+from l1l2py.algorithms_cuda import l1l2_path
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
@@ -228,7 +235,8 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         if not data_normalizer is None:
             data_tr, data_ts = data_normalizer(data_tr, data_ts)
 
-        labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
+        #labels_tr, labels_ts = labels[train_idxs, :], labels[test_idxs, :]
+        labels_tr, labels_ts = labels[train_idxs], labels[test_idxs]
         if not labels_normalizer is None:
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
 

@@ -29,6 +29,8 @@ __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 from math import sqrt
 
+from .algorithms import l1l2_regularization ### check this one
+
 import os
 
 import numpy as np
@@ -38,11 +40,6 @@ except ImportError:
     from numpy import linalg as la
     
 import ctypes
-
-# print(os.path.join(os.path.dirname(os.path.realpath(__file__)),'l1l2_path.so'))
-
-# algorithms_lib = ctypes.CDLL("./l1l2_path.so", mode=ctypes.RTLD_GLOBAL)
-
 
 algorithms_lib = ctypes.CDLL(os.path.join(os.path.dirname(os.path.realpath(__file__)),'l1l2_path.so'), mode=ctypes.RTLD_GLOBAL)
 
@@ -281,34 +278,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
         return beta, k+1
     return beta
 
-def l1l2_path_old(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5, adaptive=False):
-    
-    from collections import deque
-    n, p = data.shape
-
-    if mu == 0.0:
-        beta_ls = ridge_regression(data, labels)
-    if beta is None:
-        beta = np.zeros((p, 1))
-
-    out = deque()
-    nonzero = 0
-    for tau in reversed(tau_range):
-        if mu == 0.0 and nonzero >= n: # lasso saturation
-            beta_next = beta_ls
-        else:
-            beta_next = l1l2_regularization(data, labels, mu, tau, beta,
-                                            kmax, tolerance, adaptive=adaptive)
-
-        nonzero = len(beta_next.nonzero()[0])
-        if nonzero > 0:
-            out.appendleft(beta_next)
-
-        beta = beta_next
-
-    return out
-
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
               tolerance=1e-5, adaptive=False):
     r"""Efficient solution of different `l1l2` regularization problems on
@@ -388,30 +357,25 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     
     # print("K final = {}".format(k_final))
     
-    with open('/tmp/l1l2log.txt', 'a') as f:
-    
-        # f.write("before")
+    algorithms_lib.l1l2_path_bridge(
+        XT.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        Y.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+        ctypes.c_int(n),
+        ctypes.c_int(p),
+        ctypes.c_float(mu),
+        tau_range.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_tau_range,
+        ctypes.c_int(n_tau), # int n_tau,
+        beta.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_beta,
+        out.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_out,
+        # ctypes.byref(ctypes.c_int(k_final)),
+        ctypes.byref(n_betas_out),
+        ctypes.byref(k_final),
+        ctypes.c_int(kmax), # int kmax,
+        ctypes.c_float(tolerance), # float tolerance,
+        # ctypes.c_float(1e-2*tolerance), # float tolerance,
+        ctypes.c_int(adaptive) # int adaptive
+    )
         
-        algorithms_lib.l1l2_path_bridge(
-            XT.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
-            Y.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
-            ctypes.c_int(n),
-            ctypes.c_int(p),
-            ctypes.c_float(mu),
-            tau_range.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_tau_range,
-            ctypes.c_int(n_tau), # int n_tau,
-            beta.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_beta,
-            out.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_out,
-            # ctypes.byref(ctypes.c_int(k_final)),
-            ctypes.byref(n_betas_out),
-            ctypes.byref(k_final),
-            ctypes.c_int(kmax), # int kmax,
-            ctypes.c_float(tolerance), # float tolerance,
-            # ctypes.c_float(1e-2*tolerance), # float tolerance,
-            ctypes.c_int(adaptive) # int adaptive
-        )
-        
-        # f.write("after")
     
     out_list = list()
     
@@ -444,144 +408,3 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     
     return out_list
 
-
-# def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
-#                         tolerance=1e-5, return_iterations=False,
-#                         adaptive=False):
-#     r"""Implementation of the Fast Iterative Shrinkage-Thresholding Algorithm
-#     to solve a least squares problem with `l1l2` penalty.
-# 
-#     It solves the `l1l2` regularization problem with parameter ``mu`` on the
-#     `l2-norm` and parameter ``tau`` on the `l1-norm`.
-# 
-#     Parameters
-#     ----------
-#     data : (N, P) ndarray
-#         Data matrix.
-#     labels : (N,) or (N, 1) ndarray
-#         Labels vector.
-#     mu : float
-#         `l2-norm` penalty.
-#     tau : float
-#         `l1-norm` penalty.
-#     beta : (P,) or (P, 1) ndarray, optional (default is `None`)
-#         Starting value for the iterations.
-#         If `None`, then iterations starts from the empty model.
-#     kmax : int, optional (default is `1e5`)
-#         Maximum number of iterations.
-#     tolerance : float, optional (default is `1e-5`)
-#         Convergence tolerance.
-#     return_iterations : bool, optional (default is `False`)
-#         If `True`, returns the number of iterations performed.
-#         The algorithm has a predefined minimum number of iterations
-#         equal to `10`.
-#     adaptive : bool, optional (default is `False`)
-#         If `True`, minimization is performed calculating an adaptive step size
-#         for each iteration.
-# 
-#     Returns
-#     -------
-#     beta : (P, 1) ndarray
-#         `l1l2` solution.
-#     k : int, optional
-#         Number of iterations performed.
-# 
-#     Examples
-#     --------
-#     >>> X = numpy.array([[0.1, 1.1, 0.3], [0.2, 1.2, 1.6], [0.3, 1.3, -0.6]])
-#     >>> beta = numpy.array([0.1, 0.1, 0.0])
-#     >>> Y = numpy.dot(X, beta)
-#     >>> beta = l1l2py.algorithms.l1l2_regularization(X, Y, 0.1, 0.1)
-#     >>> len(numpy.flatnonzero(beta))
-#     1
-# 
-#     """
-# 
-#     # Useful quantities
-#     X = np.asarray(data)
-#     Y = np.asarray(labels).reshape(-1, 1)
-#     n, d = data.shape
-# 
-#     # beta starts from 0 and we assume also that the previous value is 0
-#     if beta is None:
-#         beta = np.zeros((d, 1))
-#     else:
-#         beta = beta.reshape((d, 1))
-# 
-#     if n > d:
-#         XTY = np.dot(X.T, Y)
-# 
-#     # First iteration with standard sigma
-#     sigma = _sigma(data, mu)
-#     if sigma < np.finfo(float).eps: # is zero...
-#         return beta, 0
-# 
-#     mu_s = mu / sigma
-#     tau_s = tau / (2.0 * sigma)
-#     nsigma = n * sigma
-# 
-#     # Starting conditions
-#     aux_beta = beta
-#     t = 1.
-# 
-#     for k in xrange(kmax):
-#         # Pre-calculated "heavy" computation
-#         if n > d:
-#             precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
-#         else:
-#             precalc = np.dot(X.T, Y - np.dot(X, aux_beta))
-# 
-#         # Soft-Thresholding
-#         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-#         beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
-# 
-#         ######## Adaptive step size #######################################
-#         if adaptive:
-#             beta_diff = (aux_beta - beta_next)
-# 
-#             # Only if there is an increment of the solution
-#             # we can calculate the adaptive step-size
-#             if np.any(beta_diff):
-#                 # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
-#                 # num = np.dot(beta_diff, grad_diff)
-#                 tmp = np.dot(X, beta_diff) # <-- adaptive-step-size drawback
-#                 num = np.dot(tmp, tmp) / n
-# 
-#                 sigma = (num / np.dot(beta_diff, beta_diff))
-#                 mu_s = mu / sigma
-#                 tau_s = tau / (2.0*sigma)
-#                 nsigma = n * sigma
-# 
-#                 # Soft-Thresholding
-#                 value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-#                 beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
-# 
-#         ######## FISTA ####################################################
-#         beta_diff = (beta_next - beta)
-#         t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
-#         aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
-# 
-#         # Convergence values
-#         max_diff = np.abs(beta_diff).max()
-#         max_coef = np.abs(beta_next).max()
-# 
-#         # Values update
-#         t = t_next
-#         beta = beta_next
-# 
-#         # Stopping rule (exit even if beta_next contains only zeros)
-#         if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
-# 
-#     if return_iterations:
-#         return beta, k+1
-#     return beta
-# 
-# def _sigma(matrix, mu):
-#     n, p = matrix.shape
-# 
-#     if p > n:
-#         tmp = np.dot(matrix, matrix.T)
-#     else:
-#         tmp = np.dot(matrix.T, matrix)
-# 
-#     return (la.norm(tmp, 2)/n) + mu

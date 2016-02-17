@@ -30,14 +30,16 @@ __all__ = ['model_selection', 'minimal_model', 'nested_models']
 import numpy as np
 import itertools as it
 
-# from l1l2py.algorithms import ridge_regression, l1l2_regularization, l1l2_path
-
-### NON CUDA VERSION
 from l1l2py.algorithms import ridge_regression, l1l2_regularization
-# from l1l2py.algorithms import l1l2_path
 
-### CUDA VERSION
-from l1l2py.algorithms_cuda import l1l2_path
+try:
+    ### CUDA VERSION
+    from l1l2py.algorithms_cuda import l1l2_path
+except:
+    ### NON CUDA VERSION
+    from l1l2py.algorithms import l1l2_path
+
+
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,

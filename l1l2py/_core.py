@@ -25,12 +25,14 @@ double optimization variable selection.
 ## You should have received a copy of the GNU General Public License
 ## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['model_selection', 'minimal_model', 'nested_models']
+__all__ = ['model_selection', 'model_selection_perm', 'minimal_model', 'minimal_model_perm', 'nested_models', 'nested_models_perm']
 
 import numpy as np
 import itertools as it
 
 from l1l2py.algorithms import ridge_regression, l1l2_regularization
+
+import random
 
 try:
     ### CUDA VERSION
@@ -125,6 +127,48 @@ def model_selection(data, labels, test_data, test_labels,
 
     # STAGE II
     stage2_out = nested_models(data, labels,
+                               test_data, test_labels,
+                               mu_range, out['tau_opt'], out['lambda_opt'],
+                               error_function,
+                               data_normalizer, labels_normalizer,
+                               return_predictions)
+
+    keys = ['beta_list', 'selected_list', 'err_ts_list', 'err_tr_list']
+    if return_predictions:
+        keys.append('prediction_ts_list')
+        keys.append('prediction_tr_list')
+
+    out.update(it.izip(keys, stage2_out))
+
+    return out
+
+def model_selection_perm(data, labels, test_data, test_labels,
+                    mu_range, tau_range, lambda_range,
+                    cv_splits, cv_error_function, error_function,
+                    data_normalizer=None, labels_normalizer=None,
+                    sparse=False, regularized=True,
+                    return_predictions=False):
+    """
+    XXX WITH PERMUTATION ON VALIDATION SET
+    """
+
+    # STAGE I
+    stage1_out = minimal_model_perm(data, labels, mu_range[0],
+                               tau_range, lambda_range,
+                               cv_splits, cv_error_function,
+                               data_normalizer, labels_normalizer)
+    out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
+
+    # KCV MINIMUM SELECTION
+    err_ts = out['kcv_err_ts']
+    tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min())
+    tau_opt, lambda_opt = _minimum_selection(tau_opt_idxs, lambda_opt_idxs,
+                                             sparse, regularized)
+    out['tau_opt'] = tau_range[tau_opt]
+    out['lambda_opt'] = lambda_range[lambda_opt]
+
+    # STAGE II
+    stage2_out = nested_models_perm(data, labels,
                                test_data, test_labels,
                                mu_range, out['tau_opt'], out['lambda_opt'],
                                error_function,
@@ -275,6 +319,70 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
     return err_ts, err_tr
 
+def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
+                  cv_splits, error_function,
+                  data_normalizer=None, labels_normalizer=None):
+    """
+    XXX PERM
+    """
+
+    err_ts = list()
+    err_tr = list()
+    max_tau_num = len(tau_range)
+
+    for train_idxs, test_idxs in cv_splits:
+        # First create a view and then normalize (eventually)
+        data_tr, data_ts = data[train_idxs, :], data[test_idxs, :]
+        if not data_normalizer is None:
+            data_tr, data_ts = data_normalizer(data_tr, data_ts)
+
+        labels_tr, labels_ts = labels[train_idxs], labels[test_idxs]
+        
+        ### SHUFFLE TR LABELS HERE
+        
+        idx = range(len(labels_tr))
+        random.shuffle(idx)
+        labels_tr_perm = labels_tr[idx]
+        
+        if not labels_normalizer is None:
+            # labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
+            labels_tr_perm, labels_ts = labels_normalizer(labels_tr_perm, labels_ts)
+
+        # Builds a classifier for each value of tau
+        # beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
+        beta_casc = l1l2_path(data_tr, labels_tr_perm, mu, tau_range[:max_tau_num])
+
+        if len(beta_casc) == 0:
+            raise ValueError("the given range of 'tau' values produces all "
+                             "void solutions with the given data splits")
+
+        max_tau_num = min(max_tau_num, len(beta_casc))
+        _err_ts = np.empty((max_tau_num, len(lambda_range)))
+        _err_tr = np.empty_like(_err_ts)
+
+        # For each sparse model builds a
+        # rls classifier for each value of lambda
+        for j, beta in it.izip(xrange(max_tau_num), beta_casc):
+            selected = (beta.flat != 0)
+            for k, lam in enumerate(lambda_range):
+                # beta = ridge_regression(data_tr[:, selected], labels_tr, lam)
+                beta = ridge_regression(data_tr[:, selected], labels_tr_perm, lam)
+
+                prediction = np.dot(data_ts[:, selected], beta)
+                _err_ts[j, k] = error_function(labels_ts, prediction)
+
+                prediction = np.dot(data_tr[:, selected], beta)
+                _err_tr[j, k] = error_function(labels_tr_perm, prediction)
+
+        err_ts.append(_err_ts)
+        err_tr.append(_err_tr)
+
+    # cut columns and computes the mean
+    err_ts = np.asarray([a[:max_tau_num] for a in err_ts]).mean(axis=0)
+    err_tr = np.asarray([a[:max_tau_num] for a in err_tr]).mean(axis=0)
+
+    return err_ts, err_tr
+
 def nested_models(data, labels, test_data, test_labels,
                   mu_range, tau, lambda_, error_function,
                   data_normalizer=None, labels_normalizer=None,
@@ -376,6 +484,70 @@ def nested_models(data, labels, test_data, test_labels,
 
         prediction_tr = np.dot(data[:, selected], beta)
         err_tr_list.append(error_function(labels, prediction_tr))
+
+        if return_predictions:
+            prediction_ts_list.append(prediction_ts)
+            prediction_tr_list.append(prediction_tr)
+
+    if return_predictions:
+        return (beta_list, selected_list, err_ts_list, err_tr_list,
+                prediction_ts_list, prediction_tr_list)
+    else:
+        return beta_list, selected_list, err_ts_list, err_tr_list
+    
+def nested_models_perm(data, labels, test_data, test_labels,
+                  mu_range, tau, lambda_, error_function,
+                  data_normalizer=None, labels_normalizer=None,
+                  return_predictions=False):
+    r"""
+    XXX PERM
+    """
+
+    if not data_normalizer is None:
+        data, test_data = data_normalizer(data, test_data)
+
+    
+    idx = range(len(labels))
+    random.shuffle(idx)
+    labels_perm = labels[idx]
+
+    if not labels_normalizer is None:
+        labels_perm, test_labels = labels_normalizer(labels_perm, test_labels)
+        
+    # if not labels_normalizer is None:
+    #     labels, test_labels = labels_normalizer(labels, test_labels)
+
+    beta_list = list()
+    selected_list = list()
+    err_ts_list = list()
+    err_tr_list = list()
+
+    if return_predictions:
+        prediction_ts_list = list()
+        prediction_tr_list = list()
+
+    for mu in mu_range:
+        # beta = l1l2_regularization(data, labels, mu, tau)
+        beta = l1l2_regularization(data, labels_perm, mu, tau)
+        
+        selected = (beta.flat != 0)
+
+        if not selected.any():
+            raise ValueError("the given value of 'tau' produces a void "
+                             "solution with the given data")
+
+        # beta = ridge_regression(data[:, selected], labels, lambda_)
+        beta = ridge_regression(data[:, selected], labels_perm, lambda_)
+
+        beta_list.append(beta)
+        selected_list.append(selected)
+
+        prediction_ts = np.dot(test_data[:, selected], beta)
+        err_ts_list.append(error_function(test_labels, prediction_ts))
+
+        prediction_tr = np.dot(data[:, selected], beta)
+        # err_tr_list.append(error_function(labels, prediction_tr))
+        err_tr_list.append(error_function(labels_perm, prediction_tr))
 
         if return_predictions:
             prediction_ts_list.append(prediction_ts)

@@ -37,11 +37,15 @@ import random
 try:
     ### CUDA VERSION
     from l1l2py.algorithms_cuda import l1l2_path
+    # from l1l2py.algorithms import l1l2_path
 except:
     ### NON CUDA VERSION
     from l1l2py.algorithms import l1l2_path
 
-
+def emergency_log(message, file_path = '/tmp/emergency_log.txt'):
+    
+    with open(file_path, 'a') as lf:
+        lf.write(message)
 
 def model_selection(data, labels, test_data, test_labels,
                     mu_range, tau_range, lambda_range,
@@ -152,13 +156,18 @@ def model_selection_perm(data, labels, test_data, test_labels,
     XXX WITH PERMUTATION ON VALIDATION SET
     """
 
+    # emergency_log("XXX BEFORE STAGE1\n")
+
     # STAGE I
     stage1_out = minimal_model_perm(data, labels, mu_range[0],
                                tau_range, lambda_range,
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer)
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
-
+    
+    
+    # emergency_log("XXX AFTER STAGE1\n")
+    
     # KCV MINIMUM SELECTION
     err_ts = out['kcv_err_ts']
     tau_opt_idxs, lambda_opt_idxs = np.where(err_ts == err_ts.min())
@@ -174,14 +183,18 @@ def model_selection_perm(data, labels, test_data, test_labels,
                                error_function,
                                data_normalizer, labels_normalizer,
                                return_predictions)
-
+    
+    # emergency_log("XXX AFTER STAGE2\n")
+    
     keys = ['beta_list', 'selected_list', 'err_ts_list', 'err_tr_list']
     if return_predictions:
         keys.append('prediction_ts_list')
         keys.append('prediction_tr_list')
 
     out.update(it.izip(keys, stage2_out))
-
+    
+    # emergency_log("XXX AFTER UPDATE\n")
+    
     return out
 
 def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
@@ -290,6 +303,10 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
 
         if len(beta_casc) == 0:
+            
+            emergency_log("NOPERM [len(beta_casc) == 0] the given range of 'tau' values produces all "
+                             "void solutions with the given data splits")
+            
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")
 
@@ -326,6 +343,8 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
     XXX PERM
     """
 
+    emergency_log('[minimal_model_perm]')
+
     err_ts = list()
     err_tr = list()
     max_tau_num = len(tau_range)
@@ -350,9 +369,15 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
 
         # Builds a classifier for each value of tau
         # beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
+        emergency_log("[minimal_model_perm] BEFORE L1L2PATH\n")
         beta_casc = l1l2_path(data_tr, labels_tr_perm, mu, tau_range[:max_tau_num])
+        emergency_log("[minimal_model_perm] AFTER L1L2PATH\n")
 
         if len(beta_casc) == 0:
+            
+            emergency_log("PERM [len(beta_casc) == 0] the given range of 'tau' values produces all "
+                             "void solutions with the given data splits")
+            
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")
 
@@ -362,20 +387,33 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
 
         # For each sparse model builds a
         # rls classifier for each value of lambda
-        for j, beta in it.izip(xrange(max_tau_num), beta_casc):
-            selected = (beta.flat != 0)
-            for k, lam in enumerate(lambda_range):
-                # beta = ridge_regression(data_tr[:, selected], labels_tr, lam)
-                beta = ridge_regression(data_tr[:, selected], labels_tr_perm, lam)
-
-                prediction = np.dot(data_ts[:, selected], beta)
-                _err_ts[j, k] = error_function(labels_ts, prediction)
-
-                prediction = np.dot(data_tr[:, selected], beta)
-                _err_tr[j, k] = error_function(labels_tr_perm, prediction)
+        try:
+            for j, beta in it.izip(xrange(max_tau_num), beta_casc):
+                selected = (beta.flat != 0)
+                
+                if len(selected) == 0:
+                    emergency_log("PERM [len(selected) == 0] the given range of 'tau' values produces all "
+                                 "void solutions with the given data splits")
+                    raise ValueError("PERM [len(selected) == 0] the given range of 'tau' values produces all "
+                                 "void solutions with the given data splits")
+                
+                for k, lam in enumerate(lambda_range):
+                    # beta = ridge_regression(data_tr[:, selected], labels_tr, lam)
+                    beta = ridge_regression(data_tr[:, selected], labels_tr_perm, lam)
+    
+                    prediction = np.dot(data_ts[:, selected], beta)
+                    _err_ts[j, k] = error_function(labels_ts, prediction)
+    
+                    prediction = np.dot(data_tr[:, selected], beta)
+                    _err_tr[j, k] = error_function(labels_tr_perm, prediction)
+                    
+        except Exception as ex:
+            emergency_log("[minimal_model_perm] RAISED EXCEPTION: {}\n".format(ex))
 
         err_ts.append(_err_ts)
         err_tr.append(_err_tr)
+        
+            
 
     # cut columns and computes the mean
     err_ts = np.asarray([a[:max_tau_num] for a in err_ts]).mean(axis=0)

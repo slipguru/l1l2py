@@ -274,6 +274,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
     # First iteration with standard sigma
     sigma = _sigma(data, mu)
+    print sigma
     if sigma < np.finfo(float).eps: # is zero...
         return beta, 0
 

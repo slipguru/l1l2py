@@ -158,8 +158,18 @@ def model_selection_perm(data, labels, test_data, test_labels,
 
     # emergency_log("XXX BEFORE STAGE1\n")
 
+    # shuffling 
+    idx = np.arange(len(labels))
+    np.random.shuffle(idx)
+    labels_perm = labels[idx]
+    
     # STAGE I
-    stage1_out = minimal_model_perm(data, labels, mu_range[0],
+    # stage1_out = minimal_model_perm(data, labels, mu_range[0],
+    #                            tau_range, lambda_range,
+    #                            cv_splits, cv_error_function,
+    #                            data_normalizer, labels_normalizer)
+    
+    stage1_out = minimal_model(data, labels_perm, mu_range[0],
                                tau_range, lambda_range,
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer)
@@ -177,7 +187,14 @@ def model_selection_perm(data, labels, test_data, test_labels,
     out['lambda_opt'] = lambda_range[lambda_opt]
 
     # STAGE II
-    stage2_out = nested_models_perm(data, labels,
+    # stage2_out = nested_models_perm(data, labels,
+    #                            test_data, test_labels,
+    #                            mu_range, out['tau_opt'], out['lambda_opt'],
+    #                            error_function,
+    #                            data_normalizer, labels_normalizer,
+    #                            return_predictions)
+    
+    stage2_out = nested_models(data, labels_perm,
                                test_data, test_labels,
                                mu_range, out['tau_opt'], out['lambda_opt'],
                                error_function,
@@ -343,7 +360,7 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
     XXX PERM
     """
 
-    emergency_log('[minimal_model_perm]')
+    emergency_log("[minimal_model_perm]\n")
 
     err_ts = list()
     err_tr = list()
@@ -363,13 +380,19 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
         random.shuffle(idx)
         labels_tr_perm = labels_tr[idx]
         
+        ### AND TS LABELS HERE
+        idx = range(len(labels_ts))
+        random.shuffle(idx)
+        labels_ts_perm = labels_ts[idx]
+        
         if not labels_normalizer is None:
             # labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
-            labels_tr_perm, labels_ts = labels_normalizer(labels_tr_perm, labels_ts)
+            # labels_tr_perm, labels_ts = labels_normalizer(labels_tr_perm, labels_ts)
+            labels_tr_perm, labels_ts_perm = labels_normalizer(labels_tr_perm, labels_ts_perm)
 
         # Builds a classifier for each value of tau
-        # beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
         emergency_log("[minimal_model_perm] BEFORE L1L2PATH\n")
+        # beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
         beta_casc = l1l2_path(data_tr, labels_tr_perm, mu, tau_range[:max_tau_num])
         emergency_log("[minimal_model_perm] AFTER L1L2PATH\n")
 
@@ -402,7 +425,7 @@ def minimal_model_perm(data, labels, mu, tau_range, lambda_range,
                     beta = ridge_regression(data_tr[:, selected], labels_tr_perm, lam)
     
                     prediction = np.dot(data_ts[:, selected], beta)
-                    _err_ts[j, k] = error_function(labels_ts, prediction)
+                    _err_ts[j, k] = error_function(labels_ts_perm, prediction)
     
                     prediction = np.dot(data_tr[:, selected], beta)
                     _err_tr[j, k] = error_function(labels_tr_perm, prediction)
@@ -544,17 +567,21 @@ def nested_models_perm(data, labels, test_data, test_labels,
     if not data_normalizer is None:
         data, test_data = data_normalizer(data, test_data)
 
-    
+    ### TR LABELS
     idx = range(len(labels))
     random.shuffle(idx)
     labels_perm = labels[idx]
+    
+    ### TEST LABELS
+    idx = range(len(test_labels))
+    random.shuffle(idx)
+    test_labels_perm = test_labels[idx]
 
     if not labels_normalizer is None:
-        labels_perm, test_labels = labels_normalizer(labels_perm, test_labels)
+        # labels, test_labels = labels_normalizer(labels, test_labels)
+        # labels_perm, test_labels = labels_normalizer(labels_perm, test_labels)
+        labels_perm, test_labels_perm = labels_normalizer(labels_perm, test_labels_perm)
         
-    # if not labels_normalizer is None:
-    #     labels, test_labels = labels_normalizer(labels, test_labels)
-
     beta_list = list()
     selected_list = list()
     err_ts_list = list()
@@ -581,7 +608,8 @@ def nested_models_perm(data, labels, test_data, test_labels,
         selected_list.append(selected)
 
         prediction_ts = np.dot(test_data[:, selected], beta)
-        err_ts_list.append(error_function(test_labels, prediction_ts))
+        # err_ts_list.append(error_function(test_labels, prediction_ts))
+        err_ts_list.append(error_function(test_labels_perm, prediction_ts))
 
         prediction_tr = np.dot(data[:, selected], beta)
         # err_tr_list.append(error_function(labels, prediction_tr))

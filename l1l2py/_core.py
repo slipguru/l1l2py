@@ -151,14 +151,17 @@ def model_selection_perm(data, labels, test_data, test_labels,
                     cv_splits, cv_error_function, error_function,
                     data_normalizer=None, labels_normalizer=None,
                     sparse=False, regularized=True,
-                    return_predictions=False):
+                    return_predictions=False, random_seed = None):
     """
     XXX WITH PERMUTATION ON VALIDATION SET
     """
 
     # emergency_log("XXX BEFORE STAGE1\n")
 
-    # shuffling 
+    ### Use a seed to initialize the random number generator
+    np.random.seed(random_seed)
+
+    # shuffling
     idx = np.arange(len(labels))
     np.random.shuffle(idx)
     labels_perm = labels[idx]

@@ -34,6 +34,12 @@ try:
     from scipy import linalg as la
 except ImportError:
     from numpy import linalg as la
+    
+def emergency_log(message, file_path = '/tmp/emergency_log.txt'):
+    
+    if not file_path is None:
+        with open(file_path, 'a') as lf:
+            lf.write(message)
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.
@@ -130,7 +136,7 @@ def ridge_regression(data, labels, mu=0.0):
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5, adaptive=False):
+              tolerance=1e-5, adaptive=False, input_key = None):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -181,6 +187,14 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         `l1l2` solutions with at least one non-zero element.
 
     """
+    
+    if not input_key is None:
+        emergency_log_file = '/tmp/{}.txt'.format(input_key)
+    else:
+        emergency_log_file = None
+    
+    emergency_log("l1l2_path [1]\n", emergency_log_file)
+    
     from collections import deque
     n, p = data.shape
 
@@ -188,6 +202,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         beta_ls = ridge_regression(data, labels)
     if beta is None:
         beta = np.zeros((p, 1))
+        
+    emergency_log("l1l2_path [2]\n", emergency_log_file)
 
     out = deque()
     nonzero = 0
@@ -197,12 +213,16 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         else:
             beta_next = l1l2_regularization(data, labels, mu, tau, beta,
                                             kmax, tolerance, adaptive=adaptive)
+            
+        emergency_log("l1l2_path [3] [inside tau]\n", emergency_log_file)
 
         nonzero = len(beta_next.nonzero()[0])
         if nonzero > 0:
             out.appendleft(beta_next)
 
         beta = beta_next
+
+    emergency_log("l1l2_path [4]\n", emergency_log_file)
 
     return out
 

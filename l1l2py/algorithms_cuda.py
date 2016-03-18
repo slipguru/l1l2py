@@ -29,7 +29,7 @@ __all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
 
 from math import sqrt
 
-from .algorithms import l1l2_regularization, l1_bound, _sigma, ridge_regression ### check this one
+from .algorithms import l1l2_regularization, l1_bound, _sigma, ridge_regression, emergency_log ### check this one
 
 import os
 
@@ -44,7 +44,7 @@ import ctypes
 algorithms_lib = ctypes.CDLL(os.path.join(os.path.dirname(os.path.realpath(__file__)),'l1l2_path.so'), mode=ctypes.RTLD_GLOBAL)
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5, adaptive=False):
+              tolerance=1e-5, adaptive=False, input_key = None):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -96,6 +96,13 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
 
     """
     
+    if not input_key is None:
+        emergency_log_file = '/tmp/{}.txt'.format(input_key)
+    else:
+        emergency_log_file = None
+    
+    emergency_log("l1l2_path_cuda [1]\n", emergency_log_file)
+    
     from collections import deque
     
     n, p = data.shape
@@ -115,6 +122,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     k_final = ctypes.c_int32()
     n_betas_out = ctypes.c_int32()
     
+    emergency_log("l1l2_path_cuda [2]\n", emergency_log_file)
+    
     algorithms_lib.l1l2_path_bridge(
         XT.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
         Y.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
@@ -129,13 +138,18 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         ctypes.byref(k_final),
         ctypes.c_int(kmax), # int kmax,
         ctypes.c_float(tolerance), # float tolerance,
-        ctypes.c_int(adaptive) # int adaptive
+        ctypes.c_int(adaptive), # int adaptive
+        ctypes.c_char_p(emergency_log_file)
     )
+    
+    emergency_log("l1l2_path_cuda [3]\n", emergency_log_file)
     
     out_list = list()
     
     for i in range(n_tau - n_betas_out.value, n_tau):
         out_list.append(out[i,:])
+        
+    emergency_log("l1l2_path_cuda [4]\n", emergency_log_file)
     
     return out_list
 

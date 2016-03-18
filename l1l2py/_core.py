@@ -325,13 +325,13 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
         # Builds a classifier for each value of tau
         emergency_log("before beta casc\n", emergency_log_file)
-        beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num])
+        beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num], input_key = input_key)
         emergency_log("after beta casc\n", emergency_log_file)
 
         if len(beta_casc) == 0:
             
-            emergency_log("NOPERM [len(beta_casc) == 0] the given range of 'tau' values produces all "
-                             "void solutions with the given data splits")
+            emergency_log("[len(beta_casc) == 0] the given range of 'tau' values produces all "
+                             "void solutions with the given data splits", emergency_log_file)
             
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")

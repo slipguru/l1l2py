@@ -37,8 +37,8 @@ import random
 
 try:
     ### CUDA VERSION
-    from l1l2py.algorithms_cuda import l1l2_path
-    # from l1l2py.algorithms import l1l2_path
+    # from l1l2py.algorithms_cuda import l1l2_path
+    from l1l2py.algorithms import l1l2_path
 except:
     ### NON CUDA VERSION
     from l1l2py.algorithms import l1l2_path
@@ -157,8 +157,6 @@ def model_selection_perm(data, labels, test_data, test_labels,
     XXX WITH PERMUTATION ON VALIDATION SET
     """
 
-    # emergency_log("XXX BEFORE STAGE1\n")
-
     ### Use a seed to initialize the random number generator
     np.random.seed(random_seed)
 
@@ -178,9 +176,6 @@ def model_selection_perm(data, labels, test_data, test_labels,
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer, input_key)
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
-    
-    
-    # emergency_log("XXX AFTER STAGE1\n")
     
     # KCV MINIMUM SELECTION
     err_ts = out['kcv_err_ts']
@@ -324,14 +319,14 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         emergency_log_file = '/tmp/{}.txt'.format(input_key)
 
         # Builds a classifier for each value of tau
-        emergency_log("before beta casc\n", emergency_log_file)
+        # emergency_log("before beta casc\n", emergency_log_file)
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num], input_key = input_key)
-        emergency_log("after beta casc\n", emergency_log_file)
+        # emergency_log("after beta casc\n", emergency_log_file)
 
         if len(beta_casc) == 0:
             
-            emergency_log("[len(beta_casc) == 0] the given range of 'tau' values produces all "
-                             "void solutions with the given data splits", emergency_log_file)
+            # emergency_log("[len(beta_casc) == 0] the given range of 'tau' values produces all "
+            #                  "void solutions with the given data splits", emergency_log_file)
             
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")

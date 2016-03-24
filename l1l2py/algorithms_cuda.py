@@ -101,7 +101,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     else:
         emergency_log_file = None
     
-    emergency_log("l1l2_path_cuda [1]\n", emergency_log_file)
+    # emergency_log("l1l2_path_cuda [1]\n", emergency_log_file)
     
     from collections import deque
     
@@ -122,7 +122,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     k_final = ctypes.c_int32()
     n_betas_out = ctypes.c_int32()
     
-    emergency_log("l1l2_path_cuda [2]\n", emergency_log_file)
+    # emergency_log("l1l2_path_cuda [2]\n", emergency_log_file)
     
     algorithms_lib.l1l2_path_bridge(
         XT.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
@@ -142,14 +142,13 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         ctypes.c_char_p(emergency_log_file)
     )
     
-    emergency_log("l1l2_path_cuda [3]\n", emergency_log_file)
+    # emergency_log("l1l2_path_cuda [3]\n", emergency_log_file)
     
     out_list = list()
     
     for i in range(n_tau - n_betas_out.value, n_tau):
         out_list.append(out[i,:])
         
-    emergency_log("l1l2_path_cuda [4]\n", emergency_log_file)
+    # emergency_log("l1l2_path_cuda [4]\n", emergency_log_file)
     
     return out_list
-

@@ -50,6 +50,6 @@ from _core import *
 #import algorithms
 # import algorithms_cuda as algorithms
 
-#import tools
+import tools
 
 from _version import version as __version__

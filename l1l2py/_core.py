@@ -25,8 +25,7 @@ double optimization variable selection.
 ## You should have received a copy of the GNU General Public License
 ## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
-# __all__ = ['model_selection', 'model_selection_perm', 'minimal_model', 'minimal_model_perm', 'nested_models', 'nested_models_perm']
-__all__ = ['model_selection', 'model_selection_perm', 'minimal_model', 'nested_models']
+__all__ = ['model_selection', 'minimal_model', 'nested_models']
 
 import numpy as np
 import itertools as it
@@ -34,14 +33,6 @@ import itertools as it
 from l1l2py.algorithms import ridge_regression, l1l2_regularization
 
 import random
-
-try:
-    ### CUDA VERSION
-    # from l1l2py.algorithms_cuda import l1l2_path
-    from l1l2py.algorithms import l1l2_path
-except:
-    ### NON CUDA VERSION
-    from l1l2py.algorithms import l1l2_path
 
 def emergency_log(message, file_path = '/tmp/emergency_log.txt'):
     
@@ -53,7 +44,7 @@ def model_selection(data, labels, test_data, test_labels,
                     cv_splits, cv_error_function, error_function,
                     data_normalizer=None, labels_normalizer=None,
                     sparse=False, regularized=True,
-                    return_predictions=False):
+                    return_predictions=False, algorithm_version = 'CPU'):
     r"""Complete model selection procedure.
 
     It executes the two stages implemented in ``minimal_model`` and
@@ -119,7 +110,7 @@ def model_selection(data, labels, test_data, test_labels,
     stage1_out = minimal_model(data, labels, mu_range[0],
                                tau_range, lambda_range,
                                cv_splits, cv_error_function,
-                               data_normalizer, labels_normalizer)
+                               data_normalizer, labels_normalizer, algorithm_version = algorithm_version)
     out = dict(it.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
 
     # KCV MINIMUM SELECTION
@@ -234,7 +225,7 @@ def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
 
 def minimal_model(data, labels, mu, tau_range, lambda_range,
                   cv_splits, error_function,
-                  data_normalizer=None, labels_normalizer=None, input_key = None):
+                  data_normalizer=None, labels_normalizer=None, input_key = None, algorithm_version = 'CPU'):
     r"""Minimal model selection.
 
     Given a supervised training set (``data`` and ``labels``), for a fixed
@@ -299,6 +290,15 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         the given data splits.
 
     """
+     
+    ### Load the correct version of the algorithm
+    if algorithm_version == 'CPU':
+        from l1l2py.algorithms import l1l2_path
+    elif algorithm_version == 'GPU':
+        from l1l2py.algorithms_cuda import l1l2_path
+    else:
+        raise Exception('Unknown algorithm version')
+        
 
     err_ts = list()
     err_tr = list()
@@ -315,18 +315,11 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
         if not labels_normalizer is None:
             labels_tr, labels_ts = labels_normalizer(labels_tr, labels_ts)
 
-
-        emergency_log_file = '/tmp/{}.txt'.format(input_key)
-
         # Builds a classifier for each value of tau
-        # emergency_log("before beta casc\n", emergency_log_file)
+
         beta_casc = l1l2_path(data_tr, labels_tr, mu, tau_range[:max_tau_num], input_key = input_key)
-        # emergency_log("after beta casc\n", emergency_log_file)
 
         if len(beta_casc) == 0:
-            
-            # emergency_log("[len(beta_casc) == 0] the given range of 'tau' values produces all "
-            #                  "void solutions with the given data splits", emergency_log_file)
             
             raise ValueError("the given range of 'tau' values produces all "
                              "void solutions with the given data splits")

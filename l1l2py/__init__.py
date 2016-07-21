@@ -42,9 +42,14 @@ l1l2py.tools
 ## You should have received a copy of the GNU General Public License
 ## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
+
+
+
 from _core import *
-import algorithms
+
+#import algorithms
 # import algorithms_cuda as algorithms
-import tools
+
+#import tools
 
 from _version import version as __version__

@@ -207,6 +207,8 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
 
     out = deque()
     nonzero = 0
+    # Taus are used from the biggest (sparser solutions)
+    # to the smallest (less sparse solutions)
     for tau in reversed(tau_range):
         if mu == 0.0 and nonzero >= n: # lasso saturation
             beta_next = beta_ls
@@ -218,6 +220,9 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
 
         nonzero = len(beta_next.nonzero()[0])
         if nonzero > 0:
+            # vectors are appended to the left of the queue,
+            # so that the out list contains betas ordered from
+            # less sparse to sparser
             out.appendleft(beta_next)
 
         beta = beta_next

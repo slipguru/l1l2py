@@ -1,5 +1,6 @@
-"""
-L1L2Py (l1l2py) is a package to perform feature selection by means of l1l2
+"""L1L2Py (l1l2py) is a package to perform feature selection.
+
+This is done by means of l1l2
 regularization with double optimization.
 
 Main functions
@@ -21,35 +22,37 @@ l1l2py.tools
     Implements miscellaneous useful tools.
 
 """
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
-
-
-
-from _core import *
-
-#import algorithms
-# import algorithms_cuda as algorithms
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import tools
 
-from _version import version as __version__
+from core import *
+# from _version import version as __version__
+
+from classification import L1L2Classifier
+
+
+# major number for main changes
+# minor number for new features
+# release number for bug fixes and minor updates
+# status = {'alpha', 'beta', None}
+__version__ = '1.0.6-beta'

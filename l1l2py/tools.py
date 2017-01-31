@@ -4,32 +4,33 @@ In this module are implemented some common function to use in combination
 with the rest of the package.
 
 """
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
-__all__ = ['linear_range', 'geometric_range', 'standardize', 'center',
-           'classification_error', 'balanced_classification_error',
-           'regression_error', 'kfold_splits', 'stratified_kfold_splits']
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+
+__all__ = ('linear_range', 'geometric_range', 'standardize', 'center',
+           'classification_error', 'balanced_classification_error',
+           'regression_error', 'kfold_splits', 'stratified_kfold_splits')
+
 
 # Ranges functions ------------------------------------------------------------
 def linear_range(min_value, max_value, number):
@@ -61,6 +62,7 @@ def linear_range(min_value, max_value, number):
 
     """
     return np.linspace(min_value, max_value, number)
+
 
 def geometric_range(min_value, max_value, number):
     r"""Geometric range of values between min_value and max_value.
@@ -103,6 +105,7 @@ def geometric_range(min_value, max_value, number):
     """
     ratio = (max_value/float(min_value))**(1.0/(number-1))
     return min_value * (ratio ** np.arange(number))
+
 
 # Normalization ---------------------------------------------------------------
 def center(matrix, optional_matrix=None, return_mean=False):
@@ -163,14 +166,15 @@ def center(matrix, optional_matrix=None, return_mean=False):
     if optional_matrix is None and return_mean is False:
         return matrix - mean
 
-    if optional_matrix is None: # than return_mean is True
+    if optional_matrix is None:  # than return_mean is True
         return (matrix - mean, mean)
 
-    if return_mean is False: # otherwise
+    if return_mean is False:  # otherwise
         return (matrix - mean, optional_matrix - mean)
 
     # Full case
     return (matrix - mean, optional_matrix - mean, mean)
+
 
 def standardize(matrix, optional_matrix=None, return_factors=False):
     r"""Standardize columns of a matrix setting each column with zero mean and
@@ -227,7 +231,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
         ...
     ValueError: 'matrix' must have more than one row
     >>> x = numpy.array([1, 2, 3])                       # 1-dimensional matrix
-    >>> l1l2py.tools.standardize(x, return_factors=True) # standardized as a (3, 1) matrix
+    >>> l1l2py.tools.standardize(x, return_factors=True)  # standardized as a (3, 1) matrix
     (array([-1.,  0.,  1.]), 2.0, 1.0)
     >>> l1l2py.tools.center(X, X[:,:2])
     Traceback (most recent call last):
@@ -246,14 +250,15 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     if optional_matrix is None and return_factors is False:
         return (matrix - mean)/std
 
-    if optional_matrix is None: # than return_factors is True
+    if optional_matrix is None:  # than return_factors is True
         return (matrix - mean)/std, mean, std
 
-    if return_factors is False: # otherwise
-        return (matrix - mean)/std, (optional_matrix - mean)/std
+    if return_factors is False:  # otherwise
+        return (matrix - mean) / std, (optional_matrix - mean) / std
 
     # Full case
-    return (matrix - mean)/std, (optional_matrix - mean)/std, mean, std
+    return (matrix - mean) / std, (optional_matrix - mean) / std, mean, std
+
 
 # Error functions -------------------------------------------------------------
 def classification_error(labels, predictions):
@@ -297,9 +302,10 @@ def classification_error(labels, predictions):
     """
     labels = np.asarray(labels).ravel()
     predictions = np.asarray(predictions).ravel()
-    
-    difference = (np.sign(labels) != np.sign(predictions))  
+
+    difference = (np.sign(labels) != np.sign(predictions))
     return len(*difference.nonzero()) / float(len(labels))
+
 
 def balanced_classification_error(labels, predictions, error_weights=None):
     r"""Returns the binary classification error balanced
@@ -350,6 +356,7 @@ def balanced_classification_error(labels, predictions, error_weights=None):
     errors = (np.sign(labels) != np.sign(predictions)) * error_weights
     return errors.sum() / float(len(labels))
 
+
 def regression_error(labels, predictions):
     r"""Returns regression error.
 
@@ -375,6 +382,7 @@ def regression_error(labels, predictions):
 
     difference = labels - predictions
     return np.dot(difference.T, difference).squeeze() / float(len(labels))
+
 
 # KCV tools -------------------------------------------------------------------
 def kfold_splits(labels, k, rseed=0):
@@ -415,7 +423,6 @@ def kfold_splits(labels, k, rseed=0):
     ValueError: 'k' must be greater than one and smaller or equal than the number of samples
 
     """
-
     if not (2 <= k <= len(labels)):
         raise ValueError("'k' must be greater than one and smaller or equal "
                          "than the number of samples")
@@ -424,9 +431,10 @@ def kfold_splits(labels, k, rseed=0):
     random.seed(rseed)
     indexes = range(len(labels))
     random.shuffle(indexes)
-    random.seed() #restores random generation from a random seed
+    random.seed()  #restores random generation from a random seed
 
     return _splits(indexes, k)
+
 
 def stratified_kfold_splits(labels, k, rseed=0):
     r"""Sstratified k-fold cross validation splits.
@@ -490,30 +498,30 @@ def stratified_kfold_splits(labels, k, rseed=0):
     random.seed(rseed)
     random.shuffle(n_indexes)
     n_splits = _splits(n_indexes, k)
-    
+
     random.shuffle(p_indexes)
     p_splits = _splits(p_indexes, k)
-    random.seed() #restores random generation from a random seed
+    random.seed()  # restores random generation from a random seed
 
     splits = list()
     for ns, ps in zip(n_splits, p_splits):
         train = ns[0] + ps[0]
         test = ns[1] + ps[1]
-        splits.append( (train, test) )
+        splits.append((train, test))
 
     return splits
 
-def _splits(indexes, k):
-    r"""Splits the 'indexes' list in input in k disjoint chunks.
 
+def _splits(indexes, k):
+    r"""Split the 'indexes' list in input in k disjoint chunks.
     """
     return [(indexes[:start] + indexes[end:], indexes[start:end])
-                for start, end in _split_dimensions(len(indexes), k)]
+            for start, end in _split_dimensions(len(indexes), k)]
+
 
 def _split_dimensions(num_items, num_splits):
     r"""Generator wich gives the pairs of indexes to split 'num_items' data
        in 'num_splits' chunks.
-
     """
     start = 0
     remaining_items = float(num_items)

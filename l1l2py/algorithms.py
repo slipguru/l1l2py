@@ -4,42 +4,44 @@ This module contains the functions strictly related with the statistical
 elaboration of the data.
 
 """
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
-__all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
-
-from math import sqrt
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 try:
     from scipy import linalg as la
 except ImportError:
     from numpy import linalg as la
-    
-def emergency_log(message, file_path = '/tmp/emergency_log.txt'):
-    
-    if not file_path is None:
+
+from collections import deque
+
+
+__all__ = ('l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path')
+
+
+def _emergency_log(message, file_path='/tmp/emergency_log.txt'):
+    if file_path is not None:
         with open(file_path, 'a') as lf:
             lf.write(message)
+
 
 def l1_bound(data, labels):
     r"""Estimation of an useful maximum bound for the `l1` penalty term.
@@ -79,7 +81,6 @@ def l1_bound(data, labels):
     >>> beta = l1l2py.algorithms.l1l2_regularization(X, Y, 0.0, tau_max - 1e-5)
     >>> len(numpy.flatnonzero(beta))
     1
-
     """
     n = data.shape[0]
     corr = np.abs(np.dot(data.T, labels))
@@ -87,6 +88,7 @@ def l1_bound(data, labels):
     tau_max = (corr.max() * (2.0/n))
 
     return tau_max
+
 
 def ridge_regression(data, labels, mu=0.0):
     r"""Implementation of the Regularized Least Squares solver.
@@ -123,20 +125,21 @@ def ridge_regression(data, labels, mu=0.0):
     if n < p:
         tmp = np.dot(data, data.T)
         if mu:
-            tmp += mu*n*np.eye(n)
+            tmp += mu * n * np.eye(n)
         tmp = la.pinv(tmp)
 
         return np.dot(np.dot(data.T, tmp), labels.reshape(-1, 1))
     else:
         tmp = np.dot(data.T, data)
         if mu:
-            tmp += mu*n*np.eye(p)
+            tmp += mu * n * np.eye(p)
         tmp = la.pinv(tmp)
 
         return np.dot(tmp, np.dot(data.T, labels.reshape(-1, 1)))
 
+
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5, adaptive=False, input_key = None):
+              tolerance=1e-5, adaptive=False, input_key=None):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -187,22 +190,19 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         `l1l2` solutions with at least one non-zero element.
 
     """
-    
-    if not input_key is None:
+    if input_key is not None:
         emergency_log_file = '/tmp/{}.txt'.format(input_key)
     else:
         emergency_log_file = None
-    
+
     # emergency_log("l1l2_path [1]\n", emergency_log_file)
-    
-    from collections import deque
     n, p = data.shape
 
     if mu == 0.0:
         beta_ls = ridge_regression(data, labels)
     if beta is None:
         beta = np.zeros((p, 1))
-        
+
     # emergency_log("l1l2_path [2]\n", emergency_log_file)
 
     out = deque()
@@ -210,12 +210,12 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     # Taus are used from the biggest (sparser solutions)
     # to the smallest (less sparse solutions)
     for tau in reversed(tau_range):
-        if mu == 0.0 and nonzero >= n: # lasso saturation
+        if mu == 0.0 and nonzero >= n:  # lasso saturation
             beta_next = beta_ls
         else:
             beta_next = l1l2_regularization(data, labels, mu, tau, beta,
                                             kmax, tolerance, adaptive=adaptive)
-            
+
         # emergency_log("l1l2_path [3] [inside tau]\n", emergency_log_file)
 
         nonzero = len(beta_next.nonzero()[0])
@@ -230,6 +230,7 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     # emergency_log("l1l2_path [4]\n", emergency_log_file)
 
     return out
+
 
 def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
                         tolerance=1e-5, return_iterations=False,
@@ -282,7 +283,6 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     1
 
     """
-
     # Useful quantities
     X = np.asarray(data)
     Y = np.asarray(labels).reshape(-1, 1)
@@ -299,7 +299,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
     # First iteration with standard sigma
     sigma = _sigma(data, mu)
-    if sigma < np.finfo(float).eps: # is zero...
+    if sigma < np.finfo(float).eps:  # is zero...
         return beta, 0
 
     mu_s = mu / sigma
@@ -321,7 +321,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
         beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
 
-        ######## Adaptive step size #######################################
+        # ## Adaptive step size #######################################
         if adaptive:
             beta_diff = (aux_beta - beta_next)
 
@@ -330,7 +330,7 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
             if np.any(beta_diff):
                 # grad_diff = np.dot(XTn, np.dot(X, beta_diff))
                 # num = np.dot(beta_diff, grad_diff)
-                tmp = np.dot(X, beta_diff) # <-- adaptive-step-size drawback
+                tmp = np.dot(X, beta_diff)  # <-- adaptive-step-size drawback
                 num = np.dot(tmp, tmp) / n
 
                 sigma = (num / np.dot(beta_diff, beta_diff))
@@ -340,12 +340,13 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
 
                 # Soft-Thresholding
                 value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-                beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
+                beta_next = np.sign(value) * np.clip(
+                    np.abs(value) - tau_s, 0, np.inf)
 
-        ######## FISTA ####################################################
+        # FISTA ####################################################
         beta_diff = (beta_next - beta)
-        t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
-        aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
+        t_next = 0.5 * (1.0 + np.sqrt(1.0 + 4.0 * t * t))
+        aux_beta = beta_next + ((t - 1.0) / t_next) * beta_diff
 
         # Convergence values
         max_diff = np.abs(beta_diff).max()
@@ -356,11 +357,13 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
         beta = beta_next
 
         # Stopping rule (exit even if beta_next contains only zeros)
-        if max_coef == 0.0 or (max_diff / max_coef) <= tolerance: break
+        if max_coef == 0.0 or (max_diff / max_coef) <= tolerance:
+            break
 
     if return_iterations:
-        return beta, k+1
+        return beta, k + 1
     return beta
+
 
 def _sigma(matrix, mu):
     n, p = matrix.shape
@@ -370,4 +373,4 @@ def _sigma(matrix, mu):
     else:
         tmp = np.dot(matrix.T, matrix)
 
-    return (la.norm(tmp, 2)/n) + mu
+    return (la.norm(tmp, 2) / n) + mu

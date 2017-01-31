@@ -27,41 +27,9 @@ with the rest of the package.
 
 import numpy as np
 
-__all__ = ('linear_range', 'geometric_range', 'standardize', 'center',
+__all__ = ('geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits')
-
-
-# Ranges functions ------------------------------------------------------------
-def linear_range(min_value, max_value, number):
-    r"""Linear range of values between min_value and max_value.
-
-    Sequence of ``number`` evenly spaced values from ``min_value``
-    to ``max_value``.
-
-    Parameters
-    ----------
-    min_value : float
-    max_value : float
-    number : int
-
-    Returns
-    -------
-    range : (``number``, ) ndarray
-
-    Examples
-    --------
-    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=4)
-    array([  0.        ,   3.33333333,   6.66666667,  10.        ])
-    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=2)
-    array([  0.,  10.])
-    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=1)
-    array([ 0.])
-    >>> l1l2py.tools.linear_range(min_value=0.0, max_value=10.0, number=0)
-    array([], dtype=float64)
-
-    """
-    return np.linspace(min_value, max_value, number)
 
 
 def geometric_range(min_value, max_value, number):
@@ -103,7 +71,7 @@ def geometric_range(min_value, max_value, number):
     array([], dtype=float64)
 
     """
-    ratio = (max_value/float(min_value))**(1.0/(number-1))
+    ratio = (max_value / float(min_value)) ** (1. / (number - 1))
     return min_value * (ratio ** np.arange(number))
 
 
@@ -237,9 +205,7 @@ def standardize(matrix, optional_matrix=None, return_factors=False):
     Traceback (most recent call last):
         ...
     ValueError: shape mismatch: objects cannot be broadcast to a single shape
-
     """
-
     if matrix.ndim == 2 and matrix.shape[0] == 1:
         raise ValueError("'matrix' must have more than one row")
 
@@ -431,7 +397,7 @@ def kfold_splits(labels, k, rseed=0):
     random.seed(rseed)
     indexes = range(len(labels))
     random.shuffle(indexes)
-    random.seed()  #restores random generation from a random seed
+    random.seed()  # restores random generation from a random seed
 
     return _splits(indexes, k)
 

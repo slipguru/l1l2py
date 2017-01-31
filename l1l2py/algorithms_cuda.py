@@ -4,47 +4,50 @@ This module contains the functions strictly related with the statistical
 elaboration of the data.
 
 """
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
-__all__ = ['l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path']
-
-from math import sqrt
-
-from .algorithms import l1l2_regularization, l1_bound, _sigma, ridge_regression, emergency_log ### check this one
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-
+import ctypes
 import numpy as np
+
 try:
     from scipy import linalg as la
 except ImportError:
     from numpy import linalg as la
-    
-import ctypes
 
-algorithms_lib = ctypes.CDLL(os.path.join(os.path.dirname(os.path.realpath(__file__)),'l1l2_path.so'), mode=ctypes.RTLD_GLOBAL)
+
+from .algorithms import (
+    l1l2_regularization, l1_bound, _sigma, ridge_regression, _emergency_log)
+
+
+__all__ = ('l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path')
+
+
+LIB_ALG = ctypes.CDLL(os.path.join(os.path.dirname(
+    os.path.realpath(__file__)), 'l1l2_path.so'), mode=ctypes.RTLD_GLOBAL)
+
 
 def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
-              tolerance=1e-5, adaptive=False, input_key = None):
+              tolerance=1e-5, adaptive=False, input_key=None):
     r"""Efficient solution of different `l1l2` regularization problems on
     increasing values of the `l1-norm` parameter.
 
@@ -93,62 +96,50 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
     -------
     beta_path : list of (P,) or (P, 1) ndarrays
         `l1l2` solutions with at least one non-zero element.
-
     """
-    
-    if not input_key is None:
+    if input_key is not None:
         emergency_log_file = '/tmp/{}.txt'.format(input_key)
     else:
         emergency_log_file = None
-    
+
     # emergency_log("l1l2_path_cuda [1]\n", emergency_log_file)
-    
-    from collections import deque
-    
     n, p = data.shape
-    
     XT = data.astype(np.float32)
     Y = labels.astype(np.float32)
-    
+
     n_tau = len(tau_range)
     adaptive = int(adaptive)
-    
-    tau_range = np.array(tau_range).astype(np.float32)
-    
-    beta = np.zeros((p,)).astype(np.float32)
+
+    tau_range = np.array(tau_range, dtype=np.float32)
+
+    beta = np.zeros(p, dtype=np.float32)
     # out = 6 * np.ones((n_tau,p)).astype(np.float32)
-    out = np.empty((n_tau,p)).astype(np.float32)
-    
+    out = np.empty((n_tau, p), dtype=np.float32)
+
     k_final = ctypes.c_int32()
     n_betas_out = ctypes.c_int32()
-    
+
     # emergency_log("l1l2_path_cuda [2]\n", emergency_log_file)
-    
-    algorithms_lib.l1l2_path_bridge(
+
+    LIB_ALG.l1l2_path_bridge(
         XT.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
         Y.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
         ctypes.c_int(n),
         ctypes.c_int(p),
         ctypes.c_float(mu),
-        tau_range.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_tau_range,
-        ctypes.c_int(n_tau), # int n_tau,
-        beta.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_beta,
-        out.ctypes.data_as(ctypes.POINTER(ctypes.c_float)), # float * h_out,
+        tau_range.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),  # float * h_tau_range,
+        ctypes.c_int(n_tau),  # int n_tau,
+        beta.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),  # float * h_beta,
+        out.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),  # float * h_out,
         ctypes.byref(n_betas_out),
         ctypes.byref(k_final),
-        ctypes.c_int(kmax), # int kmax,
-        ctypes.c_float(tolerance), # float tolerance,
-        ctypes.c_int(adaptive), # int adaptive
+        ctypes.c_int(kmax),  # int kmax,
+        ctypes.c_float(tolerance),  # float tolerance,
+        ctypes.c_int(adaptive),  # int adaptive
         ctypes.c_char_p(emergency_log_file)
     )
-    
+
     # emergency_log("l1l2_path_cuda [3]\n", emergency_log_file)
-    
-    out_list = list()
-    
-    for i in range(n_tau - n_betas_out.value, n_tau):
-        out_list.append(out[i,:])
-        
+    out_list = [out[i, :] for i in range(n_tau - n_betas_out.value, n_tau)]
     # emergency_log("l1l2_path_cuda [4]\n", emergency_log_file)
-    
     return out_list

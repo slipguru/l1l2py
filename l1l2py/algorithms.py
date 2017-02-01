@@ -82,11 +82,8 @@ def l1_bound(data, labels):
     >>> len(numpy.flatnonzero(beta))
     1
     """
-    n = data.shape[0]
     corr = np.abs(np.dot(data.T, labels))
-
-    tau_max = (corr.max() * (2.0/n))
-
+    tau_max = (corr.max() * (2. / data.shape[0]))
     return tau_max
 
 
@@ -190,10 +187,10 @@ def l1l2_path(data, labels, mu, tau_range, beta=None, kmax=100000,
         `l1l2` solutions with at least one non-zero element.
 
     """
-    if input_key is not None:
-        emergency_log_file = '/tmp/{}.txt'.format(input_key)
-    else:
-        emergency_log_file = None
+    # if input_key is not None:
+    #     emergency_log_file = '/tmp/{}.txt'.format(input_key)
+    # else:
+    #     emergency_log_file = None
 
     # emergency_log("l1l2_path [1]\n", emergency_log_file)
     n, p = data.shape

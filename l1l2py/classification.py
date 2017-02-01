@@ -22,6 +22,11 @@ except ImportError:
 
 
 def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adaptive=False):
+    """Fista algorithm for l1l2 regularization.
+
+    We minimize
+    (1/n) * norm(y - X w, 2)^2 + tau norm(w, 1) + mu norm(w, 2)^2
+    """
     n_samples = y.shape[0]
     n_features = beta.shape[0]
 
@@ -38,7 +43,8 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
     nsigma = n_samples * sigma
 
     # Starting conditions
-    aux_beta = beta
+    aux_beta = beta.copy()
+    beta_next = np.empty(n_features)
     t = 1.
 
     for n_iter in xrange(max_iter):
@@ -50,7 +56,9 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
 
         # Soft-Thresholding
         value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-        beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
+        # beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
+        np.clip(np.abs(value) - tau_s, 0, np.inf, beta_next)
+        beta_next *= np.sign(value)
 
         # ## Adaptive step size #######################################
         if adaptive:
@@ -71,8 +79,8 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
 
                 # Soft-Thresholding
                 value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-                beta_next = np.sign(value) * np.clip(
-                    np.abs(value) - tau_s, 0, np.inf)
+                np.clip(np.abs(value) - tau_s, 0, np.inf, beta_next)
+                beta_next *= np.sign(value)
 
         # FISTA ####################################################
         beta_diff = (beta_next - beta)
@@ -146,8 +154,7 @@ def l1l2_regularization(
             _pre_fit(X, y, Xy, precompute, normalize=False,
                      fit_intercept=False, copy=False)
     if alphas is None:
-        # No need to normalize of fit_intercept: it has been done
-        # above
+        # No need to normalize of fit_intercept: it has been done above
         alphas = _alpha_grid(X, y, Xy=Xy, l1_ratio=l1_ratio,
                              fit_intercept=False, eps=eps, n_alphas=n_alphas,
                              normalize=False, copy_X=False)
@@ -245,7 +252,7 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, ElasticNet):
     #              random_state=None, selection='cyclic'):
     path = staticmethod(l1l2_regularization)
 
-    def __init__(self, mu=1e-4, tau=1.0, fit_intercept=True, max_iter=10000,
+    def __init__(self, mu=.5, tau=1.0, fit_intercept=True, max_iter=10000,
                  use_gpu=False, tol=1e-4, l1_ratio=None, alpha=None,
                  threshold=1e-16, **kwargs):
         """INIT DOC."""

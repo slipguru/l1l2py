@@ -21,7 +21,52 @@ except ImportError:
 # from l1l2py.algorithms import ridge_regression
 
 
-def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adaptive=False):
+def get_lipschitz(data):
+    """Get the Lipschitz constant for a specific loss function.
+
+    Only square loss implemented.
+
+    Parameters
+    ----------
+    data : (n, d) float ndarray
+        data matrix
+    loss : string
+        the selected loss function in {'square', 'logit'}
+    Returns
+    ----------
+    L : float
+        the Lipschitz constant
+    """
+    n, p = data.shape
+
+    if p > n:
+        tmp = np.dot(data, data.T)
+    else:
+        tmp = np.dot(data.T, data)
+    return la.norm(tmp, 2)
+
+
+def prox_l1(w, alpha):
+    r"""Proximity operator for l1 norm.
+
+    :math:`\\hat{\\alpha}_{l,m} = sign(u_{l,m})\\left||u_{l,m}| - \\tau \\right|_+`
+    Parameters
+    ----------
+    u : ndarray
+        The vector (of the n-dimensional space) on witch we want
+        to compute the proximal operator
+    lambda_ : float
+        regularisation parameter
+    Returns
+    -------
+    ndarray : the vector corresponding to the application of the
+             proximity operator to u
+    """
+    return np.sign(w) * np.maximum(np.abs(w) - alpha, 0.)
+
+
+def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
+               adaptive=False):
     """Fista algorithm for l1l2 regularization.
 
     We minimize
@@ -30,35 +75,45 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
     n_samples = y.shape[0]
     n_features = beta.shape[0]
 
-    if n_samples > n_features:
-        XTY = np.dot(X.T, y)
+    Xt = X.transpose()
+    XTY = np.dot(Xt, y)
+    # XTX = np.dot(Xt, X)
+    # if n_samples > n_features:
+    #     XTY = np.dot(Xt, y)
 
     # First iteration with standard sigma
-    sigma = _sigma(X, mu)
-    if sigma < np.finfo(float).eps:  # is zero...
-        return beta, 0
+    lipschitz_constant = get_lipschitz(X)
+    sigma = lipschitz_constant / n_samples + mu
 
-    mu_s = mu / sigma
-    tau_s = tau / (2.0 * sigma)
-    nsigma = n_samples * sigma
+    if sigma < np.finfo(float).eps:  # is zero...
+        return beta, None, tol, 0
+
+    # mu_s = 1 - mu / sigma
+    mu_s = 1 - mu * n_samples / (lipschitz_constant + mu * n_samples)
+    # tau_s = tau / (2.0 * sigma)
+    tau_s = tau * n_samples / (2. * lipschitz_constant + mu * n_samples)
+    # nsigma = n_samples * sigma
+    gamma = 1. / (lipschitz_constant + mu * n_samples)
 
     # Starting conditions
-    aux_beta = beta.copy()
+    aux_beta = np.copy(beta)
     beta_next = np.empty(n_features)
     t = 1.
 
     for n_iter in xrange(max_iter):
         # Pre-calculated "heavy" computation
-        if n_samples > n_features:
-            precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
-        else:
-            precalc = np.dot(X.T, y - np.dot(X, aux_beta))
+        # if n_samples > n_features:
+        #     precalc = XTY - np.dot(Xt, np.dot(X, aux_beta))
+        # else:
+        #     precalc = np.dot(Xt, y - np.dot(X, aux_beta))
+        grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
 
         # Soft-Thresholding
-        value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-        # beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
-        np.clip(np.abs(value) - tau_s, 0, np.inf, beta_next)
-        beta_next *= np.sign(value)
+        # value = (precalc / nsigma) + (mu_s * aux_beta)
+        value = gamma * grad + (mu_s * aux_beta)
+        beta_next = prox_l1(value, tau_s)
+        # np.maximum(np.abs(value) - tau_s, 0, beta_next)
+        # beta_next *= np.sign(value)
 
         # ## Adaptive step size #######################################
         if adaptive:
@@ -74,18 +129,19 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
 
                 sigma = (num / np.dot(beta_diff, beta_diff))
                 mu_s = mu / sigma
-                tau_s = tau / (2.0*sigma)
+                tau_s = tau / (2. * sigma)
                 nsigma = n_samples * sigma
 
                 # Soft-Thresholding
-                value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
-                np.clip(np.abs(value) - tau_s, 0, np.inf, beta_next)
+                value = (precalc / nsigma) + ((1. - mu_s) * aux_beta)
+                # beta_next = np.sign(value) * np.maximum(np.abs(value) - tau_s, 0)
+                np.maximum(np.abs(value) - tau_s, 0, beta_next)
                 beta_next *= np.sign(value)
 
-        # FISTA ####################################################
+        # FISTA
         beta_diff = (beta_next - beta)
-        t_next = 0.5 * (1.0 + np.sqrt(1.0 + 4.0 * t * t))
-        aux_beta = beta_next + ((t - 1.0) / t_next) * beta_diff
+        t_next = 0.5 * (1 + np.sqrt(1 + 4 * t * t))
+        aux_beta = beta_next + ((t - 1) / t_next) * beta_diff
 
         # Convergence values
         max_diff = np.abs(beta_diff).max()
@@ -93,6 +149,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
 
         # Values update
         t = t_next
+        # beta = np.copy(beta_next)
         beta = beta_next
 
         # Stopping rule (exit even if beta_next contains only zeros)
@@ -100,18 +157,6 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive, adapti
             break
 
     return beta, None, tol, n_iter + 1
-
-
-def _sigma(matrix, mu):
-    n, p = matrix.shape
-
-    if p > n:
-        tmp = np.dot(matrix, matrix.T)
-    else:
-        tmp = np.dot(matrix.T, matrix)
-
-    return (la.norm(tmp, 2) / n) + mu
-
 
 
 def l1l2_regularization(
@@ -256,38 +301,31 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, ElasticNet):
                  use_gpu=False, tol=1e-4, l1_ratio=None, alpha=None,
                  threshold=1e-16, **kwargs):
         """INIT DOC."""
-        super(L1L2Classifier, self).__init__(
-            alpha=alpha, l1_ratio=l1_ratio, fit_intercept=fit_intercept,
-            max_iter=max_iter, tol=tol, **kwargs)
+        ElasticNet.__init__(self, alpha=alpha, l1_ratio=l1_ratio,
+                            fit_intercept=fit_intercept,
+                            max_iter=max_iter, tol=tol, **kwargs)
         self.mu = mu
         self.tau = tau
-        # self.lamda = lamda
-        self.fit_intercept = fit_intercept
         self.use_gpu = use_gpu
-        self.max_iter = max_iter
-        self.tol = tol
-        # self.path = l1l2_regularization
-        self.alpha = alpha
-        self.l1_ratio = l1_ratio
         self.threshold = threshold  # threshold to select relevant feature
 
-        if l1_ratio is not None and alpha is not None:
+
+    def fit(self, X, y, check_input=True):
+        if self.l1_ratio is not None and self.alpha is not None:
             # tau and mu are selected as enet
-            if l1_ratio == 1:
+            if self.l1_ratio == 1:
                 self.mu = 0
-                self.tau = 2 * alpha
-            elif l1_ratio == 0:
-                self.mu = 2 * alpha
+                self.tau = 2 * self.alpha
+            elif self.l1_ratio == 0:
+                self.mu = 2 * self.alpha
                 self.tau = 0
             else:
-                self.mu = 2 * alpha * (1 - l1_ratio)
-                self.tau = 2 * alpha * l1_ratio
+                self.mu = 2 * self.alpha * (1 - self.l1_ratio)
+                self.tau = 2 * self.alpha * self.l1_ratio
         else:
             self.l1_ratio = self.tau / (self.tau + 2 * self.mu)
             self.alpha = self.tau * .5 / self.l1_ratio
 
-
-    def fit(self, X, y, check_input=True):
         self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
         y = self._label_binarizer.fit_transform(y)
         if self._label_binarizer.y_type_.startswith('multilabel'):

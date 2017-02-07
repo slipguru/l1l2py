@@ -49,13 +49,13 @@ def get_lipschitz(data):
 def prox_l1(w, alpha):
     r"""Proximity operator for l1 norm.
 
-    :math:`\\hat{\\alpha}_{l,m} = sign(u_{l,m})\\left||u_{l,m}| - \\tau \\right|_+`
+    :math:`\\hat{\\alpha}_{l,m} = sign(u_{l,m})\\left||u_{l,m}| - \\alpha \\right|_+`
     Parameters
     ----------
     u : ndarray
         The vector (of the n-dimensional space) on witch we want
         to compute the proximal operator
-    lambda_ : float
+    alpha : float
         regularisation parameter
     Returns
     -------
@@ -103,9 +103,9 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
     for n_iter in xrange(max_iter):
         # Pre-calculated "heavy" computation
         # if n_samples > n_features:
-        #     precalc = XTY - np.dot(Xt, np.dot(X, aux_beta))
+        #     grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
         # else:
-        #     precalc = np.dot(Xt, y - np.dot(X, aux_beta))
+        #     grad = np.dot(Xt, y - np.dot(X, aux_beta))
         grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
 
         # Soft-Thresholding
@@ -128,15 +128,15 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
                 num = np.dot(tmp, tmp) / n_samples
 
                 sigma = (num / np.dot(beta_diff, beta_diff))
-                mu_s = mu / sigma
+                mu_s = 1 - mu / sigma
                 tau_s = tau / (2. * sigma)
                 nsigma = n_samples * sigma
 
                 # Soft-Thresholding
-                value = (precalc / nsigma) + ((1. - mu_s) * aux_beta)
-                # beta_next = np.sign(value) * np.maximum(np.abs(value) - tau_s, 0)
-                np.maximum(np.abs(value) - tau_s, 0, beta_next)
-                beta_next *= np.sign(value)
+                value = grad / nsigma + mu_s * aux_beta
+                beta_next = prox_l1(value, tau_s)
+                # np.maximum(np.abs(value) - tau_s, 0, beta_next)
+                # beta_next *= np.sign(value)
 
         # FISTA
         beta_diff = (beta_next - beta)
@@ -297,20 +297,46 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, ElasticNet):
     #              random_state=None, selection='cyclic'):
     path = staticmethod(l1l2_regularization)
 
-    def __init__(self, mu=.5, tau=1.0, fit_intercept=True, max_iter=10000,
-                 use_gpu=False, tol=1e-4, l1_ratio=None, alpha=None,
-                 threshold=1e-16, **kwargs):
-        """INIT DOC."""
-        ElasticNet.__init__(self, alpha=alpha, l1_ratio=l1_ratio,
-                            fit_intercept=fit_intercept,
-                            max_iter=max_iter, tol=tol, **kwargs)
+    def __init__(self, mu=.5, tau=1.0, use_gpu=False, threshold=1e-16,
+                 alpha=None, l1_ratio=None, fit_intercept=True,
+                 normalize=False, precompute=False, max_iter=10000,
+                 copy_X=True, tol=1e-4, warm_start=False, positive=False,
+                 random_state=None, selection='cyclic'):
         self.mu = mu
         self.tau = tau
         self.use_gpu = use_gpu
         self.threshold = threshold  # threshold to select relevant feature
 
+        self.alpha = alpha
+        self.l1_ratio = l1_ratio
+        self.coef_ = None
+        self.fit_intercept = fit_intercept
+        self.normalize = normalize
+        self.precompute = precompute
+        self.max_iter = max_iter
+        self.copy_X = copy_X
+        self.tol = tol
+        self.warm_start = warm_start
+        self.positive = positive
+        self.intercept_ = 0.0
+        self.random_state = random_state
+        self.selection = selection
 
     def fit(self, X, y, check_input=True):
+        """Fit model with fista.
+
+        Parameters
+        -----------
+        X : ndarray or scipy.sparse matrix, (n_samples, n_features)
+            Data
+
+        y : ndarray, shape (n_samples,) or (n_samples, n_targets)
+            Target
+
+        check_input : boolean, (default=True)
+            Allow to bypass several input checking.
+            Don't use this parameter unless you know what you do.
+        """
         if self.l1_ratio is not None and self.alpha is not None:
             # tau and mu are selected as enet
             if self.l1_ratio == 1:
@@ -344,15 +370,6 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, ElasticNet):
             ndim = 1
         self.coef_ = self.coef_.reshape(ndim, -1)
 
-        # from sklearn.utils import safe_mask
-        # mask = self.get_support().ravel()
-        # X_ = X[:, safe_mask(X, mask).ravel()]
-        # rls_coef_ = ridge_regression(X_, y, self.lamda)
-        # print rls_coef_
-        # # self.coef = rls_coef_
-        # self.coef_[:, mask] = rls_coef_
-        # print mask
-
         return self
 
     @property
@@ -364,19 +381,3 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, ElasticNet):
         scores = _get_feature_importances(self)
         self.threshold_ = _calculate_threshold(self, scores, self.threshold)
         return scores >= self.threshold_
-
-
-#     def run(self):
-#         # Execution
-#         result = l1l2py.model_selection(
-#             self._Xtr, self._Ytr, self._Xts, self._Yts,
-#             self._mu_range, self._tau_range, self._lambda_range,
-#             self.get_param('ms_split'), self.get_param(
-#                 'cv_error'), self.get_param('error'),
-#             data_normalizer=self.get_param('data_normalizer'),
-#             labels_normalizer=self.get_param('labels_normalizer'),
-#             sparse=self.get_param('sparse'),
-#             regularized=self.get_param('regularized'),
-#             return_predictions=self.get_param('return_predictions'),
-#             algorithm_version=self.get_algorithm_version()
-#         )

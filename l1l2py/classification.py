@@ -46,6 +46,25 @@ def get_lipschitz(data):
     return la.norm(tmp, 2)
 
 
+def least_square_step(y, X, Z):
+    """
+    Returns the point in witch we apply gradient descent
+    parameters
+    ----------
+    y : np-array
+        the labels vector
+    K : 2D np-array
+        the concatenation of all the kernels, of shape
+        n_samples, n_kernels*n_samples
+    Z : a linear combination of the last two coefficient vectors
+    returns
+    -------
+    res : np-array of shape n_samples*,_kernels
+          a point of the space where we will apply gradient descent
+    """
+    return np.dot(X.transpose(), y - np.dot(X, Z))
+
+
 def prox_l1(w, alpha):
     r"""Proximity operator for l1 norm.
 
@@ -75,8 +94,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
     n_samples = y.shape[0]
     n_features = beta.shape[0]
 
-    Xt = X.transpose()
-    XTY = np.dot(Xt, y)
+    # XTY = np.dot(Xt, y)
     # XTX = np.dot(Xt, X)
     # if n_samples > n_features:
     #     XTY = np.dot(Xt, y)
@@ -106,7 +124,8 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
         #     grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
         # else:
         #     grad = np.dot(Xt, y - np.dot(X, aux_beta))
-        grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
+        # grad = XTY - np.dot(Xt, np.dot(X, aux_beta))
+        grad = least_square_step(y, X, aux_beta)
 
         # Soft-Thresholding
         # value = (precalc / nsigma) + (mu_s * aux_beta)

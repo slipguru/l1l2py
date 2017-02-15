@@ -5,7 +5,7 @@ from distutils.core import setup
 pkg_path = os.path.dirname(__file__)
 
 # Package description
-README = os.path.join(pkg_path, 'README')
+README = os.path.join(pkg_path, 'README.md')
 lines = open(README).readlines()
 description = ''.join(lines[:2])
 long_description = ''.join(lines[2:])

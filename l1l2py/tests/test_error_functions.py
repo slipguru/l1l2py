@@ -1,26 +1,27 @@
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from nose.tools import *
+from nose.tools import assert_almost_equals, assert_equals, assert_equal
+
 from l1l2py.tools import *
 import l1l2py.algorithms as alg
 from l1l2py.tests import _TEST_DATA_PATH
@@ -40,8 +41,8 @@ class TestErrorFunctions(object):
         labels = np.ones(100)
         predictions = labels.copy()
         for exp_error in (0.0, 0.5, 0.75, 1.0):
-            index = exp_error*100
-            predictions[0:index] = -1
+            index = int(exp_error * 100)
+            predictions[:index] = -1
             error = classification_error(labels, predictions)
             assert_almost_equals(exp_error, error)
 
@@ -53,7 +54,7 @@ class TestErrorFunctions(object):
             assert_almost_equals(exp_error, error)
 
             error = balanced_classification_error(labels, predictions)
-            assert_almost_equals(0.0, error) # Always zero in LOO!
+            assert_almost_equals(0.0, error)  # Always zero in LOO!
 
             error = regression_error(labels, predictions)
             assert_almost_equals(exp_error, error)
@@ -77,9 +78,9 @@ class TestErrorFunctions(object):
         labels = np.ones(100)
         predictions = np.ones(100)
 
-        for imbalance in np.linspace(10, 90, 9):
+        for imbalance in map(int, np.linspace(10, 90, 9)):
             labels[:imbalance] = -1
-            exp_error = (imbalance * abs(-1 - labels.mean()))/ 100.0
+            exp_error = (imbalance * abs(-1 - labels.mean())) / 100.0
 
             error = balanced_classification_error(labels, predictions)
 
@@ -87,7 +88,7 @@ class TestErrorFunctions(object):
 
     def test_balance_weights(self):
         labels = [1, 1, -1, -1, -1]
-        predictions = [-1, -1, 1, 1, 1] # all errors
+        predictions = [-1, -1, 1, 1, 1]  # all errors
         default_weights = np.abs(center(np.asarray(labels)))
 
         exp_error = balanced_classification_error(labels, predictions)
@@ -101,7 +102,7 @@ class TestErrorFunctions(object):
 
         # Balanced classes
         labels = [1, 1, 1, -1, -1, -1]
-        predictions = [-1, -1, -1, 1, 1, 1] # all errors
+        predictions = [-1, -1, -1, 1, 1, 1]  # all errors
         exp_error = classification_error(labels, predictions)
         error = balanced_classification_error(labels, predictions)
         assert_equals(exp_error, error)

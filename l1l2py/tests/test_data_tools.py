@@ -1,23 +1,23 @@
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 from nose.tools import *
@@ -25,7 +25,7 @@ from l1l2py.tools import *
 from l1l2py.tests import _TEST_DATA_PATH
 
 class TestDataTools(object):
-    
+
     def setup(self):
         data = np.loadtxt(_TEST_DATA_PATH)
         self.X = data[:,:-1]
@@ -43,7 +43,7 @@ class TestDataTools(object):
 
     def test_linear_ranges(self):
         exp_lin = [ 0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
-        lin = linear_range(0.0, 1.0, 11)
+        lin = np.linspace(0.0, 1.0, 11)
 
         assert_true(np.allclose(exp_lin, lin))
 

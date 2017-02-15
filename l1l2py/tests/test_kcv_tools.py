@@ -1,23 +1,23 @@
-## This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-## and Annalisa Barla <annalisa.barla@unige.it>
-## Copyright (C) 2010 SlipGURU -
-## Statistical Learning and Image Processing Genoa University Research Group
-## Via Dodecaneso, 35 - 16146 Genova, ITALY.
-##
-## This file is part of L1L2Py.
-##
-## L1L2Py is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## L1L2Py is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
+# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
+# and Annalisa Barla <annalisa.barla@unige.it>
+# Copyright (C) 2010 SlipGURU -
+# Statistical Learning and Image Processing Genoa University Research Group
+# Via Dodecaneso, 35 - 16146 Genova, ITALY.
+#
+# This file is part of L1L2Py.
+#
+# L1L2Py is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# L1L2Py is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
 from nose.tools import *
@@ -103,27 +103,27 @@ class TestKCVTools(object):
         assert_equal(splits1, splits2)
         assert_not_equal(splits1, splits3)
         assert_not_equal(splits2, splits3)
-        
+
     def test_rseed_client_code(self):
         import random
-        
+
         labels = np.ones(10)
         labels[0:5] = -1
-        
+
         for split_func in (kfold_splits, stratified_kfold_splits):
             random.seed(1)
             indexes_1 = [random.random() for i in range(10)]
             split_func(labels, 2)
             indexes_2 = [random.random() for i in range(10)]
-            
-            assert_not_equal(indexes_1, indexes_2)        
-            
+
+            assert_not_equal(indexes_1, indexes_2)
+
             split_func(labels, 2)
             indexes_3 = [random.random() for i in range(10)]
-            
+
             assert_not_equal(indexes_1, indexes_2)
             assert_not_equal(indexes_1, indexes_3)
-            assert_not_equal(indexes_2, indexes_3)        
+            assert_not_equal(indexes_2, indexes_3)
 
     @staticmethod
     def _test_splits(labels_size, splits):

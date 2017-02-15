@@ -89,6 +89,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
     We minimize
     (1/n) * norm(y - X w, 2)^2 + tau norm(w, 1) + mu norm(w, 2)^2
     """
+    # print "tau", tau, "mu", mu
     n_samples = y.shape[0]
     n_features = beta.shape[0]
 
@@ -454,22 +455,19 @@ class L1L2(ElasticNet):
         """
         if self.l1_ratio is not None and self.alpha is not None:
             # tau and mu are selected as enet
-            if self.l1_ratio == 1:
-                self.mu = 0
-                self.tau = 2 * self.alpha
-            elif self.l1_ratio == 0:
-                self.mu = 2 * self.alpha
-                self.tau = 0
-            else:
-                self.mu = 2 * self.alpha * (1 - self.l1_ratio)
-                self.tau = 2 * self.alpha * self.l1_ratio
+            self.mu = self.alpha * (1 - self.l1_ratio)
+            self.tau = 2 * self.alpha * self.l1_ratio
         else:
-            self.l1_ratio = self.tau / (self.tau + 2 * self.mu)
-            self.alpha = self.tau * .5 / self.l1_ratio
+            if self.tau == 0:  # no l1 term, avoid ZeroDivisionError if mu=0
+                self.l1_ratio = 0
+            else:
+                self.l1_ratio = self.tau / (self.tau + self.mu * 2.)
+            self.alpha = 0.5 * self.tau + self.mu
 
         # self.coef_ = self.path(
         #     X, y, self.mu, self.tau, beta=None, kmax=self.max_iter,
         #     tolerance=self.tol, return_iterations=False, adaptive=False)
+        # print "tau", self.tau, "mu", self.mu, "alpha", self.alpha, "l1_ratio", self.l1_ratio
         super(L1L2, self).fit(X, y, check_input)
 
         return self

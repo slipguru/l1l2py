@@ -161,21 +161,6 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, L1L2):
             Allow to bypass several input checking.
             Don't use this parameter unless you know what you do.
         """
-        if self.l1_ratio is not None and self.alpha is not None:
-            # tau and mu are selected as enet
-            if self.l1_ratio == 1:
-                self.mu = 0
-                self.tau = 2 * self.alpha
-            elif self.l1_ratio == 0:
-                self.mu = 2 * self.alpha
-                self.tau = 0
-            else:
-                self.mu = 2 * self.alpha * (1 - self.l1_ratio)
-                self.tau = 2 * self.alpha * self.l1_ratio
-        else:
-            self.l1_ratio = self.tau / (self.tau + 2 * self.mu)
-            self.alpha = self.tau * .5 / self.l1_ratio
-
         self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
         y = self._label_binarizer.fit_transform(y)
         if self._label_binarizer.y_type_.startswith('multilabel'):

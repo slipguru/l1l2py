@@ -1,6 +1,7 @@
 include INSTALL
 include LICENSE
 include CHANGELOG
+include README.md
 
 include l1l2py/tests/data.txt
 

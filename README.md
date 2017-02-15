@@ -1,7 +1,7 @@
-![travis-status](https://travis-ci.org/slipguru/l1l2py.svg?branch=master)
-
 **l1l2py** is a Python package to perform variable selection by means
 of l1l2 regularization with double optimization.
+
+![travis-status](https://travis-ci.org/slipguru/l1l2py.svg?branch=master)
 
 **l1l2py** makes use of NumPy <http://numpy.scipy.org> to provide fast
 N-dimensional array manipulation and is the Python implementation of the

@@ -1,6 +1,11 @@
 language: python
 python:
   - "2.7"
+# indirect dependencies
+before_install:
+  - sudo apt-get install libblas-dev
+  - sudo apt-get install liblapack-dev
+  - sudo apt-get install gfortran
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests

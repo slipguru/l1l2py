@@ -1,3 +1,5 @@
+![travis-status](https://travis-ci.org/slipguru/l1l2py.svg?branch=master)
+
 **l1l2py** is a Python package to perform variable selection by means
 of l1l2 regularization with double optimization.
 

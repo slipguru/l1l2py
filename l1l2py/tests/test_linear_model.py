@@ -21,7 +21,6 @@
 
 import numpy as np
 from nose.tools import assert_equals, assert_raises, assert_true
-# from nose.plugins.attrib import attr
 
 from l1l2py.linear_model import L1L2
 from l1l2py.tests import _TEST_DATA_PATH

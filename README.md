@@ -20,6 +20,20 @@ Genoa University Research Group - Via Dodecaneso, 35 - 16146 Genova, ITALY
 **l1l2py** is free software. It is licensed under the GNU General Public
 License (GPL) version 3 <http://www.gnu.org/licenses/gpl.html>.
 
+## Installation
+
+**l1l2py** supports Python 2.7
+
+### Pip installation
+`$ pip install L1L2py`
+
+### Installing from sources
+```bash
+$ git clone https://github.com/slipguru/l1l2py
+$ cd l1l2py
+$ python setup.py install
+```
+
 ## Try L1L2py
 **l1l2py** can be applied both to regression and classification problems.
 

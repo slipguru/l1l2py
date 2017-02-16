@@ -143,11 +143,6 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, L1L2):
                  normalize=False, precompute=False, max_iter=10000,
                  copy_X=True, tol=1e-4, warm_start=False, positive=False,
                  random_state=None, selection='cyclic'):
-        """
-        Parameters
-        ----------
-
-        """
         self.mu = mu
         self.tau = tau
         self.use_gpu = use_gpu

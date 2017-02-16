@@ -20,17 +20,18 @@
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from nose.tools import *
-from nose.plugins.attrib import attr
-from l1l2py.algorithms import *
+from nose.tools import assert_equals, assert_equal, assert_true
+
+from l1l2py.algorithms import (
+    ridge_regression, l1l2_regularization, l1_bound, l1l2_path)
 from l1l2py.tests import _TEST_DATA_PATH
 
 class TestAlgorithms(object):
 
     def setup(self):
         data = np.loadtxt(_TEST_DATA_PATH)
-        self.X = data[:,:-1]
-        self.Y = data[:,-1]
+        self.X = data[:, :-1]
+        self.Y = data[:, -1]
 
     def test_data(self):
         assert_equals((30, 40), self.X.shape)
@@ -48,7 +49,7 @@ class TestAlgorithms(object):
 
         # case d > n
         X = self.X.T
-        Y = self.X[0:1,:].T
+        Y = self.X[0:1, :].T
         for penalty in np.linspace(0.0, 1.0, 5):
             value = ridge_regression(X, Y, penalty)
             assert_equal(value.shape, (X.shape[1], 1))

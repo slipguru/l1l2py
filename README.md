@@ -35,7 +35,7 @@ $ python setup.py install
 ```
 
 ## Try L1L2py
-**l1l2py** can be applied both to regression and classification problems.
+**l1l2py** can be used to solve both regression and classification problems.
 
 ### Regression
 ```python
@@ -74,8 +74,8 @@ array([[-0.        , -0.        ,  0.00013437,  0.00046001, -0.        ,
         -0.        , -0.        , -0.        , -0.        , -0.        ]])
 ```
 
-## For more information
-* [L1L2py documentation](http://www.slipguru.unige.it/Software/L1L2Py/)
+## More info
+Check the [L1L2py documentation](http://www.slipguru.unige.it/Software/L1L2Py/).
 
 ## Reference
 [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,

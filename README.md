@@ -11,6 +11,8 @@ of l1l2 regularization with double optimization.
 N-dimensional array manipulation and is the Python implementation of the
 method proposed and applied in [DeMol09]_.
 
+Also, it is fully compatible with `scikit-learn` Python toolbox for machine learning <http://scikit-learn.org/stable/>.
+
 **l1l2py** is a project of SLIPGURU - Statistical Learning and Image Processing
 Genoa University Research Group - Via Dodecaneso, 35 - 16146 Genova, ITALY
 <http://slipguru.unige.it/>.

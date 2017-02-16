@@ -74,8 +74,8 @@ array([[-0.        , -0.        ,  0.00013437,  0.00046001, -0.        ,
         -0.        , -0.        , -0.        , -0.        , -0.        ]])
 ```
 
-## More info
-Check the [L1L2py documentation](http://www.slipguru.unige.it/Software/L1L2Py/).
+## Help and support
+HTML documentation [L1L2py documentation](http://www.slipguru.unige.it/Software/L1L2Py/).
 
 ## Reference
 [DeMol09] C. De Mol, S. Mosci, M. Traskine, A. Verri,

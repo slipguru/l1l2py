@@ -20,10 +20,10 @@ Genoa University Research Group - Via Dodecaneso, 35 - 16146 Genova, ITALY
 **l1l2py** is free software. It is licensed under the GNU General Public
 License (GPL) version 3 <http://www.gnu.org/licenses/gpl.html>.
 
-#### Test L1L2py
+## Try L1L2py
 **l1l2py** can be applied both to regression and classification problems.
 
-##### Regression
+### Regression
 ```python
 >>> from l1l2py.linear_model import L1L2
 >>> from sklearn.datasets import load_boston
@@ -40,7 +40,7 @@ array([-0.07871197,  0.05147779, -0.00579328,  0.        , -0.        ,
        -0.77808095,  0.00851397, -0.75325201])
 ```
 
-##### Classification
+### Classification
 ```python
 >>> from l1l2py.classification import L1L2Classifier
 >>> from sklearn.datasets import load_breast_cancer

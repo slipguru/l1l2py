@@ -1,6 +1,7 @@
 language: python
 python:
   - "2.7"
+  - "3.5.2"
 # indirect dependencies
 before_install:
   - sudo apt-get install libblas-dev
@@ -16,6 +17,6 @@ notifications:
       - matteo.barbieri@dibris.unige.it
       - samuele.fiorini@dibris.unige.it
       - federico.tomasi@dibris.unige.it
-   on_success: never # default: change
-   on_failure: change # default: always
+   on_success: never  # default: change
+   on_failure: always # default: always
 

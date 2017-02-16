@@ -1,7 +1,6 @@
 language: python
 python:
   - "2.7"
-  - "3.5.2"
 # indirect dependencies
 before_install:
   - sudo apt-get install libblas-dev

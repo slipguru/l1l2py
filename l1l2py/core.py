@@ -2,11 +2,13 @@
 
 In this module are implemented the two main stages of the l1l2 with
 double optimization variable selection.
-
 """
-# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-# and Annalisa Barla <annalisa.barla@unige.it>
-# Copyright (C) 2010 SlipGURU -
+
+# This code is written by
+#       Salvatore Masecchia <salvatore.masecchia@unige.it>
+#       Annalisa Barla <annalisa.barla@unige.it>
+#       Federico Tomasi <federico.tomasi@dibris.unige.it>
+# Copyright (C) 2017 SlipGURU -
 # Statistical Learning and Image Processing Genoa University Research Group
 # Via Dodecaneso, 35 - 16146 Genova, ITALY.
 #
@@ -24,6 +26,7 @@ double optimization variable selection.
 #
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
+
 import itertools
 import numpy as np
 

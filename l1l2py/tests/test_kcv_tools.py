@@ -1,5 +1,6 @@
-# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-# and Annalisa Barla <annalisa.barla@unige.it>
+# This code is written by
+#       Salvatore Masecchia <salvatore.masecchia@unige.it>
+#       Annalisa Barla <annalisa.barla@unige.it>
 # Copyright (C) 2010 SlipGURU -
 # Statistical Learning and Image Processing Genoa University Research Group
 # Via Dodecaneso, 35 - 16146 Genova, ITALY.

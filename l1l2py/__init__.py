@@ -20,11 +20,13 @@ l1l2py.algorithms
     Efficiently implements the underlying optimization algorithms.
 l1l2py.tools
     Implements miscellaneous useful tools.
-
 """
-# This code is written by Salvatore Masecchia <salvatore.masecchia@unige.it>
-# and Annalisa Barla <annalisa.barla@unige.it>
-# Copyright (C) 2010 SlipGURU -
+
+# This code is written by
+#       Salvatore Masecchia <salvatore.masecchia@unige.it>
+#       Annalisa Barla <annalisa.barla@unige.it>
+#       Federico Tomasi <federico.tomasi@dibris.unige.it>
+# Copyright (C) 2017 SlipGURU -
 # Statistical Learning and Image Processing Genoa University Research Group
 # Via Dodecaneso, 35 - 16146 Genova, ITALY.
 #
@@ -43,13 +45,11 @@ l1l2py.tools
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
-import tools
-
-from core import *
+# from core import *
 # from _version import version as __version__
 
+from linear_model import L1L2
 from classification import L1L2Classifier
-
 
 # major number for main changes
 # minor number for new features

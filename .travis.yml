@@ -11,12 +11,12 @@ before_install:
 install: "pip install -r requirements.txt"
 # command to run tests
 script: nosetests
+# configure notifications
 notifications:
   email:
     recipients:
       - matteo.barbieri@dibris.unige.it
       - samuele.fiorini@dibris.unige.it
       - federico.tomasi@dibris.unige.it
-   on_success: never  # default: change
-   on_failure: always # default: always
-
+    on_success: never # default: change
+    on_failure: always # default: always

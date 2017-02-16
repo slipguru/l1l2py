@@ -25,6 +25,11 @@ from nose.tools import *
 from l1l2py.tools import *
 from l1l2py.tests import _TEST_DATA_PATH
 
+try:
+    xrange
+except:
+    xrange = range
+
 class TestKCVTools(object):
 
     def setup(self):

@@ -25,9 +25,13 @@ with the rest of the package.
 #
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
 import numpy as np
 
+try:
+    xrange
+except:
+    xrange = range
+    
 __all__ = ('geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits')
@@ -396,7 +400,7 @@ def kfold_splits(labels, k, rseed=0):
 
     import random
     random.seed(rseed)
-    indexes = range(len(labels))
+    indexes = list(range(len(labels)))
     random.shuffle(indexes)
     random.seed()  # restores random generation from a random seed
 

@@ -21,12 +21,18 @@
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import numpy as np
 from nose.tools import assert_equals, assert_raises, assert_true
 # from nose.plugins.attrib import attr
 
 from l1l2py.core import minimal_model, nested_models, model_selection
 from l1l2py.tests import _TEST_DATA_PATH
+
+try:
+    xrange
+except:
+    xrange = range
 
 class TestCore(object):
 
@@ -167,6 +173,7 @@ class TestCore(object):
 
     def test_nested_models(self):
         from l1l2py import tools
+        import sys
         splits = tools.kfold_splits(self.Y, 2)
         tr_idx, ts_idx = splits[0]
         data, test_data = self.X[tr_idx, :], self.X[ts_idx, :]
@@ -195,7 +202,6 @@ class TestCore(object):
         for i in xrange(1, len(mu_range)):
             s_prev = selected_list[i-1]
             s = selected_list[i]
-
             assert_true(len(s_prev[s_prev]) <= len(s[s]))
 
     def test_nested_models_predictions(self):

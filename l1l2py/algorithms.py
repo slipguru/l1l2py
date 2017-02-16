@@ -33,6 +33,10 @@ except ImportError:
 
 from collections import deque
 
+try:
+    xrange
+except:
+    xrange = range
 
 __all__ = ('l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path')
 

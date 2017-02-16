@@ -26,7 +26,7 @@ double optimization variable selection.
 #
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
-
+from __future__ import print_function
 import itertools
 import numpy as np
 
@@ -34,6 +34,13 @@ from l1l2py.algorithms import ridge_regression, l1l2_regularization
 
 
 __all__ = ('model_selection', 'minimal_model', 'nested_models')
+
+try:
+    from itertools import izip
+    xrange
+except:
+    izip = zip
+    xrange = range
 
 
 def _emergency_log(message, file_path='/tmp/emergency_log.txt'):
@@ -121,7 +128,7 @@ def model_selection(
                                cv_splits, cv_error_function,
                                data_normalizer, labels_normalizer,
                                algorithm_version=algorithm_version)
-    out = dict(itertools.izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
+    out = dict(izip(('kcv_err_ts', 'kcv_err_tr'), stage1_out))
 
     # KCV MINIMUM SELECTION
     err_ts = out['kcv_err_ts']
@@ -144,7 +151,7 @@ def model_selection(
         keys.append('prediction_ts_list')
         keys.append('prediction_tr_list')
 
-    out.update(itertools.izip(keys, stage2_out))
+    out.update(izip(keys, stage2_out))
 
     return out
 
@@ -158,7 +165,7 @@ def _minimum_selection(tau_idxs, lambda_idxs, sparse=False, regularized=False):
     from collections import defaultdict
 
     d = defaultdict(list)
-    for t, l in itertools.izip(tau_idxs, lambda_idxs):
+    for t, l in izip(tau_idxs, lambda_idxs):
         d[t].append(l)
 
     tau_idx = max(d.keys()) if sparse else min(d.keys())
@@ -273,7 +280,7 @@ def minimal_model(data, labels, mu, tau_range, lambda_range,
 
         # For each sparse model builds a
         # rls classifier for each value of lambda
-        for j, beta in itertools.izip(xrange(max_tau_num), beta_casc):
+        for j, beta in izip(xrange(max_tau_num), beta_casc):
             selected = (beta.flat != 0)
             for k, lam in enumerate(lambda_range):
                 beta = ridge_regression(data_tr[:, selected], labels_tr, lam)

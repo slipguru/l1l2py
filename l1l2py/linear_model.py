@@ -23,7 +23,7 @@
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-
+from six.moves import xrange
 from sklearn.linear_model import ElasticNet
 from sklearn.linear_model.base import _pre_fit
 from sklearn.linear_model.coordinate_descent import _alpha_grid
@@ -308,7 +308,8 @@ def l1l2_regularization(
         coefs[..., i] = coef_
         dual_gaps[i] = dual_gap_
         n_iters.append(n_iter_)
-        if dual_gap_ > eps_:
+        #if dual_gap_ > eps_:  # TODO evaluate the dual gap
+        if n_iter_ >= max_iter:
             import warnings
             warnings.warn('Objective did not converge.' +
                           ' You might want' +

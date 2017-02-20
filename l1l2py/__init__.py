@@ -55,4 +55,4 @@ from .classification import L1L2Classifier
 # minor number for new features
 # release number for bug fixes and minor updates
 # status = {'alpha', 'beta', None}
-__version__ = '2.0.0a'
+__version__ = '1.1.0'

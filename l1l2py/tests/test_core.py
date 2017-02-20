@@ -25,14 +25,11 @@ from __future__ import print_function
 import numpy as np
 from nose.tools import assert_equals, assert_raises, assert_true
 # from nose.plugins.attrib import attr
+from six.moves import xrange
 
 from l1l2py.core import minimal_model, nested_models, model_selection
 from l1l2py.tests import _TEST_DATA_PATH
 
-try:
-    xrange
-except:
-    xrange = range
 
 class TestCore(object):
 

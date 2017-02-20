@@ -26,21 +26,15 @@ double optimization variable selection.
 #
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import print_function
-import itertools
 import numpy as np
 
+from six.moves import xrange, zip as izip
 from l1l2py.algorithms import ridge_regression, l1l2_regularization
 
 
 __all__ = ('model_selection', 'minimal_model', 'nested_models')
-
-try:
-    from itertools import izip
-    xrange
-except:
-    izip = zip
-    xrange = range
 
 
 def _emergency_log(message, file_path='/tmp/emergency_log.txt'):

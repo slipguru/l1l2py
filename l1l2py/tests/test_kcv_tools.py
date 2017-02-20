@@ -24,11 +24,8 @@ import numpy as np
 from nose.tools import *
 from l1l2py.tools import *
 from l1l2py.tests import _TEST_DATA_PATH
+from six.moves import xrange
 
-try:
-    xrange
-except:
-    xrange = range
 
 class TestKCVTools(object):
 

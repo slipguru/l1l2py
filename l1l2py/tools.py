@@ -26,12 +26,9 @@ with the rest of the package.
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
+from six.moves import xrange
 
-try:
-    xrange
-except:
-    xrange = range
-    
+
 __all__ = ('geometric_range', 'standardize', 'center',
            'classification_error', 'balanced_classification_error',
            'regression_error', 'kfold_splits', 'stratified_kfold_splits')

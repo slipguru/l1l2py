@@ -32,11 +32,7 @@ except ImportError:
     from numpy import linalg as la
 
 from collections import deque
-
-try:
-    xrange
-except:
-    xrange = range
+from six.moves import xrange
 
 __all__ = ('l1_bound', 'ridge_regression', 'l1l2_regularization', 'l1l2_path')
 

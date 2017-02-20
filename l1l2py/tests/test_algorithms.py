@@ -21,17 +21,12 @@
 
 import numpy as np
 from nose.tools import assert_equals, assert_equal, assert_true
+from six.moves import xrange
 
 from l1l2py.algorithms import (
     ridge_regression, l1l2_regularization, l1_bound, l1l2_path)
 from l1l2py.tests import _TEST_DATA_PATH
 
-try:
-    from itertools import izip
-    xrange
-except:
-    izip = zip
-    xrange = range
 
 class TestAlgorithms(object):
 

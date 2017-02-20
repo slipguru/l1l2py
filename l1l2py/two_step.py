@@ -21,8 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import RidgeClassifier
 from sklearn.utils.validation import check_is_fitted

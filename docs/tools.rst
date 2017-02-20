@@ -26,7 +26,6 @@ The functions included in this module are divided in four groups:
 Range generators
 ================  
 
-.. autofunction:: linear_range
 .. autofunction:: geometric_range
 
 

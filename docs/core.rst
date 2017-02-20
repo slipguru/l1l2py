@@ -69,14 +69,14 @@ runs the two stages sequentially.
 
 Stage I: Minimal Model Selection
 ================================
-.. autofunction:: minimal_model
+.. autofunction:: l1l2py.core.minimal_model
 
 .. _stage_ii:
 
 Stage II: Nested lists generation
 =================================
-.. autofunction:: nested_models
+.. autofunction:: l1l2py.core.nested_models
 
 Complete model selection
 ========================
-.. autofunction:: model_selection
+.. autofunction:: l1l2py.core.model_selection

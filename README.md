@@ -9,7 +9,7 @@ of l1l2 regularization with double optimization.
 
 **l1l2py** makes use of `numpy` <http://numpy.scipy.org> to provide fast
 N-dimensional array manipulation and it is the Python implementation of the
-method proposed and applied in [DeMol09]_.
+method proposed and applied in [DeMol09].
 
 **l1l2py** is fully compatible with `scikit-learn` Python toolbox for machine learning <http://scikit-learn.org/stable/>.
 

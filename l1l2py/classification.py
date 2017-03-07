@@ -21,17 +21,16 @@
 # You should have received a copy of the GNU General Public License
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
+from sklearn.linear_model import RidgeClassifier
 from sklearn.linear_model.base import LinearClassifierMixin
-from sklearn.feature_selection.base import SelectorMixin
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.utils.validation import check_is_fitted
-from sklearn.feature_selection.from_model import _get_feature_importances
-from sklearn.feature_selection.from_model import _calculate_threshold
 
 from l1l2py.linear_model import L1L2
 
 
-class L1L2Classifier(LinearClassifierMixin, SelectorMixin, L1L2):
+class L1L2Classifier(LinearClassifierMixin, L1L2):
     """Classification with combined L1 and L2 priors as regularizer.
 
     Minimizes the objective function::
@@ -202,8 +201,50 @@ class L1L2Classifier(LinearClassifierMixin, SelectorMixin, L1L2):
     def classes_(self):
         return self._label_binarizer.classes_
 
-    def _get_support_mask(self):
-        check_is_fitted(self, "n_iter_")
-        scores = _get_feature_importances(self)
-        self.threshold_ = _calculate_threshold(self, scores, self.threshold)
-        return scores >= self.threshold_
+
+class L1L2TwoStepClassifier(Pipeline):
+    """TODO docstring."""
+
+    def __init__(self, mu=.5, tau=1.0, lamda=1, use_gpu=False, threshold=1e-16,
+                 alpha=None, l1_ratio=None, fit_intercept=True,
+                 normalize=False, precompute=False, max_iter=10000,
+                 copy_X=True, tol=1e-4, warm_start=False, positive=False,
+                 random_state=None, selection='cyclic'):
+        """INIT DOC."""
+        vs = L1L2(mu=mu, tau=tau, use_gpu=use_gpu, threshold=threshold,
+                  alpha=alpha, l1_ratio=l1_ratio, fit_intercept=fit_intercept,
+                  normalize=normalize, precompute=precompute,
+                  max_iter=max_iter, copy_X=copy_X, tol=tol,
+                  warm_start=warm_start, positive=positive,
+                  random_state=random_state, selection=selection)
+        mdl = RidgeClassifier(
+            alpha=lamda, fit_intercept=fit_intercept,
+            normalize=normalize, copy_X=copy_X, max_iter=max_iter,
+            tol=tol, random_state=random_state)
+        super(L1L2TwoStepClassifier, self).__init__(
+            (('l1l2', vs), ('ridge', mdl)))
+
+        self.mu = mu
+        self.tau = tau
+        self.lamda = lamda
+        self.alpha = alpha
+        self.l1_ratio = l1_ratio
+        self.use_gpu = use_gpu
+        self.threshold = threshold
+
+        self.fit_intercept = fit_intercept
+        self.normalize = normalize
+        self.precompute = precompute
+        self.max_iter = max_iter
+        self.copy_X = copy_X
+        self.tol = tol
+        self.warm_start = warm_start
+        self.positive = positive
+        self.intercept_ = 0.0
+        self.random_state = random_state
+        self.selection = selection
+
+    @property
+    def coef_(self):
+        check_is_fitted(self.steps[1][1], "coef_")
+        return self.steps[1][1].coef_

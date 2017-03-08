@@ -25,6 +25,8 @@
 # along with L1L2Py. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
+import six
+
 from six.moves import xrange
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.feature_selection.base import SelectorMixin
@@ -41,7 +43,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils import check_array
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
-from sklearn.exceptions import NotFittedError
 
 # from l1l2py.algorithms import l1l2_regularization
 try:
@@ -124,7 +125,6 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
     We minimize
     (1/n) * norm(y - X w, 2)^2 + tau norm(w, 1) + mu norm(w, 2)^2
     """
-    # print "tau", tau, "mu", mu
     n_samples = y.shape[0]
     n_features = beta.shape[0]
 
@@ -143,7 +143,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
     # mu_s = 1 - mu / sigma
     mu_s = 1 - mu * n_samples / (lipschitz_constant + mu * n_samples)
     # tau_s = tau / (2.0 * sigma)
-    tau_s = tau * n_samples / (2. * lipschitz_constant + mu * n_samples)
+    tau_s = tau * n_samples * 0.5 / (lipschitz_constant + mu * n_samples)
     # nsigma = n_samples * sigma
     gamma = 1. / (lipschitz_constant + mu * n_samples)
 
@@ -162,7 +162,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
         grad = least_square_step(y, X, aux_beta)
 
         # Soft-Thresholding
-        # value = (precalc / nsigma) + (mu_s * aux_beta)
+        # value = (grad / nsigma) + (mu_s * aux_beta)
         value = gamma * grad + (mu_s * aux_beta)
         beta_next = prox_l1(value, tau_s)
         # np.maximum(np.abs(value) - tau_s, 0, beta_next)
@@ -504,6 +504,7 @@ class L1L2(SelectorMixin, ElasticNet):
         # self.coef_ = self.path(
         #     X, y, self.mu, self.tau, beta=None, kmax=self.max_iter,
         #     tolerance=self.tol, return_iterations=False, adaptive=False)
+        # print "l1l2 fit tau", self.tau, "mu", self.mu, "alpha", self.alpha, "l1_ratio", self.l1_ratio
         super(L1L2, self).fit(X, y, check_input)
 
         return self
@@ -516,125 +517,124 @@ class L1L2(SelectorMixin, ElasticNet):
 
 
 class L1L2TwoStep(Pipeline):
-        r"""L1L2 penalized linear regression with overshinking correction.
+    r"""L1L2 penalized linear regression with overshinking correction.
 
-        Linear regression with combined L1 and L2 priors as regularizer,
-        followed by a ridge regression on the selected variables.
+    Linear regression with combined L1 and L2 priors as regularizer,
+    followed by a ridge regression on the selected variables.
 
-        Minimizes the objective function::
-                1 / n_samples * ||y - Xw||^2_2
-                + tau * ||w||_1
-                + mu * ||w||^2_2
+    Minimizes the objective function::
+            1 / n_samples * ||y - Xw||^2_2
+            + tau * ||w||_1
+            + mu * ||w||^2_2
 
-        followed by the minimization of::
-                1 / n_samples * ||y - X_tilde w_tilde||^2_2
-                + lambda * ||w_tilde||^2_2
+    followed by the minimization of::
+            1 / n_samples * ||y - X_tilde w_tilde||^2_2
+            + lambda * ||w_tilde||^2_2
 
 
-        in which `w_tilde` and `X_tilde`
-        represent, respectively, the weights vector and the input matrix
-        restricted to the variables selected by the l1l2 selection.
+    in which `w_tilde` and `X_tilde`
+    represent, respectively, the weights vector and the input matrix
+    restricted to the variables selected by the l1l2 selection.
 
-        Parameters
-        ----------
-        tau : float, optional, default 1
-            Constant that multiplies the l1 norm.
+    Parameters
+    ----------
+    tau : float, optional, default 1
+        Constant that multiplies the l1 norm.
 
-        mu : float, optional, default 0.5
-            Constant that multiplies the l2 norm.
+    mu : float, optional, default 0.5
+        Constant that multiplies the l2 norm.
 
-        use_gpu : bool, optional, default False
-            If True, use the implementation of FISTA using the GPU.
-            Currently ignored.
+    use_gpu : bool, optional, default False
+        If True, use the implementation of FISTA using the GPU.
+        Currently ignored.
 
-        alpha : float, optional, default None
-            Constant that multiplies the penalty terms. Defaults to None.
-            This is for parallel with sklearn ElasticNet class.
-            See the notes for the exact mathematical meaning of this
-            parameter.``alpha = 0`` is equivalent to an ordinary least square,
-            solved by the :class:`LinearRegression` object. For numerical
-            reasons, using ``alpha = 0`` with the ``Lasso`` object is not advised.
-            Given this, you should use the :class:`LinearRegression` object.
+    alpha : float, optional, default None
+        Constant that multiplies the penalty terms. Defaults to None.
+        This is for parallel with sklearn ElasticNet class.
+        See the notes for the exact mathematical meaning of this
+        parameter.``alpha = 0`` is equivalent to an ordinary least square,
+        solved by the :class:`LinearRegression` object. For numerical
+        reasons, using ``alpha = 0`` with the ``Lasso`` object is not advised.
+        Given this, you should use the :class:`LinearRegression` object.
 
-        l1_ratio : float, optional, default None
-            This is for parallel with sklearn ElasticNet class.
-            The ElasticNet mixing parameter, with ``0 <= l1_ratio <= 1``. For
-            ``l1_ratio = 0`` the penalty is an L2 penalty. ``For l1_ratio = 1`` it
-            is an L1 penalty.  For ``0 < l1_ratio < 1``, the penalty is a
-            combination of L1 and L2.
+    l1_ratio : float, optional, default None
+        This is for parallel with sklearn ElasticNet class.
+        The ElasticNet mixing parameter, with ``0 <= l1_ratio <= 1``. For
+        ``l1_ratio = 0`` the penalty is an L2 penalty. ``For l1_ratio = 1`` it
+        is an L1 penalty.  For ``0 < l1_ratio < 1``, the penalty is a
+        combination of L1 and L2.
 
-        fit_intercept : bool
-            Whether the intercept should be estimated or not. If ``False``, the
-            data is assumed to be already centered.
+    fit_intercept : bool
+        Whether the intercept should be estimated or not. If ``False``, the
+        data is assumed to be already centered.
 
-        normalize : boolean, optional, default False
-            If ``True``, the regressors X will be normalized before regression.
-            This parameter is ignored when ``fit_intercept`` is set to ``False``.
-            When the regressors are normalized, note that this makes the
-            hyperparameters learnt more robust and almost independent of the number
-            of samples. The same property is not valid for standardized data.
-            However, if you wish to standardize, please use
-            :class:`preprocessing.StandardScaler` before calling ``fit`` on an
-            estimator with ``normalize=False``.
+    normalize : boolean, optional, default False
+        If ``True``, the regressors X will be normalized before regression.
+        This parameter is ignored when ``fit_intercept`` is set to ``False``.
+        When the regressors are normalized, note that this makes the
+        hyperparameters learnt more robust and almost independent of the number
+        of samples. The same property is not valid for standardized data.
+        However, if you wish to standardize, please use
+        :class:`preprocessing.StandardScaler` before calling ``fit`` on an
+        estimator with ``normalize=False``.
 
-        precompute : True | False | array-like
-            Whether to use a precomputed Gram matrix to speed up
-            calculations. The Gram matrix can also be passed as argument.
-            For sparse input this option is always ``True`` to preserve sparsity.
+    precompute : True | False | array-like
+        Whether to use a precomputed Gram matrix to speed up
+        calculations. The Gram matrix can also be passed as argument.
+        For sparse input this option is always ``True`` to preserve sparsity.
 
-        max_iter : int, optional
-            The maximum number of iterations
+    max_iter : int, optional
+        The maximum number of iterations
 
-        copy_X : boolean, optional, default True
-            If ``True``, X will be copied; else, it may be overwritten.
+    copy_X : boolean, optional, default True
+        If ``True``, X will be copied; else, it may be overwritten.
 
-        tol : float, optional
-            The tolerance for the optimization: if the updates are
-            smaller than ``tol``, the optimization code checks the
-            dual gap for optimality and continues until it is smaller
-            than ``tol``.
+    tol : float, optional
+        The tolerance for the optimization: if the updates are
+        smaller than ``tol``, the optimization code checks the
+        dual gap for optimality and continues until it is smaller
+        than ``tol``.
 
-        warm_start : bool, optional
-            When set to ``True``, reuse the solution of the previous call to fit as
-            initialization, otherwise, just erase the previous solution.
+    warm_start : bool, optional
+        When set to ``True``, reuse the solution of the previous call to fit as
+        initialization, otherwise, just erase the previous solution.
 
-        positive : bool, optional
-            When set to ``True``, forces the coefficients to be positive.
+    positive : bool, optional
+        When set to ``True``, forces the coefficients to be positive.
 
-        selection : str, default 'cyclic'
-            If set to 'random', a random coefficient is updated every iteration
-            rather than looping over features sequentially by default. This
-            (setting to 'random') often leads to significantly faster convergence
-            especially when tol is higher than 1e-4.
+    selection : str, default 'cyclic'
+        If set to 'random', a random coefficient is updated every iteration
+        rather than looping over features sequentially by default. This
+        (setting to 'random') often leads to significantly faster convergence
+        especially when tol is higher than 1e-4.
 
-        random_state : int, RandomState instance, or None (default)
-            The seed of the pseudo random number generator that selects
-            a random feature to update. Useful only when selection is set to
-            'random'.
+    random_state : int, RandomState instance, or None (default)
+        The seed of the pseudo random number generator that selects
+        a random feature to update. Useful only when selection is set to
+        'random'.
 
-        Attributes
-        ----------
-        coef_ : array, shape (n_features,) | (n_targets, n_features)
-            parameter vector (w in the cost function formula)
+    Attributes
+    ----------
+    coef_ : array, shape (n_features,) | (n_targets, n_features)
+        parameter vector (w in the cost function formula)
 
-        sparse_coef_ : scipy.sparse matrix, shape (n_features, 1) | \
-                (n_targets, n_features)
-            ``sparse_coef_`` is a readonly property derived from ``coef_``
+    sparse_coef_ : scipy.sparse matrix, shape (n_features, 1) | \
+            (n_targets, n_features)
+        ``sparse_coef_`` is a readonly property derived from ``coef_``
 
-        intercept_ : float | array, shape (n_targets,)
-            independent term in decision function.
+    intercept_ : float | array, shape (n_targets,)
+        independent term in decision function.
 
-        n_iter_ : array-like, shape (n_targets,)
-            number of iterations run by the coordinate descent solver to reach
-            the specified tolerance.
-        """
+    n_iter_ : array-like, shape (n_targets,)
+        number of iterations run by the coordinate descent solver to reach
+        the specified tolerance.
+    """
 
     def __init__(self, mu=.5, tau=1.0, lamda=1, use_gpu=False, threshold=1e-16,
                  alpha=None, l1_ratio=None, fit_intercept=True,
                  normalize=False, precompute=False, max_iter=10000,
                  copy_X=True, tol=1e-4, warm_start=False, positive=False,
                  random_state=None, selection='cyclic'):
-        """INIT DOC."""
         vs = L1L2(mu=mu, tau=tau, use_gpu=use_gpu, threshold=threshold,
                   alpha=alpha, l1_ratio=l1_ratio, fit_intercept=fit_intercept,
                   normalize=normalize, precompute=precompute,
@@ -685,7 +685,17 @@ class L1L2TwoStep(Pipeline):
         -------
         self : Returns self.
         """
-        super(L1L2TwoStep, self).fit(X, y, **fit_params)
+        fit_params_ = {}
+        # account for different names
+        map_l1l2 = dict(check_input='check_input')
+        for mapped, param in six.iteritems(map_l1l2):
+            if fit_params.get(param, None) is not None:
+                fit_params_['__'.join(('l1l2', mapped))] = fit_params[param]
+        map_ridge = dict(sample_weight='sample_weight')
+        for mapped, param in six.iteritems(map_ridge):
+            if fit_params.get(param, None) is not None:
+                fit_params_['__'.join(('ridge', mapped))] = fit_params[param]
+        super(L1L2TwoStep, self).fit(X, y, **fit_params_)
 
         # self.coef_ contains a zero vector apart from coef_ selected by Ridge
         l1l2_coef_ = self.steps[0][1].coef_
@@ -701,6 +711,36 @@ class L1L2TwoStep(Pipeline):
     # def coef_(self):
     #     check_is_fitted(self.steps[1][1], "coef_")
     #     return self.steps[1][1].coef_
+
+    def set_params(self, **kwargs):
+        """Set the parameters of this estimator.
+
+        Valid parameter keys can be listed with ``get_params()``.
+
+        Returns
+        -------
+        self
+        """
+        # kwargs_ = {}
+        # account for different names
+        map_l1l2 = dict(
+            mu='mu', tau='tau', use_gpu='use_gpu', threshold='threshold',
+            alpha='alpha', l1_ratio='l1_ratio', fit_intercept='fit_intercept',
+            normalize='normalize', precompute='precompute',
+            max_iter='max_iter', copy_X='copy_X', tol='tol',
+            warm_start='warm_start', positive='positive',
+            random_state='random_state', selection='selection')
+        for mapped, param in six.iteritems(map_l1l2):
+            if kwargs.get(param, None) is not None:
+                kwargs['__'.join(('l1l2', mapped))] = kwargs[param]
+        map_ridge = dict(
+            alpha='lamda', fit_intercept='fit_intercept',
+            normalize='normalize', copy_X='copy_X', max_iter='max_iter',
+            tol='tol', random_state='random_state')
+        for mapped, param in six.iteritems(map_ridge):
+            if kwargs.get(param, None) is not None:
+                kwargs['__'.join(('ridge', mapped))] = kwargs[param]
+        return super(L1L2TwoStep, self).set_params(**kwargs)
 
 
 class L1L2StageOne(RegressorMixin, BaseEstimator):
@@ -906,7 +946,7 @@ class L1L2StageOne(RegressorMixin, BaseEstimator):
         self : Returns self.
         """
         param_grid = {'tau': self.taus, 'lamda': self.lamdas}
-        fit_params = {'ridge__sample_weight': sample_weight}
+        fit_params = {'sample_weight': sample_weight}
         gs = GridSearchCV(
             L1L2TwoStep(
                 mu=self.mu, fit_intercept=self.fit_intercept,
@@ -988,16 +1028,21 @@ class L1L2StageTwo(RegressorMixin, BaseEstimator):
 
         tau_ = self.estimator.tau_
         lamda_ = self.estimator.lamda_
-        params_ = self.estimator.get_params()
-        params_.pop('mu')
-        params_.pop('lamdas')
-        params_.pop('taus')
-        params_.pop('scoring')
-        params_.pop('cv')
+        params = self.estimator.get_params()
 
         coef_ = []
         for mu in self.mus:
-            estimator = L1L2TwoStep(mu=mu, tau=tau_, lamda=lamda_, **params_)
+            estimator = L1L2TwoStep(
+                mu=mu, tau=tau_, lamda=lamda_, use_gpu=params['use_gpu'],
+                threshold=params['threshold'],
+                fit_intercept=params['fit_intercept'],
+                normalize=params['normalize'],
+                precompute=params['precompute'], max_iter=params['max_iter'],
+                copy_X=params['copy_X'], tol=params['tol'],
+                warm_start=params['warm_start'],
+                positive=params['positive'],
+                random_state=params['random_state'],
+                selection=params['selection'])
             estimator_coef_ = estimator.fit(X, y).coef_
             coef_.append(estimator_coef_.copy())
 

@@ -182,7 +182,7 @@ def fista_l1l2(beta, tau, mu, X, y, max_iter, tol, rng, random, positive,
 
                 sigma = (num / np.dot(beta_diff, beta_diff))
                 mu_s = 1 - mu / sigma
-                tau_s = tau / (2. * sigma)
+                tau_s = 0.5 * tau / sigma
                 nsigma = n_samples * sigma
 
                 # Soft-Thresholding
@@ -517,7 +517,7 @@ class L1L2(SelectorMixin, ElasticNet):
 
 
 class L1L2TwoStep(Pipeline):
-    r"""L1L2 penalized linear regression with overshinking correction.
+    r"""L1L2 penalized linear regression with overshrinking correction.
 
     Linear regression with combined L1 and L2 priors as regularizer,
     followed by a ridge regression on the selected variables.
@@ -927,7 +927,7 @@ class L1L2StageOne(RegressorMixin, BaseEstimator):
         self.error_score = error_score
         self.return_train_score = return_train_score
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, check_input=True):
         """Fit Ridge regression model after searching for the best mu and tau.
 
         Parameters
@@ -946,7 +946,8 @@ class L1L2StageOne(RegressorMixin, BaseEstimator):
         self : Returns self.
         """
         param_grid = {'tau': self.taus, 'lamda': self.lamdas}
-        fit_params = {'sample_weight': sample_weight}
+        fit_params = {'sample_weight': sample_weight,
+                      'check_input': check_input}
         gs = GridSearchCV(
             L1L2TwoStep(
                 mu=self.mu, fit_intercept=self.fit_intercept,
@@ -1001,7 +1002,7 @@ class L1L2StageTwo(RegressorMixin, BaseEstimator):
         self.mus = mus
         self.estimator = estimator
 
-    def fit(self, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None, check_input=True):
         """Fit Ridge regression model after searching for the best mu and tau.
 
         Parameters
@@ -1024,7 +1025,8 @@ class L1L2StageTwo(RegressorMixin, BaseEstimator):
         attributes = ('tau_', 'lamda_')
         if not all([hasattr(self.estimator, attr) for attr in attributes]):
             # not fitted
-            self.estimator.fit(X, y, sample_weight=sample_weight)
+            self.estimator.fit(X, y, sample_weight=sample_weight,
+                               check_input=check_input)
 
         tau_ = self.estimator.tau_
         lamda_ = self.estimator.lamda_
@@ -1043,7 +1045,9 @@ class L1L2StageTwo(RegressorMixin, BaseEstimator):
                 positive=params['positive'],
                 random_state=params['random_state'],
                 selection=params['selection'])
-            estimator_coef_ = estimator.fit(X, y).coef_
+            estimator_coef_ = estimator.fit(
+                X, y, sample_weight=sample_weight,
+                check_input=check_input).coef_
             coef_.append(estimator_coef_.copy())
 
         self.coef_ = coef_

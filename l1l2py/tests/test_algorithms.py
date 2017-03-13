@@ -131,8 +131,8 @@ class TestAlgorithms(object):
     def test_l1_bound(self):
         tau_max = l1_bound(self.X, self.Y)
 
-        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max)
+        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max, adaptive=True)
         assert_equals(0, len(beta.nonzero()[0]))
 
-        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max-1e-3)
+        beta = l1l2_regularization(self.X, self.Y, 0.0, tau_max - 1e-3)
         assert_equals(1, len(beta.nonzero()[0]))

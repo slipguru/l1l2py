@@ -37,11 +37,6 @@ from l1l2py.algorithms import ridge_regression, l1l2_regularization
 __all__ = ('model_selection', 'minimal_model', 'nested_models')
 
 
-def _emergency_log(message, file_path='/tmp/emergency_log.txt'):
-    with open(file_path, 'a') as lf:
-        lf.write(message)
-
-
 def model_selection(
     data, labels, test_data, test_labels,
     mu_range, tau_range, lambda_range,

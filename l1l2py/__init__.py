@@ -48,8 +48,8 @@ l1l2py.tools
 # from core import *
 # from _version import version as __version__
 
-from .linear_model import L1L2
-from .classification import L1L2Classifier
+# from .linear_model import L1L2
+# from .classification import L1L2Classifier
 
 # major number for main changes
 # minor number for new features

@@ -25,6 +25,8 @@ import numpy as np
 from nose.tools import assert_equals, assert_raises, assert_true
 
 from l1l2py.linear_model import L1L2
+from l1l2py.regression import L1L2StageOne
+from l1l2py.regression import L1L2StageTwo
 from l1l2py.tests import _TEST_DATA_PATH
 
 class TestLinearModel(object):
@@ -41,21 +43,22 @@ class TestLinearModel(object):
     def test_l1l2(self):
         coef_ = L1L2(mu=.5, tau=1.0).fit(self.X, self.Y).coef_
 
-        true_coef = np.array(
-            [ 2.54847672,  2.5712637 ,  2.56824943,  2.56879183,  2.55001544,
-              2.49877257,  2.49117123,  2.49292074,  2.48615372,  2.49009366,
-              2.39617356,  2.4019562 ,  2.39986878,  2.37417205,  2.42213084,
-              0.        , -0.        , -0.        , -0.        ,  0.06651892,
-              0.0229522 , -0.1862063 ,  0.40750036, -0.        , -0.06511224,
-              -0.32570505, -0.37182631, -0.74583084,  0.        , -0.       ,
-              0.        , -0.48883576, -0.36477394, -0.        ,  0.        ,
-              -0.        ,  0.        , -0.        , -0.        ,  0.31458035])
+        true_coef = np.array([
+            2.54916703,  2.57154267,  2.56869228,  2.56931109,  2.55051137,
+            2.49967827,  2.49216303,  2.49392693,  2.48734147,  2.4912053 ,
+            2.39791057,  2.4035761 ,  2.40152707,  2.37603518,  2.42354404,
+            0.        , -0.        , -0.        , -0.        ,  0.0862872 ,
+            0.03008878, -0.1937291 ,  0.42276159, -0.        , -0.0768753 ,
+           -0.33118946, -0.37828447, -0.74693446,  0.        , -0.        ,
+            0.        , -0.49657344, -0.37692851, -0.        ,  0.        ,
+           -0.        ,  0.        , -0.        , -0.        ,  0.32717314])
+
         assert_true(np.allclose(true_coef, coef_))
 
         coef_ = L1L2(mu=0, tau=1.0).fit(self.X, self.Y).coef_
 
-        true_coef = np.array(
-            [  0.        ,  10.93683418,   3.46579585,   0.        ,
+        true_coef = np.array([
+             0.        ,  10.93683418,   3.46579585,   0.        ,
              0.        ,   7.13565392,   0.        ,   7.37737905,
              0.        ,   0.        ,   0.        ,   0.        ,
              0.        ,   0.        ,  14.36854962,  -0.        ,
@@ -65,6 +68,7 @@ class TestLinearModel(object):
             -0.        ,  -0.        ,   0.        ,  -0.        ,
             -0.        ,  -0.        ,   0.        ,  -0.        ,
             -0.        ,  -0.        ,  -0.        ,   0.        ])
+
         assert_true(np.allclose(true_coef, coef_))
 
     def test_conversion_params(self):
@@ -79,3 +83,13 @@ class TestLinearModel(object):
         coef_0 = L1L2(mu=0, tau=1).fit(self.X, self.Y).coef_
         coef_1 = L1L2(l1_ratio=1, alpha=0.5).fit(self.X, self.Y).coef_
         assert_true(np.allclose(coef_0, coef_1))
+
+    def test_stage_two(self):
+        mdl = L1L2StageTwo(None)
+        assert_raises(TypeError, mdl.fit, None, None)
+
+        coefs = L1L2StageTwo(
+            L1L2StageOne(error_score=-1), mus=(.1, 1, 10, 100)
+        ).fit(self.X, self.Y, sample_weight=1., check_input=True).coef_
+        for i in range(1, len(coefs)):
+            assert_true(np.sum(coefs[i - 1] != 0) <= np.sum(coefs[i] != 0))

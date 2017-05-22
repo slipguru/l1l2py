@@ -206,7 +206,7 @@ class L1L2Classifier(LinearClassifierMixin, L1L2):
         return self._label_binarizer.classes_
 
 
-class L1L2TwoStepClassifier(Pipeline):
+class L1L2TwoStepClassifier(Pipeline, LinearClassifierMixin):
     r"""L1L2 penalized linear classification with overshrinking correction.
 
     Linear regression with combined L1 and L2 priors as regularizer,
@@ -378,6 +378,13 @@ class L1L2TwoStepClassifier(Pipeline):
         """
         # print "l1l22step tau", self.tau, "mu", self.mu, 'lamda', self.lamda
         # print self.steps
+        self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
+        y = self._label_binarizer.fit_transform(y)
+        if self._label_binarizer.y_type_.startswith('multilabel'):
+            raise ValueError(
+                "%s doesn't support multi-label classification" % (
+                    self.__class__.__name__))
+
         fit_params_ = {}
         # account for different names
         map_l1l2 = dict(check_input='check_input')
@@ -398,7 +405,17 @@ class L1L2TwoStepClassifier(Pipeline):
         coef_[selected_] = ridge_coef_
         self.coef_ = coef_
 
+        if self.classes_.shape[0] > 2:
+            ndim = self.classes_.shape[0]
+        else:
+            ndim = 1
+        self.coef_ = self.coef_.reshape(ndim, -1)
+
         return self
+
+    @property
+    def classes_(self):
+        return self._label_binarizer.classes_
 
     def set_params(self, **kwargs):
         """Set the parameters of this estimator.
@@ -429,6 +446,12 @@ class L1L2TwoStepClassifier(Pipeline):
             if kwargs.get(param, None) is not None:
                 kwargs['__'.join(('ridge', mapped))] = kwargs[param]
         return super(L1L2TwoStepClassifier, self).set_params(**kwargs)
+
+    def predict(self, X):
+        return LinearClassifierMixin.predict(self, X)
+
+    def score(self, X, y, sample_weight=None):
+        return LinearClassifierMixin.score(self, X, y, sample_weight=sample_weight)
 
 
 class L1L2StageOneClassifier(LinearClassifierMixin, BaseEstimator):

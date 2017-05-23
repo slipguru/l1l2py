@@ -1,5 +1,5 @@
 import os
-from distutils.core import setup
+from setuptools import setup
 
 # Package path
 pkg_path = os.path.dirname(__file__)

@@ -12,7 +12,7 @@ def test_classification_error():
     labels = np.ones(100)
     predictions = labels.copy()
     for exp_error in (0.0, 0.5, 0.75, 1.0):
-        index = exp_error*100
+        index = int(exp_error * 100)
         predictions[0:index] = -1
         error = classification_error(labels, predictions)
         assert_almost_equal(exp_error, error)
@@ -24,10 +24,10 @@ def test_loo_error():
     for predictions, exp_error in (([0], 1.0), ([1], 0.0)):
         error = classification_error(labels, predictions)
         assert_almost_equal(exp_error, error)
-        
+
         error = balanced_classification_error(labels, predictions)
         assert_almost_equal(0.0, error) # Always zero in LOO!
-        
+
         error = regression_error(labels, predictions)
         assert_almost_equal(exp_error, error)
 
@@ -37,8 +37,8 @@ def test_regression_error():
     random_state = np.random.RandomState(0)
     X = random_state.randn(10, 100)
     y = random_state.randn(10)
-    
-    ridge = RidgeRegression(mu=0.0).train(X, y)    
+
+    ridge = RidgeRegression(mu=0.0).train(X, y)
     predictions = ridge.predict(X)
     error = regression_error(y, predictions)
     assert_almost_equals(0.0, error)
@@ -57,7 +57,7 @@ def test_balanced_classification_error():
     predictions = np.ones(100)
 
     for imbalance in np.linspace(10, 90, 9):
-        labels[:imbalance] = -1
+        labels[:int(imbalance)] = -1
         exp_error = (imbalance * abs(-1 - labels.mean()))/ 100.0
 
         error = balanced_classification_error(labels, predictions)
@@ -103,4 +103,3 @@ def test_input_shape_errors():
         assert_equal(0.0, regression_error(l, p))
         assert_equal(0.0, classification_error(l, p))
         assert_equal(0.0, balanced_classification_error(l, p))
-

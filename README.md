@@ -2,7 +2,7 @@
   <img src="http://www.slipguru.unige.it/Software/L1L2Py/_static/l1l2py_logo.png"><br><br>
 </p>
 -----------------
-![travis-status](https://travis-ci.org/slipguru/l1l2py.svg?branch=master)
+[![Build Status](https://travis-ci.org/slipguru/l1l2py.svg?branch=master)](https://travis-ci.org/slipguru/l1l2py)
 
 **l1l2py** is a Python package to perform variable selection by means
 of l1l2 regularization with double optimization.

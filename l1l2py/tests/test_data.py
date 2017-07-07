@@ -30,12 +30,12 @@ from ..proximal import Lasso
 def test_centering():
     X = [[1., 2., 3.],
          [3., 2., 1.]]
-    
+
     Xcent, mean = center(X, return_mean=True)
     assert_array_almost_equal([2., 2., 2.], mean)
     assert_array_almost_equal([[-1., 0.,  1.],
                                [ 1., 0., -1.]], Xcent)
-    
+
     assert_array_almost_equal(X - mean, Xcent)
     assert_array_almost_equal(Xcent + mean, X)
 
@@ -49,7 +49,7 @@ def test_centering():
 
 def test_centering_outputs():
     y = [1., 2., 3.]
-    
+
     assert_equals(np.ndarray, type(center(y)))
     assert_equals(2, len(center(y, y)))
     assert_equals(2, len(center(y, return_mean=True)))
@@ -59,7 +59,7 @@ def test_centering_outputs():
 def test_standardization():
     # Note: standardization includes matrix centering!
     X = [[1., 2.], [3., 4.]]
-    
+
     Xstd, mean, std = standardize(X, return_factors=True)
     assert_array_almost_equal((X - mean)/std, Xstd)
     assert_array_almost_equal((Xstd * std) + mean, X)
@@ -68,17 +68,17 @@ def test_standardization():
     assert_array_almost_equal(Xstd, Xstd2)
     assert_array_almost_equal(np.zeros(Xstd.shape[1]), mean2)
     assert_array_almost_equal(np.ones(Xstd.shape[1]), std2)
-    
+
     Xstd, Xstd2 = standardize(X, X)
     assert_array_almost_equal(Xstd, Xstd2)
-    
+
     # One row matrix
-    assert_raises(ValueError, standardize, np.array([[1, 2, 3]]))    
+    assert_raises(ValueError, standardize, np.array([[1, 2, 3]]))
 
 
 def test_standardization_outputs():
     X = [[1., 2.], [3., 4.]]
-    
+
     assert_equals(np.ndarray, type(standardize(X)))
     assert_equals(2, len(standardize(X, X)))
     assert_equals(3, len(standardize(X, return_factors=True)))
@@ -88,12 +88,12 @@ def test_standardization_outputs():
 def test_tau_max():
     X = [[1., 2.], [3., 4.]]
     y = [1., -1.]
-    
+
     tmax = tau_max(X, y)
     assert_equals(2.0, tmax)
 
-    lasso = Lasso(tau=tmax).train(X, y)
-    assert_equals(0, len(lasso.beta.nonzero()[0]))
+    lasso = Lasso(tau=tmax).fit(X, y)
+    assert_equals(0, len(lasso.coef_.nonzero()[0]))
 
 
 def test_correlated_dataset():

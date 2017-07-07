@@ -3,10 +3,9 @@
 
 import numpy as np
 from numpy import linalg as la
+from scipy import sparse
 
-from sklearn.linear_model.base import LinearModel
-
-from .data import center
+from sklearn.linear_model.base import LinearModel, _pre_fit
 
 
 class AbstractLinearModel(LinearModel):
@@ -17,18 +16,15 @@ class AbstractLinearModel(LinearModel):
         y = np.asanyarray(y)
 
         # Centering Data
-        if self.fit_intercept:
-            X, Xmean = center(X, return_mean=True)
-            y, ymean = center(y, return_mean=True)
+        X, y, X_offset, y_offset, X_scale, precompute, Xy = \
+            _pre_fit(X, y, None, self.precompute, self.normalize,
+                     self.fit_intercept, copy=False)
 
         # Calling the class-specific train method
         self._fit(X, y, *args, **kwargs)
 
         # Fitting the intercept if required
-        if self.fit_intercept:
-            self._intercept = ymean - np.dot(Xmean, self.coef_)
-        else:
-            self._intercept = 0.0
+        self._set_intercept(X_offset, y_offset, X_scale)
 
         self._trained = True
         return self
@@ -37,9 +33,12 @@ class AbstractLinearModel(LinearModel):
 class RidgeRegression(AbstractLinearModel):
     """Ridge regression solved as direct method. """
 
-    def __init__(self, mu=0.0, fit_intercept=True):
+    def __init__(self, mu=0.0, fit_intercept=True, precompute=False,
+                 normalize=False):
         self.mu = mu
         self.fit_intercept = fit_intercept
+        self.precompute = precompute
+        self.normalize = normalize
 
     def _fit(self, X, y):
         # Calling the class-specific train method

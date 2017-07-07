@@ -95,25 +95,25 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
     nsigma = n * sigma
 
     # Starting conditions
-    aux_beta = beta
+    auxcoef_ = beta
     t = 1.
 
     for k in xrange(kmax):
         # Pre-calculated "heavy" computation
         if n > d:
-            precalc = XTY - np.dot(X.T, np.dot(X, aux_beta))
+            precalc = XTY - np.dot(X.T, np.dot(X, auxcoef_))
         else:
-            precalc = np.dot(X.T, Y - np.dot(X, aux_beta))
-            
+            precalc = np.dot(X.T, Y - np.dot(X, auxcoef_))
+
         # TODO: stopping rule based on r = Y - Xbeta ??
 
         # Soft-Thresholding
-        value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
+        value = (precalc / nsigma) + ((1.0 - mu_s) * auxcoef_)
         beta_next = np.sign(value) * np.clip(np.abs(value) - tau_s, 0, np.inf)
 
         ######## Adaptive step size #######################################
         if adaptive:
-            beta_diff = (aux_beta - beta_next)
+            beta_diff = (auxcoef_ - beta_next)
 
             # Only if there is an increment of the solution
             # we can calculate the adaptive step-size
@@ -129,13 +129,13 @@ def l1l2_regularization(data, labels, mu, tau, beta=None, kmax=100000,
                 nsigma = n * sigma
 
                 # Soft-Thresholding
-                value = (precalc / nsigma) + ((1.0 - mu_s) * aux_beta)
+                value = (precalc / nsigma) + ((1.0 - mu_s) * auxcoef_)
                 beta_next = value * np.maximum(0, 1 - tau_s/np.abs(value))
 
         ######## FISTA ####################################################
         beta_diff = (beta_next - beta)
         t_next = 0.5 * (1.0 + sqrt(1.0 + 4.0 * t*t))
-        aux_beta = beta_next + ((t - 1.0)/t_next)*beta_diff
+        auxcoef_ = beta_next + ((t - 1.0)/t_next)*beta_diff
 
         # Convergence values
         max_diff = np.abs(beta_diff).max()
@@ -193,30 +193,34 @@ class ElasticNet(AbstractLinearModel):
 
     """
     def __init__(self, fit_intercept=True, tau=0.5, mu=0.5,
-                 adaptive_step_size=False, max_iter=10000, tol=1e-4):
-        super(ElasticNet, self).__init__(fit_intercept)
-        
+                 adaptive_step_size=False, max_iter=10000, tol=1e-4,
+                 precompute=False, normalize=False):
+
         self.tau = tau
         self.mu = mu
         self.max_iter = max_iter
         self.tol = tol
         self.adaptive_step_size = adaptive_step_size
-                
-    def _train(self, X, y, warm_start=None):
+        self.fit_intercept = fit_intercept
+        self.precompute = precompute
+        self.normalize = normalize
+        self.intercept_ = 0.0
+
+    def _fit(self, X, y, warm_start=None):
         if warm_start is None:
-            self._beta = np.zeros(X.shape[1])
+            self.coef_ = np.zeros(X.shape[1])
         else:
-            self._beta = np.asanyarray(warm_start)
+            self.coef_ = np.asanyarray(warm_start)
 
         l1l2_proximal = l1l2_regularization
-        self._beta, self.niter_ = l1l2_proximal(X, y,
+        self.coef_, self.niter_ = l1l2_proximal(X, y,
                                                 self.mu, self.tau,
-                                                beta=self.beta,
+                                                beta=self.coef_,
                                                 kmax=self.max_iter,
                                                 tolerance=self.tol,
                                                 return_iterations=True,
                                                 adaptive=self.adaptive_step_size)
-        
+
         if self.niter_ == self.max_iter:
             warnings.warn('Objective did not converge, you might want'
                           ' to increase the number of iterations')
@@ -226,13 +230,14 @@ class ElasticNet(AbstractLinearModel):
 class Lasso(ElasticNet):
     def __init__(self, tau=0.5, fit_intercept=True,
                  adaptive_step_size=False,
-                 max_iter=10000, tol=1e-4):
+                 max_iter=10000, tol=1e-4, precompute=False, normalize=False):
 
         super(Lasso, self).__init__(tau=tau, mu=0.0,
                                     fit_intercept=fit_intercept,
                                     adaptive_step_size=adaptive_step_size,
                                     max_iter=max_iter,
-                                    tol=tol)
+                                    tol=tol, precompute=precompute,
+                                    normalize=normalize)
 
 ##############################################################################
 # Paths

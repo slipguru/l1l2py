@@ -174,7 +174,10 @@ def enet_admm_path(X, y, fit_intercept=True, tau=0.5, mu=0.5,
             # model = cd_fast.enet_coordinate_descent_gram(
             #     coef_, l1_reg, l2_reg, precompute, Xy, y, max_iter,
             #     tol, rng, random, positive)
-            raise NotImplementedError()
+            # raise NotImplementedError()
+            model = enet_admm(
+                X, y, coef_, rho=rho, alpha=alpha, max_iter=max_iter,
+                abs_tol=abs_tol, rel_tol=rel_tol, tau=tau, mu=mu)
         elif precompute is False:
             model = enet_admm(
                 X, y, coef_, rho=rho, alpha=alpha, max_iter=max_iter,

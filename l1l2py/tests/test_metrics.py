@@ -38,7 +38,7 @@ def test_regression_error():
     X = random_state.randn(10, 100)
     y = random_state.randn(10)
 
-    ridge = RidgeRegression(mu=0.0).train(X, y)
+    ridge = RidgeRegression(mu=0.0, fit_intercept=False).fit(X, y)
     predictions = ridge.predict(X)
     error = regression_error(y, predictions)
     assert_almost_equals(0.0, error)

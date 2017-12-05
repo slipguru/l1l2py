@@ -1,6 +1,5 @@
 <p align="center">
   <!-- <img src="http://www.slipguru.unige.it/Software/L1L2Py/_static/l1l2py_logo.png"><br><br> BROKEN LINK-->
-  <img src="http://slipguru.disi.unige.it/Software/L1L2Py/_static/l1l2py_logo.png"><br><br>
 </p>
 
 <img src="https://travis-ci.org/slipguru/l1l2py.svg?branch=master" alt="Build Status" />
